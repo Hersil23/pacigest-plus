@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const appointmentController = require('../controllers/appointmentController');
 const { protect, checkPermission } = require('../middlewares/auth');
+const { checkSubscription } = require('../middlewares/subscription');
 
-// Todas las rutas protegidas
+// Todas las rutas protegidas (autenticación + suscripción)
 router.use(protect);
+router.use(checkSubscription);
 
 // Rutas de citas (requieren permiso)
 router.post('/', checkPermission('canScheduleAppointments'), appointmentController.createAppointment);

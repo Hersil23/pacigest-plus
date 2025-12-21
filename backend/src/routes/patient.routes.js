@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const patientController = require('../controllers/patientController');
 const { protect, checkPermission } = require('../middlewares/auth');
+const { checkSubscription } = require('../middlewares/subscription');
 
-// Todas las rutas protegidas
+// Todas las rutas protegidas (autenticación + suscripción)
 router.use(protect);
+router.use(checkSubscription);
 
 // Rutas de pacientes
 router.post('/', checkPermission('canCreatePatients'), patientController.createPatient);

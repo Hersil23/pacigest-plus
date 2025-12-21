@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const medicalFileController = require('../controllers/medicalFileController');
 const { protect, checkPermission } = require('../middlewares/auth');
+const { checkSubscription } = require('../middlewares/subscription');
 
-// Todas las rutas protegidas
+// Todas las rutas protegidas (autenticación + suscripción)
 router.use(protect);
+router.use(checkSubscription);
 
 // Rutas de archivos médicos (requieren permiso)
 router.post('/', checkPermission('canViewMedicalRecords'), medicalFileController.createMedicalFile);

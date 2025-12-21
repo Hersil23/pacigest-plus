@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const prescriptionController = require('../controllers/prescriptionController');
 const { protect, checkPermission } = require('../middlewares/auth');
+const { checkSubscription } = require('../middlewares/subscription');
 
-// Todas las rutas protegidas
+// Todas las rutas protegidas (autenticación + suscripción)
 router.use(protect);
+router.use(checkSubscription);
 
 // Rutas de recetas médicas (requieren permiso)
 router.post('/', checkPermission('canViewPrescriptions'), prescriptionController.createPrescription);

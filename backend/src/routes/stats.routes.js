@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const statsController = require('../controllers/statsController');
 const { protect } = require('../middlewares/auth');
+const { checkSubscription } = require('../middlewares/subscription');
 
-// Todas las rutas protegidas
+// Todas las rutas protegidas (autenticación + suscripción)
 router.use(protect);
+router.use(checkSubscription);
 
 // Rutas de estadísticas
 router.get('/dashboard/:doctorId', statsController.getDoctorDashboard);
