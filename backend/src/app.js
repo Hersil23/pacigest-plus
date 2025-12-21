@@ -21,7 +21,6 @@ app.get('/', (req, res) => {
     version: '1.0.0'
   });
 });
-
 // Health check
 app.get('/health', (req, res) => {
   res.json({
@@ -30,5 +29,11 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Rutas
+const userRoutes = require('./routes/user.routes');
+
+// Usar rutas
+app.use('/api/users', userRoutes);
 
 module.exports = app;
