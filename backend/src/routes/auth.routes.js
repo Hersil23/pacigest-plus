@@ -5,6 +5,7 @@ const { protect } = require('../middlewares/auth');
 
 // Rutas públicas (sin autenticación)
 router.post('/register', authController.register);           // Registrar nuevo usuario
+router.post('/verify-email', authController.verifyEmail);    // Verificar email
 router.post('/login', authController.login);                 // Iniciar sesión
 
 // Rutas protegidas (requieren autenticación)

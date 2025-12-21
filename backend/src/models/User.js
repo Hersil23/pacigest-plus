@@ -250,12 +250,18 @@ const userSchema = new mongoose.Schema({
   // CAMPOS DEL SISTEMA
   // ============================================
   lastLogin: {
-    type: Date
-  },
-  emailVerified: {
-    type: Boolean,
-    default: false
-  }
+  type: Date
+},
+emailVerified: {
+  type: Boolean,
+  default: false
+},
+emailVerificationToken: {
+  type: String
+},
+emailVerificationExpires: {
+  type: Date
+}
 }, {
   timestamps: true // Crea automáticamente createdAt y updatedAt
 });
