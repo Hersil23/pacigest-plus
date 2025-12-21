@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
+const { protect, authorize } = require('../middlewares/auth');
 
-// Rutas de usuarios
-router.post('/', userController.createUser);           // Crear usuario
-router.get('/', userController.getAllUsers);           // Obtener todos
-router.get('/:id', userController.getUserById);        // Obtener uno por ID
+// Todas las rutas protegidas
+router.use(protect);
+
+// Rutas de usuarios (solo doctores pueden acceder)
+router.post('/', authorize('doctor'), userController.createUser);
+router.get('/', userController.getAllUsers);
+router.get('/:id', userController.getUserById);
 
 module.exports = router;

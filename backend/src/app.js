@@ -37,6 +37,8 @@ const patientRoutes = require('./routes/patient.routes');
 const medicalRecordRoutes = require('./routes/medicalRecord.routes');
 const prescriptionRoutes = require('./routes/prescription.routes');
 const medicalFileRoutes = require('./routes/medicalFile.routes');
+const appointmentRoutes = require('./routes/appointment.routes');
+const statsRoutes = require('./routes/stats.routes');
 
 // Usar rutas
 app.use('/api/auth', authRoutes);
@@ -45,5 +47,6 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/medical-files', medicalFileRoutes);
-
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/stats', statsRoutes);
 module.exports = app;

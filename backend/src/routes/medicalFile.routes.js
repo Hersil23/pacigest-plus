@@ -1,14 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const medicalFileController = require('../controllers/medicalFileController');
+const { protect, checkPermission } = require('../middlewares/auth');
 
-// Rutas de archivos médicos
-router.post('/', medicalFileController.createMedicalFile);                                          // Crear registro de archivo
-router.get('/patient/:patientId', medicalFileController.getFilesByPatient);                         // Por paciente
-router.get('/medical-record/:medicalRecordId', medicalFileController.getFilesByMedicalRecord);      // Por historia clínica
-router.get('/patient/:patientId/category/:category', medicalFileController.getFilesByCategory);     // Por categoría
-router.get('/:id', medicalFileController.getFileById);                                              // Obtener uno por ID
-router.put('/:id', medicalFileController.updateMedicalFile);                                        // Actualizar
-router.delete('/:id', medicalFileController.deleteMedicalFile);                                     // Eliminar (soft delete)
+// Todas las rutas protegidas
+router.use(protect);
+
+// Rutas de archivos médicos (requieren permiso)
+router.post('/', checkPermission('canViewMedicalRecords'), medicalFileController.createMedicalFile);
+router.get('/patient/:patientId', checkPermission('canViewMedicalRecords'), medicalFileController.getFilesByPatient);
+router.get('/medical-record/:medicalRecordId', checkPermission('canViewMedicalRecords'), medicalFileController.getFilesByMedicalRecord);
+router.get('/patient/:patientId/category/:category', checkPermission('canViewMedicalRecords'), medicalFileController.getFilesByCategory);
+router.get('/:id', checkPermission('canViewMedicalRecords'), medicalFileController.getFileById);
+router.put('/:id', checkPermission('canEditMedicalRecords'), medicalFileController.updateMedicalFile);
+router.delete('/:id', checkPermission('canEditMedicalRecords'), medicalFileController.deleteMedicalFile);
 
 module.exports = router;

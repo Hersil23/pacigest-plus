@@ -1,0 +1,416 @@
+const Appointment = require('../models/Appointment');
+
+// ============================================
+// CREAR NUEVA CITA
+// ============================================
+exports.createAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.create(req.body);
+
+    res.status(201).json({
+      success: true,
+      message: 'Cita creada exitosamente',
+      data: appointment
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al crear cita',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// OBTENER TODAS LAS CITAS (CON FILTROS)
+// ============================================
+exports.getAllAppointments = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    // Filtros opcionales
+    const filter = { isActive: true };
+    
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+    
+    if (req.query.date) {
+      const startDate = new Date(req.query.date);
+      const endDate = new Date(req.query.date);
+      endDate.setHours(23, 59, 59, 999);
+      filter.appointmentDate = { $gte: startDate, $lte: endDate };
+    }
+
+    const appointments = await Appointment.find(filter)
+      .populate('patientId', 'firstName lastName phone email')
+      .populate('doctorId', 'firstName lastName specialty')
+      .populate('createdBy', 'firstName lastName')
+      .sort({ appointmentDate: 1, appointmentTime: 1 })
+      .limit(limit)
+      .skip(skip);
+
+    const total = await Appointment.countDocuments(filter);
+
+    res.status(200).json({
+      success: true,
+      count: appointments.length,
+      total: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      data: appointments
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener citas',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// OBTENER CITAS POR MÉDICO
+// ============================================
+exports.getAppointmentsByDoctor = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const filter = { 
+      doctorId,
+      isActive: true 
+    };
+
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    if (req.query.date) {
+      const startDate = new Date(req.query.date);
+      const endDate = new Date(req.query.date);
+      endDate.setHours(23, 59, 59, 999);
+      filter.appointmentDate = { $gte: startDate, $lte: endDate };
+    }
+
+    const appointments = await Appointment.find(filter)
+      .populate('patientId', 'firstName lastName phone email')
+      .sort({ appointmentDate: 1, appointmentTime: 1 })
+      .limit(limit)
+      .skip(skip);
+
+    const total = await Appointment.countDocuments(filter);
+
+    res.status(200).json({
+      success: true,
+      count: appointments.length,
+      total: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      data: appointments
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener citas del médico',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// OBTENER CITAS POR PACIENTE
+// ============================================
+exports.getAppointmentsByPatient = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const appointments = await Appointment.find({ 
+      patientId,
+      isActive: true 
+    })
+      .populate('doctorId', 'firstName lastName specialty phone')
+      .sort({ appointmentDate: -1 })
+      .limit(limit)
+      .skip(skip);
+
+    const total = await Appointment.countDocuments({ 
+      patientId,
+      isActive: true 
+    });
+
+    res.status(200).json({
+      success: true,
+      count: appointments.length,
+      total: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      data: appointments
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener citas del paciente',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// OBTENER UNA CITA POR ID
+// ============================================
+exports.getAppointmentById = async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id)
+      .populate('patientId', 'firstName lastName phone email dateOfBirth gender')
+      .populate('doctorId', 'firstName lastName specialty phone email')
+      .populate('createdBy', 'firstName lastName')
+      .populate('medicalRecordId');
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Cita no encontrada'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: appointment
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener cita',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// ACTUALIZAR CITA
+// ============================================
+exports.updateAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Cita no encontrada'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Cita actualizada exitosamente',
+      data: appointment
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al actualizar cita',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// CONFIRMAR CITA
+// ============================================
+exports.confirmAppointment = async (req, res) => {
+  try {
+    const { confirmedBy } = req.body;
+
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { 
+        status: 'confirmed',
+        confirmedBy: confirmedBy || 'doctor',
+        confirmedAt: new Date()
+      },
+      { new: true }
+    );
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Cita no encontrada'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Cita confirmada exitosamente',
+      data: appointment
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al confirmar cita',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// CANCELAR CITA
+// ============================================
+exports.cancelAppointment = async (req, res) => {
+  try {
+    const { cancellationReason, cancelledBy } = req.body;
+
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { 
+        status: 'cancelled',
+        cancellationReason,
+        cancelledBy: cancelledBy || 'doctor',
+        cancelledAt: new Date()
+      },
+      { new: true }
+    );
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Cita no encontrada'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Cita cancelada exitosamente',
+      data: appointment
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al cancelar cita',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// COMPLETAR CITA
+// ============================================
+exports.completeAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { status: 'completed' },
+      { new: true }
+    );
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Cita no encontrada'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Cita completada exitosamente',
+      data: appointment
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al completar cita',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// ELIMINAR CITA (SOFT DELETE)
+// ============================================
+exports.deleteAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { isActive: false },
+      { new: true }
+    );
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Cita no encontrada'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Cita eliminada exitosamente',
+      data: appointment
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al eliminar cita',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// OBTENER AGENDA DEL DÍA
+// ============================================
+exports.getTodaySchedule = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const appointments = await Appointment.find({
+      doctorId,
+      appointmentDate: { $gte: today, $lt: tomorrow },
+      isActive: true
+    })
+      .populate('patientId', 'firstName lastName phone')
+      .sort({ appointmentTime: 1 });
+
+    res.status(200).json({
+      success: true,
+      count: appointments.length,
+      date: today.toISOString().split('T')[0],
+      data: appointments
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener agenda del día',
+      error: error.message
+    });
+  }
+};
