@@ -31,11 +31,19 @@ app.get('/health', (req, res) => {
 });
 
 // Rutas
+const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const patientRoutes = require('./routes/patient.routes');
+const medicalRecordRoutes = require('./routes/medicalRecord.routes');
+const prescriptionRoutes = require('./routes/prescription.routes');
+const medicalFileRoutes = require('./routes/medicalFile.routes');
 
 // Usar rutas
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/patients', patientRoutes);
+app.use('/api/medical-records', medicalRecordRoutes);
+app.use('/api/prescriptions', prescriptionRoutes);
+app.use('/api/medical-files', medicalFileRoutes);
 
 module.exports = app;
