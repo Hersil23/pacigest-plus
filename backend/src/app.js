@@ -32,8 +32,10 @@ app.get('/health', (req, res) => {
 
 // Rutas
 const userRoutes = require('./routes/user.routes');
+const patientRoutes = require('./routes/patient.routes');
 
 // Usar rutas
 app.use('/api/users', userRoutes);
+app.use('/api/patients', patientRoutes);
 
 module.exports = app;
