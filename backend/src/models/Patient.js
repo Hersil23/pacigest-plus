@@ -180,6 +180,15 @@ const patientSchema = new mongoose.Schema({
   },
 
   // ============================================
+// IDIOMA DEL PACIENTE
+// ============================================
+language: {
+  type: String,
+  enum: ['es', 'en'],
+  default: 'es'
+},
+
+  // ============================================
   // NÚMERO DE EXPEDIENTE
   // ============================================
   medicalRecordNumber: {

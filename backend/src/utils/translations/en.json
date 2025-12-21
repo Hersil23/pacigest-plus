@@ -1,0 +1,129 @@
+{
+  "common": {
+    "company": "PaciGest Plus",
+    "footer": "This is an automated email, please do not reply to this message.",
+    "copyright": "© 2025 PaciGest Plus. All rights reserved.",
+    "greeting": "Hello {name}!",
+    "greetingDoctor": "Hello Dr. {name},",
+    "greetingFormal": "Hello {name},",
+    "salutation": "Best regards,",
+    "team": "The PaciGest Plus Team"
+  },
+  "emails": {
+    "verification": {
+      "subject": "Verify your email - PaciGest Plus",
+      "title": "Verify your email",
+      "intro": "Thank you for signing up for PaciGest Plus. To activate your account and start your <strong>7-day free trial</strong>, we need to verify your email.",
+      "codeLabel": "Your verification code is:",
+      "expires": "⏰ This code expires in 24 hours.",
+      "notRequested": "If you didn't request this registration, you can ignore this email.",
+      "closing": "See you soon! 🚀"
+    },
+    "welcome": {
+      "subject": "Welcome to PaciGest Plus! 🎉",
+      "title": "Welcome to PaciGest Plus!",
+      "intro": "Your account has been successfully verified and your <strong>7-day free trial</strong> has started.",
+      "trialExpires": "📅 Your trial expires on: {date}",
+      "accessTitle": "✨ You now have access to:",
+      "feature1Title": "👥 Patient Management",
+      "feature1Desc": "Create complete files with medical records",
+      "feature2Title": "📅 Appointment System",
+      "feature2Desc": "Schedule and manage your appointments easily",
+      "feature3Title": "💊 Medical Prescriptions",
+      "feature3Desc": "Generate professional digital prescriptions",
+      "feature4Title": "📊 Statistics",
+      "feature4Desc": "Dashboard with metrics of your practice",
+      "bonus": "<strong>🎁 Bonus:</strong> We've created some sample patients and appointments for you to explore the system.",
+      "ready": "Ready to get started?",
+      "support": "If you have any questions, we're here to help.",
+      "closing": "Good luck! 🚀"
+    },
+    "trialReminder": {
+      "subject": "⏰ Your trial expires in {days} days - PaciGest Plus",
+      "title": "⏰ Your trial is about to expire",
+      "alertTitle": "⚠️ Your trial period expires in {days} days",
+      "intro": "We hope you've enjoyed using PaciGest Plus. To continue using all features without interruption, we invite you to subscribe.",
+      "plansTitle": "💎 Available plans:",
+      "planStarter": "<strong>Starter:</strong> $20/month - Perfect for individual practices",
+      "planProfessional": "<strong>Professional:</strong> $40/month - Advanced features",
+      "planClinic": "<strong>Clinic:</strong> $80/month - For clinics with multiple doctors",
+      "needMore": "<strong>Need more time to decide?</strong> Contact us and we'll be happy to help."
+    },
+    "trialExpired": {
+      "subject": "❌ Your trial has expired - PaciGest Plus",
+      "title": "❌ Trial Expired",
+      "intro": "Your 7-day trial period has ended.",
+      "dataSafe": "All your data is safe and secure. To continue accessing your account, you need to subscribe to a plan.",
+      "dontLoseTitle": "<strong>Don't lose access to:</strong>",
+      "item1": "Your patients and their medical records",
+      "item2": "Your scheduled appointments",
+      "item3": "Your medical prescriptions",
+      "item4": "All your statistics",
+      "support": "Have questions? We're here to help."
+    },
+    "passwordReset": {
+      "subject": "Reset your password - PaciGest Plus",
+      "title": "🔒 Reset Password",
+      "intro": "We received a request to reset your password.",
+      "codeLabel": "Your recovery code is:",
+      "expires": "⏰ This code expires in 1 hour.",
+      "notRequested": "If you didn't request this change, you can ignore this email and your password will remain unchanged."
+    },
+    "appointmentConfirmation": {
+      "subject": "✅ Appointment Confirmed - Dr. {doctorName}",
+      "title": "✅ Appointment Confirmed",
+      "intro": "Your appointment has been successfully confirmed.",
+      "dateLabel": "📅 Date:",
+      "timeLabel": "⏰ Time:",
+      "doctorLabel": "👨‍⚕️ Doctor:",
+      "clinicLabel": "🏥 Clinic:",
+      "addressLabel": "📍 Address:",
+      "phoneLabel": "📞 Phone:",
+      "recommendationsTitle": "💡 Recommendations:",
+      "rec1": "Arrive 10 minutes before your appointment",
+      "rec2": "Bring your identification documents",
+      "rec3": "If you have previous exams, bring them with you",
+      "cancelNote": "If you need to cancel or reschedule, please contact the clinic in advance.",
+      "closing": "See you soon!"
+    },
+    "appointmentReminder24h": {
+      "subject": "⏰ Reminder: Appointment tomorrow with Dr. {doctorName}",
+      "title": "⏰ Appointment Reminder",
+      "reminderTitle": "🗓️ You have an appointment tomorrow",
+      "with": "With Dr. {doctorName}",
+      "confirm": "Please confirm your attendance or contact the clinic if you need to cancel.",
+      "closing": "See you soon!"
+    },
+    "appointmentReminder2h": {
+      "subject": "🔔 Your appointment is in 2 hours - Dr. {doctorName}",
+      "title": "🔔 Your appointment is soon!",
+      "urgentTitle": "⏰ Your appointment is in 2 hours",
+      "with": "With Dr. {doctorName}",
+      "reminder": "<strong>Remember to arrive 10 minutes early.</strong>",
+      "closing": "See you soon!"
+    },
+    "appointmentCancelled": {
+      "subject": "❌ Appointment Cancelled - Dr. {doctorName}",
+      "title": "❌ Appointment Cancelled",
+      "intro": "Your appointment has been cancelled:",
+      "dateLabel": "<strong>Date:</strong> {date}",
+      "timeLabel": "<strong>Time:</strong> {time}",
+      "doctorLabel": "<strong>Doctor:</strong> Dr. {doctorName}",
+      "reasonLabel": "<strong>Reason:</strong> {reason}",
+      "reschedule": "If you'd like to reschedule, please contact the clinic.",
+      "apology": "We apologize for any inconvenience.",
+      "closing": "Dr. {doctorName}'s Office"
+    },
+    "newAppointment": {
+      "subject": "📅 New appointment scheduled - {patientName}",
+      "title": "📅 New Appointment Scheduled",
+      "intro": "A new appointment has been scheduled on your calendar:",
+      "patientLabel": "<strong>👤 Patient:</strong> {patientName}",
+      "dateLabel": "<strong>📅 Date:</strong> {date}",
+      "timeLabel": "<strong>⏰ Time:</strong> {time}",
+      "reasonLabel": "<strong>📝 Reason:</strong> {reason}",
+      "noReason": "Not specified",
+      "dashboard": "You can see more details on your PaciGest Plus dashboard."
+    }
+  }
+}

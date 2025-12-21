@@ -2,6 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { createDemoData } = require('../utils/demoData');
+const { sendVerificationEmail, sendWelcomeEmail } = require('../utils/emailService');
 
 // ============================================
 // GENERAR TOKEN JWT
@@ -25,7 +26,8 @@ exports.register = async (req, res) => {
       phone,
       specialty,
       licenseNumber,
-      role
+      role,
+      language
     } = req.body;
 
     // Verificar si el email ya existe
@@ -56,6 +58,9 @@ exports.register = async (req, res) => {
       role: role || 'doctor',
       emailVerificationToken: verificationToken,
       emailVerificationExpires: verificationExpires,
+      preferences: {
+        language: language || 'es'
+      },
       subscription: {
         plan: 'starter',
         status: 'inactive',
@@ -63,15 +68,16 @@ exports.register = async (req, res) => {
       }
     });
 
-    // TODO: Aquí enviarías el email con el código
-    // Por ahora, lo devolvemos en la respuesta para testing
-    console.log(`📧 Código de verificación para ${email}: ${verificationToken}`);
+    // Enviar email de verificación
+    await sendVerificationEmail(email, firstName, verificationToken, user.preferences.language);
+    console.log(`📧 Email de verificación enviado a ${email}`);
 
     res.status(201).json({
       success: true,
       message: 'Usuario registrado exitosamente. Por favor verifica tu email.',
       userId: user._id,
       email: user.email,
+      // SOLO PARA TESTING - Quitar en producción
       verificationToken: verificationToken,
       note: 'Revisa tu email para el código de verificación'
     });
@@ -162,6 +168,10 @@ exports.verifyEmail = async (req, res) => {
     // Crear datos de ejemplo
     console.log('📦 Creando datos de ejemplo para nuevo usuario...');
     await createDemoData(user._id);
+
+    // Enviar email de bienvenida
+    await sendWelcomeEmail(user.email, user.firstName, user.subscription.trialEndsAt, user.preferences.language);
+    console.log(`📧 Email de bienvenida enviado a ${user.email}`);
 
     // Generar token
     const token = generateToken(user._id);

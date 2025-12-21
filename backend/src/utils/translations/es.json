@@ -1,0 +1,129 @@
+{
+  "common": {
+    "company": "PaciGest Plus",
+    "footer": "Este es un email automático, por favor no respondas a este mensaje.",
+    "copyright": "© 2025 PaciGest Plus. Todos los derechos reservados.",
+    "greeting": "¡Hola {name}!",
+    "greetingDoctor": "Hola Dr. {name},",
+    "greetingFormal": "Hola {name},",
+    "salutation": "Saludos,",
+    "team": "El equipo de PaciGest Plus"
+  },
+  "emails": {
+    "verification": {
+      "subject": "Verifica tu email - PaciGest Plus",
+      "title": "Verifica tu email",
+      "intro": "Gracias por registrarte en PaciGest Plus. Para activar tu cuenta y comenzar tu período de prueba de <strong>7 días gratis</strong>, necesitamos verificar tu email.",
+      "codeLabel": "Tu código de verificación es:",
+      "expires": "⏰ Este código expira en 24 horas.",
+      "notRequested": "Si no solicitaste este registro, puedes ignorar este email.",
+      "closing": "¡Nos vemos pronto! 🚀"
+    },
+    "welcome": {
+      "subject": "¡Bienvenido a PaciGest Plus! 🎉",
+      "title": "¡Bienvenido a PaciGest Plus!",
+      "intro": "Tu cuenta ha sido verificada exitosamente y tu período de prueba de <strong>7 días gratis</strong> ha comenzado.",
+      "trialExpires": "📅 Tu trial expira el: {date}",
+      "accessTitle": "✨ Ya tienes acceso a:",
+      "feature1Title": "👥 Gestión de Pacientes",
+      "feature1Desc": "Crea fichas completas con historias clínicas",
+      "feature2Title": "📅 Sistema de Citas",
+      "feature2Desc": "Agenda y gestiona tus citas fácilmente",
+      "feature3Title": "💊 Recetas Médicas",
+      "feature3Desc": "Genera recetas digitales profesionales",
+      "feature4Title": "📊 Estadísticas",
+      "feature4Desc": "Dashboard con métricas de tu práctica",
+      "bonus": "<strong>🎁 Bonus:</strong> Hemos creado algunos pacientes y citas de ejemplo para que explores el sistema.",
+      "ready": "¿Listo para comenzar?",
+      "support": "Si tienes alguna pregunta, estamos aquí para ayudarte.",
+      "closing": "¡Éxitos! 🚀"
+    },
+    "trialReminder": {
+      "subject": "⏰ Tu trial expira en {days} días - PaciGest Plus",
+      "title": "⏰ Tu trial está por expirar",
+      "alertTitle": "⚠️ Tu período de prueba expira en {days} días",
+      "intro": "Esperamos que hayas disfrutado usando PaciGest Plus. Para continuar usando todas las funcionalidades sin interrupciones, te invitamos a suscribirte.",
+      "plansTitle": "💎 Planes disponibles:",
+      "planStarter": "<strong>Starter:</strong> $20/mes - Perfecto para consultorios individuales",
+      "planProfessional": "<strong>Professional:</strong> $40/mes - Funcionalidades avanzadas",
+      "planClinic": "<strong>Clinic:</strong> $80/mes - Para clínicas con múltiples médicos",
+      "needMore": "<strong>¿Necesitas más tiempo para decidir?</strong> Contáctanos y con gusto te ayudamos."
+    },
+    "trialExpired": {
+      "subject": "❌ Tu trial ha expirado - PaciGest Plus",
+      "title": "❌ Trial Expirado",
+      "intro": "Tu período de prueba de 7 días ha finalizado.",
+      "dataSafe": "Todos tus datos están seguros y guardados. Para continuar accediendo a tu cuenta, necesitas suscribirte a un plan.",
+      "dontLoseTitle": "<strong>No pierdas acceso a:</strong>",
+      "item1": "Tus pacientes y sus historias clínicas",
+      "item2": "Tus citas programadas",
+      "item3": "Tus recetas médicas",
+      "item4": "Todas tus estadísticas",
+      "support": "¿Tienes preguntas? Estamos aquí para ayudarte."
+    },
+    "passwordReset": {
+      "subject": "Recupera tu contraseña - PaciGest Plus",
+      "title": "🔒 Recuperar Contraseña",
+      "intro": "Recibimos una solicitud para restablecer tu contraseña.",
+      "codeLabel": "Tu código de recuperación es:",
+      "expires": "⏰ Este código expira en 1 hora.",
+      "notRequested": "Si no solicitaste este cambio, puedes ignorar este email y tu contraseña permanecerá sin cambios."
+    },
+    "appointmentConfirmation": {
+      "subject": "✅ Cita Confirmada - Dr. {doctorName}",
+      "title": "✅ Cita Confirmada",
+      "intro": "Tu cita ha sido confirmada exitosamente.",
+      "dateLabel": "📅 Fecha:",
+      "timeLabel": "⏰ Hora:",
+      "doctorLabel": "👨‍⚕️ Doctor:",
+      "clinicLabel": "🏥 Consultorio:",
+      "addressLabel": "📍 Dirección:",
+      "phoneLabel": "📞 Teléfono:",
+      "recommendationsTitle": "💡 Recomendaciones:",
+      "rec1": "Llega 10 minutos antes de tu cita",
+      "rec2": "Trae tus documentos de identidad",
+      "rec3": "Si tienes exámenes previos, tráelos contigo",
+      "cancelNote": "Si necesitas cancelar o reagendar, por favor contacta al consultorio con anticipación.",
+      "closing": "¡Te esperamos!"
+    },
+    "appointmentReminder24h": {
+      "subject": "⏰ Recordatorio: Cita mañana con Dr. {doctorName}",
+      "title": "⏰ Recordatorio de Cita",
+      "reminderTitle": "🗓️ Tienes una cita mañana",
+      "with": "Con Dr. {doctorName}",
+      "confirm": "Por favor confirma tu asistencia o contacta al consultorio si necesitas cancelar.",
+      "closing": "¡Te esperamos!"
+    },
+    "appointmentReminder2h": {
+      "subject": "🔔 Tu cita es en 2 horas - Dr. {doctorName}",
+      "title": "🔔 ¡Tu cita es pronto!",
+      "urgentTitle": "⏰ Tu cita es en 2 horas",
+      "with": "Con Dr. {doctorName}",
+      "reminder": "<strong>Recuerda llegar 10 minutos antes.</strong>",
+      "closing": "¡Nos vemos pronto!"
+    },
+    "appointmentCancelled": {
+      "subject": "❌ Cita Cancelada - Dr. {doctorName}",
+      "title": "❌ Cita Cancelada",
+      "intro": "Tu cita ha sido cancelada:",
+      "dateLabel": "<strong>Fecha:</strong> {date}",
+      "timeLabel": "<strong>Hora:</strong> {time}",
+      "doctorLabel": "<strong>Doctor:</strong> Dr. {doctorName}",
+      "reasonLabel": "<strong>Motivo:</strong> {reason}",
+      "reschedule": "Si deseas reagendar, por favor contacta al consultorio.",
+      "apology": "Disculpa las molestias.",
+      "closing": "Consultorio Dr. {doctorName}"
+    },
+    "newAppointment": {
+      "subject": "📅 Nueva cita agendada - {patientName}",
+      "title": "📅 Nueva Cita Agendada",
+      "intro": "Se ha agendado una nueva cita en tu calendario:",
+      "patientLabel": "<strong>👤 Paciente:</strong> {patientName}",
+      "dateLabel": "<strong>📅 Fecha:</strong> {date}",
+      "timeLabel": "<strong>⏰ Hora:</strong> {time}",
+      "reasonLabel": "<strong>📝 Motivo:</strong> {reason}",
+      "noReason": "No especificado",
+      "dashboard": "Puedes ver más detalles en tu dashboard de PaciGest Plus."
+    }
+  }
+}
