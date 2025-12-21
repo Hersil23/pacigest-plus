@@ -257,11 +257,22 @@ emailVerified: {
   default: false
 },
 emailVerificationToken: {
-  type: String
+  type: String,
+  select: false
 },
 emailVerificationExpires: {
-  type: Date
-}
+  type: Date,
+  select: false
+},
+// Token de recuperación de contraseña
+passwordResetToken: {
+  type: String,
+  select: false
+},
+passwordResetExpires: {
+  type: Date,
+  select: false
+},
 }, {
   timestamps: true // Crea automáticamente createdAt y updatedAt
 });

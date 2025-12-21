@@ -1,4 +1,8 @@
 const Appointment = require('../models/Appointment');
+const Patient = require('../models/Patient');
+const User = require('../models/User');
+const { sendAppointmentConfirmation, sendNewAppointmentNotification, sendAppointmentCancelled } = require('../utils/emailService');
+const logger = require('../utils/logger');
 
 // ============================================
 // CREAR NUEVA CITA
@@ -6,6 +10,50 @@ const Appointment = require('../models/Appointment');
 exports.createAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.create(req.body);
+
+    // Obtener datos del paciente y médico para el email
+    const patient = await Patient.findById(req.body.patientId);
+    const doctor = await User.findById(req.body.doctorId);
+
+    // Enviar email de confirmación al paciente (si tiene email)
+    if (patient && patient.email) {
+      const appointmentData = {
+        patientEmail: patient.email,
+        patientName: `${patient.firstName} ${patient.lastName}`,
+        doctorName: `${doctor.firstName} ${doctor.lastName}`,
+        appointmentDate: appointment.appointmentDate,
+        appointmentTime: appointment.appointmentTime,
+        clinicName: doctor.clinic?.name,
+        clinicAddress: doctor.clinic?.address ? 
+          `${doctor.clinic.address.street}, ${doctor.clinic.address.city}, ${doctor.clinic.address.state}` : null,
+        clinicPhone: doctor.clinic?.phone,
+        language: patient.language || 'es'
+      };
+
+      await sendAppointmentConfirmation(appointmentData);
+      logger.logEmail(patient.email, 'Confirmación de cita', true);
+    }
+
+    // Enviar email de notificación al médico
+    if (doctor && doctor.email) {
+      const doctorNotification = {
+        doctorEmail: doctor.email,
+        doctorName: `${doctor.firstName} ${doctor.lastName}`,
+        patientName: `${patient.firstName} ${patient.lastName}`,
+        appointmentDate: appointment.appointmentDate,
+        appointmentTime: appointment.appointmentTime,
+        reasonForVisit: appointment.reasonForVisit,
+        language: doctor.preferences?.language || 'es'
+      };
+
+      await sendNewAppointmentNotification(doctorNotification);
+      logger.logEmail(doctor.email, 'Nueva cita agendada', true);
+      logger.logAudit('APPOINTMENT_CREATED', doctor._id, { 
+        appointmentId: appointment._id, 
+        patientId: patient._id, 
+        date: appointment.appointmentDate 
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -296,6 +344,30 @@ exports.cancelAppointment = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Cita no encontrada'
+      });
+    }
+
+    // Enviar email de cancelación al paciente
+    const patient = await Patient.findById(appointment.patientId);
+    const doctor = await User.findById(appointment.doctorId);
+
+    if (patient && patient.email) {
+      const cancellationData = {
+        patientEmail: patient.email,
+        patientName: `${patient.firstName} ${patient.lastName}`,
+        doctorName: `${doctor.firstName} ${doctor.lastName}`,
+        appointmentDate: appointment.appointmentDate,
+        appointmentTime: appointment.appointmentTime,
+        cancellationReason: appointment.cancellationReason,
+        language: patient.language || 'es'
+      };
+
+      await sendAppointmentCancelled(cancellationData);
+      logger.logEmail(patient.email, 'Cita cancelada', true);
+      logger.logAudit('APPOINTMENT_CANCELLED', doctor._id, { 
+        appointmentId: appointment._id, 
+        patientId: patient._id, 
+        reason: cancellationReason 
       });
     }
 

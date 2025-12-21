@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { createDemoData } = require('../utils/demoData');
 const { sendVerificationEmail, sendWelcomeEmail } = require('../utils/emailService');
+const logger = require('../utils/logger');
 
 // ============================================
 // GENERAR TOKEN JWT
@@ -70,7 +71,8 @@ exports.register = async (req, res) => {
 
     // Enviar email de verificación
     await sendVerificationEmail(email, firstName, verificationToken, user.preferences.language);
-    console.log(`📧 Email de verificación enviado a ${email}`);
+    logger.logEmail(email, 'Verificación de email', true);
+    logger.logInfo(`Usuario registrado: ${email}`, { userId: user._id, role: user.role });
 
     res.status(201).json({
       success: true,
@@ -166,12 +168,13 @@ exports.verifyEmail = async (req, res) => {
     await user.save();
 
     // Crear datos de ejemplo
-    console.log('📦 Creando datos de ejemplo para nuevo usuario...');
+    logger.logInfo(`Creando datos de ejemplo para usuario: ${user._id}`);
     await createDemoData(user._id);
 
     // Enviar email de bienvenida
     await sendWelcomeEmail(user.email, user.firstName, user.subscription.trialEndsAt, user.preferences.language);
-    console.log(`📧 Email de bienvenida enviado a ${user.email}`);
+    logger.logEmail(user.email, 'Email de bienvenida', true);
+    logger.logAudit('EMAIL_VERIFIED', user._id, { email: user.email, trialEndsAt: user.subscription.trialEndsAt });
 
     // Generar token
     const token = generateToken(user._id);
@@ -244,7 +247,7 @@ exports.login = async (req, res) => {
 
     user.lastLogin = new Date();
     await user.save();
-
+    logger.logAuth('LOGIN', user._id, true, { email: user.email });
     const token = generateToken(user._id);
     user.password = undefined;
 
@@ -366,6 +369,127 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error al cambiar contraseña',
+      error: error.message
+    });
+  }
+};
+// ============================================
+// SOLICITAR RECUPERACIÓN DE CONTRASEÑA
+// ============================================
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Por favor proporciona tu email'
+      });
+    }
+
+    // Buscar usuario
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      // Por seguridad, no revelar si el email existe
+      return res.status(200).json({
+        success: true,
+        message: 'Si el email existe, recibirás instrucciones para recuperar tu contraseña'
+      });
+    }
+
+    // Generar código de 6 dígitos
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+
+    // Guardar en BD
+    user.passwordResetToken = resetToken;
+    user.passwordResetExpires = resetExpires;
+    await user.save();
+
+    // Enviar email
+    const { sendPasswordResetEmail } = require('../utils/emailService');
+    await sendPasswordResetEmail(email, user.firstName, resetToken, user.preferences.language);
+    logger.logEmail(email, 'Recuperación de contraseña', true);
+    logger.logInfo(`Solicitud de recuperación de contraseña: ${email}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Si el email existe, recibirás instrucciones para recuperar tu contraseña',
+      // SOLO PARA TESTING - Quitar en producción
+      resetToken: resetToken
+    });
+
+  } catch (error) {
+    logger.logError('Error en forgot password', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al procesar solicitud',
+      error: error.message
+    });
+  }
+};
+
+// ============================================
+// RESTABLECER CONTRASEÑA
+// ============================================
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, resetToken, newPassword } = req.body;
+
+    if (!email || !resetToken || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Por favor proporciona email, código y nueva contraseña'
+      });
+    }
+
+    // Buscar usuario
+    const user = await User.findOne({ email }).select('+passwordResetToken +passwordResetExpires');
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Código inválido o expirado'
+      });
+    }
+
+    // Verificar si el token expiró
+    if (new Date() > user.passwordResetExpires) {
+      return res.status(400).json({
+        success: false,
+        message: 'El código ha expirado. Solicita uno nuevo.',
+        code: 'TOKEN_EXPIRED'
+      });
+    }
+
+    // Verificar código
+    if (user.passwordResetToken !== resetToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Código inválido'
+      });
+    }
+
+    // Cambiar contraseña
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    logger.logAudit('PASSWORD_RESET', user._id, { email: user.email });
+    logger.logInfo(`Contraseña restablecida exitosamente: ${email}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Contraseña restablecida exitosamente. Ya puedes iniciar sesión.'
+    });
+
+  } catch (error) {
+    logger.logError('Error en reset password', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al restablecer contraseña',
       error: error.message
     });
   }
