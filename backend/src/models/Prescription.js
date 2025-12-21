@@ -30,7 +30,6 @@ const prescriptionSchema = new mongoose.Schema({
   prescriptionNumber: {
     type: String,
     unique: true,
-    required: true
   },
 
   // ============================================
@@ -126,14 +125,13 @@ const prescriptionSchema = new mongoose.Schema({
 // ============================================
 // MIDDLEWARE PARA GENERAR NÚMERO DE RECETA
 // ============================================
-prescriptionSchema.pre('save', async function(next) {
+prescriptionSchema.pre('save', async function() {
   if (!this.prescriptionNumber) {
     // Genera número único: RX-YYYYMMDD-XXXX
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const count = await mongoose.model('Prescription').countDocuments();
     this.prescriptionNumber = `RX-${date}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
 });
 
 // ============================================
