@@ -25,7 +25,6 @@ const appointmentSchema = new mongoose.Schema({
   appointmentNumber: {
     type: String,
     unique: true,
-    required: true
   },
   appointmentDate: {
     type: Date,
@@ -161,14 +160,13 @@ const appointmentSchema = new mongoose.Schema({
 // ============================================
 // MIDDLEWARE PARA GENERAR NÚMERO DE CITA
 // ============================================
-appointmentSchema.pre('save', async function(next) {
+appointmentSchema.pre('save', async function() {
   if (!this.appointmentNumber) {
     // Genera número único: APT-YYYYMMDD-XXXX
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const count = await mongoose.model('Appointment').countDocuments();
     this.appointmentNumber = `APT-${date}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
 });
 
 // ============================================

@@ -185,7 +185,6 @@ const patientSchema = new mongoose.Schema({
   medicalRecordNumber: {
     type: String,
     unique: true,
-    required: true
   },
 
   // ============================================
@@ -207,14 +206,13 @@ const patientSchema = new mongoose.Schema({
 // ============================================
 // MIDDLEWARE PARA GENERAR NÚMERO DE EXPEDIENTE
 // ============================================
-patientSchema.pre('save', async function(next) {
+patientSchema.pre('save', async function() {
   if (!this.medicalRecordNumber) {
     // Genera número único: PAC-YYYYMMDD-XXXX
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const count = await mongoose.model('Patient').countDocuments();
     this.medicalRecordNumber = `PAC-${date}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
 });
 
 // ============================================

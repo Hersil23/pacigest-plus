@@ -182,7 +182,8 @@ exports.updateProfile = async (req, res) => {
       availability: req.body.availability,
       clinic: req.body.clinic,
       preferences: req.body.preferences,
-      profilePhotoUrl: req.body.profilePhotoUrl
+      profilePhotoUrl: req.body.profilePhotoUrl,
+      permissions: req.body.permissions
     };
 
     const user = await User.findByIdAndUpdate(
