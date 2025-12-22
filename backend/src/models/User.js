@@ -166,12 +166,12 @@ const userSchema = new mongoose.Schema({
   // ============================================
   // SUSCRIPCIÓN Y PAGOS
   // ============================================
-  subscription: {
-    plan: {
-      type: String,
-      enum: ['starter', 'professional', 'clinic'],
-      default: 'starter'
-    },
+    subscription: {
+      plan: {
+        type: String,
+        enum: ['premium_individual', 'vip_practice', 'corporate_pro', 'enterprise_health'],
+        default: 'premium_individual'
+      },
     status: {
       type: String,
       enum: ['active', 'inactive', 'trial', 'cancelled', 'expired'],

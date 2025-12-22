@@ -49,6 +49,7 @@ app.use('/api/medical-records', require('./src/routes/medicalRecord.routes'));
 app.use('/api/prescriptions', require('./src/routes/prescription.routes'));
 app.use('/api/medical-files', require('./src/routes/medicalFile.routes'));
 app.use('/api/stats', require('./src/routes/stats.routes'));
+app.use('/api/payments', require('./src/routes/payment.routes'));
 // ============================================
 // MANEJO DE ERRORES 404
 // ============================================
