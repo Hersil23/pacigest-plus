@@ -1,36 +1,175 @@
 @import "tailwindcss";
 
 @layer base {
+  /* ========================================== */
+  /* MODO CLARO - TEMA SOFT (DEFAULT)          */
+  /* ========================================== */
   :root {
-    /* Colores Pasteles - Soft Professional */
-    --pastel-blue: 201 214 255; /* #C9D6FF */
-    --pastel-lavender: 224 195 252; /* #E0C3FC */
-    --pastel-pink: 255 229 241; /* #FFE5F1 */
-    --pastel-yellow: 255 244 204; /* #FFF4CC */
-    --pearl-white: 248 249 250; /* #F8F9FA */
-    
-    /* Colores Principales */
-    --primary-blue: 74 144 226; /* #4A90E2 */
-    --primary-blue-hover: 53 122 189; /* #357ABD */
-    
-    /* Grises */
-    --gray-dark: 45 55 72; /* #2D3748 */
-    --gray-medium: 74 85 104; /* #4A5568 */
-    --gray-light: 203 213 224; /* #CBD5E0 */
-    --gray-very-light: 247 250 252; /* #F7FAFC */
-    
-    /* Estados */
-    --success: 72 187 120; /* #48BB78 */
-    --warning: 246 173 85; /* #F6AD55 */
-    --error: 245 101 101; /* #F56565 */
-    --info: 66 153 225; /* #4299E1 */
+    --pastel-blue: 201 214 255;
+    --pastel-lavender: 224 195 252;
+    --pastel-pink: 255 229 241;
+    --pastel-yellow: 255 244 204;
+    --pearl-white: 248 249 250;
+    --primary: 74 144 226;
+    --primary-hover: 53 122 189;
+    --gray-dark: 45 55 72;
+    --gray-medium: 74 85 104;
+    --gray-light: 203 213 224;
+    --gray-very-light: 247 250 252;
+    --success: 72 187 120;
+    --warning: 246 173 85;
+    --error: 245 101 101;
+    --info: 66 153 225;
+    --background: 248 249 250;
+    --foreground: 45 55 72;
+    --sidebar: 201 214 255;
+    --card: 255 255 255;
+    --border: 201 214 255;
+    --accent: 224 195 252;
+  }
+
+  /* ========================================== */
+  /* MODO CLARO - TEMA CORPORATE                */
+  /* ========================================== */
+  [data-theme="corporate"]:not([data-mode="dark"]) {
+    --primary: 37 99 235;
+    --primary-hover: 29 78 216;
+    --pastel-blue: 96 165 250;
+    --pastel-lavender: 147 197 253;
+    --pastel-pink: 191 219 254;
+    --pastel-yellow: 254 240 138;
+    --pearl-white: 248 250 252;
+    --gray-dark: 30 41 59;
+    --gray-medium: 71 85 105;
+    --gray-light: 203 213 225;
+    --gray-very-light: 241 245 249;
+    --success: 34 197 94;
+    --warning: 251 146 60;
+    --error: 239 68 68;
+    --info: 59 130 246;
+    --background: 248 250 252;
+    --foreground: 30 41 59;
+    --sidebar: 96 165 250;
+    --card: 255 255 255;
+    --border: 147 197 253;
+    --accent: 37 99 235;
+  }
+
+  /* ========================================== */
+  /* MODO CLARO - TEMA MEDICAL                  */
+  /* ========================================== */
+  [data-theme="medical"]:not([data-mode="dark"]) {
+    --primary: 16 185 129;
+    --primary-hover: 5 150 105;
+    --pastel-blue: 110 231 183;
+    --pastel-lavender: 167 243 208;
+    --pastel-pink: 209 250 229;
+    --pastel-yellow: 254 249 195;
+    --pearl-white: 240 253 244;
+    --gray-dark: 20 83 45;
+    --gray-medium: 74 85 104;
+    --gray-light: 187 247 208;
+    --gray-very-light: 236 253 245;
+    --success: 34 197 94;
+    --warning: 234 179 8;
+    --error: 239 68 68;
+    --info: 14 165 233;
+    --background: 240 253 244;
+    --foreground: 20 83 45;
+    --sidebar: 110 231 183;
+    --card: 255 255 255;
+    --border: 167 243 208;
+    --accent: 16 185 129;
+  }
+
+  /* ========================================== */
+  /* MODO OSCURO - TEMA SOFT                    */
+  /* ========================================== */
+  [data-theme="soft"][data-mode="dark"],
+  :root[data-mode="dark"]:not([data-theme]) {
+    --background: 26 32 44;
+    --foreground: 237 242 247;
+    --sidebar: 45 55 72;
+    --card: 45 55 72;
+    --border: 74 85 104;
+    --pastel-blue: 147 197 253;
+    --pastel-lavender: 196 181 253;
+    --pastel-pink: 251 207 232;
+    --pastel-yellow: 253 224 71;
+    --accent: 139 92 246;
+    --primary: 96 165 250;
+    --primary-hover: 147 197 253;
+    --gray-dark: 237 242 247;
+    --gray-medium: 160 174 192;
+    --gray-light: 74 85 104;
+    --gray-very-light: 45 55 72;
+    --success: 110 231 183;
+    --warning: 251 191 36;
+    --error: 252 165 165;
+    --info: 96 165 250;
+  }
+
+  /* ========================================== */
+  /* MODO OSCURO - TEMA CORPORATE               */
+  /* ========================================== */
+  [data-theme="corporate"][data-mode="dark"] {
+    --background: 15 23 42;
+    --foreground: 248 250 252;
+    --sidebar: 30 41 59;
+    --card: 30 41 59;
+    --border: 51 65 85;
+    --primary: 59 130 246;
+    --primary-hover: 96 165 250;
+    --pastel-blue: 147 197 253;
+    --pastel-lavender: 191 219 254;
+    --pastel-pink: 219 234 254;
+    --pastel-yellow: 254 249 195;
+    --accent: 59 130 246;
+    --gray-dark: 248 250 252;
+    --gray-medium: 148 163 184;
+    --gray-light: 71 85 105;
+    --gray-very-light: 51 65 85;
+    --success: 74 222 128;
+    --warning: 251 191 36;
+    --error: 248 113 113;
+    --info: 96 165 250;
+  }
+
+  /* ========================================== */
+  /* MODO OSCURO - TEMA MEDICAL                 */
+  /* ========================================== */
+  [data-theme="medical"][data-mode="dark"] {
+    --background: 6 78 59;
+    --foreground: 236 253 245;
+    --sidebar: 6 95 70;
+    --card: 6 95 70;
+    --border: 6 120 86;
+    --primary: 52 211 153;
+    --primary-hover: 110 231 183;
+    --pastel-blue: 167 243 208;
+    --pastel-lavender: 209 250 229;
+    --pastel-pink: 240 253 244;
+    --pastel-yellow: 254 249 195;
+    --accent: 52 211 153;
+    --gray-dark: 236 253 245;
+    --gray-medium: 134 239 172;
+    --gray-light: 6 120 86;
+    --gray-very-light: 6 95 70;
+    --success: 134 239 172;
+    --warning: 250 204 21;
+    --error: 248 113 113;
+    --info: 34 211 238;
   }
 }
 
+/* ========================================== */
+/* ESTILOS BASE                              */
+/* ========================================== */
 @layer base {
   body {
-    background-color: rgb(var(--pearl-white));
-    color: rgb(var(--gray-dark));
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
     font-family: var(--font-geist-sans);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
