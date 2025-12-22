@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Colores Pasteles - Soft Professional */
+    --pastel-blue: 201 214 255; /* #C9D6FF */
+    --pastel-lavender: 224 195 252; /* #E0C3FC */
+    --pastel-pink: 255 229 241; /* #FFE5F1 */
+    --pastel-yellow: 255 244 204; /* #FFF4CC */
+    --pearl-white: 248 249 250; /* #F8F9FA */
+    
+    /* Colores Principales */
+    --primary-blue: 74 144 226; /* #4A90E2 */
+    --primary-blue-hover: 53 122 189; /* #357ABD */
+    
+    /* Grises */
+    --gray-dark: 45 55 72; /* #2D3748 */
+    --gray-medium: 74 85 104; /* #4A5568 */
+    --gray-light: 203 213 224; /* #CBD5E0 */
+    --gray-very-light: 247 250 252; /* #F7FAFC */
+    
+    /* Estados */
+    --success: 72 187 120; /* #48BB78 */
+    --warning: 246 173 85; /* #F6AD55 */
+    --error: 245 101 101; /* #F56565 */
+    --info: 66 153 225; /* #4299E1 */
+  }
+}
+
+@layer base {
+  body {
+    background-color: rgb(var(--pearl-white));
+    color: rgb(var(--gray-dark));
+    font-family: var(--font-geist-sans);
+  }
+}
