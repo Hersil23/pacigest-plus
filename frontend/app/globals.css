@@ -136,14 +136,14 @@
   }
 
   /* ========================================== */
-  /* MODO OSCURO - TEMA MEDICAL                 */
+  /* MODO OSCURO - TEMA MEDICAL (TEAL)         */
   /* ========================================== */
   [data-theme="medical"][data-mode="dark"] {
-    --background: 6 78 59;
-    --foreground: 236 253 245;
-    --sidebar: 6 95 70;
-    --card: 6 95 70;
-    --border: 6 120 86;
+    --background: 15 28 26;
+    --foreground: 243 244 246;
+    --sidebar: 26 46 42;
+    --card: 26 46 42;
+    --border: 52 211 153;
     --primary: 52 211 153;
     --primary-hover: 110 231 183;
     --pastel-blue: 167 243 208;
@@ -151,11 +151,11 @@
     --pastel-pink: 240 253 244;
     --pastel-yellow: 254 249 195;
     --accent: 52 211 153;
-    --gray-dark: 236 253 245;
-    --gray-medium: 134 239 172;
-    --gray-light: 6 120 86;
-    --gray-very-light: 6 95 70;
-    --success: 134 239 172;
+    --gray-dark: 243 244 246;
+    --gray-medium: 156 163 175;
+    --gray-light: 52 73 68;
+    --gray-very-light: 26 46 42;
+    --success: 52 211 153;
     --warning: 250 204 21;
     --error: 248 113 113;
     --info: 34 211 238;
