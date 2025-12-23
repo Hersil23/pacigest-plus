@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MobileMenu from './MobileMenu';
+import Footer from './Footer';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -33,6 +34,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           <div className="container mx-auto px-4 py-6">
             {children}
           </div>
+          <Footer />
         </main>
       </div>
     </div>
