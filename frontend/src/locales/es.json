@@ -105,5 +105,9 @@
       "completed": "Completada",
       "cancelled": "Cancelada"
     }
+  },
+  "footer": {
+    "developedBy": "Desarrollado por",
+    "allRightsReserved": "Todos los derechos reservados"
   }
 }

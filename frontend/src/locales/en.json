@@ -63,6 +63,10 @@
     "data": "Data",
     "preferences": "Preferences"
   },
+  "footer": {
+    "developedBy": "Developed by",
+    "allRightsReserved": "All rights reserved"
+  },
   "auth": {
     "login": "Login",
     "register": "Sign Up",

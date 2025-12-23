@@ -6,7 +6,11 @@ import NotificationDropdown from '@/components/NotificationDropdown';
 import SettingsDropdown from '@/components/SettingsDropdown';
 import UserDropdown from '@/components/UserDropdown';
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
   const { t } = useLanguage();
 
   return (
@@ -14,18 +18,29 @@ export default function Header() {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           
-          {/* Logo / App Name */}
-          <Link 
-            href="/" 
-            className="flex items-center gap-2 text-[rgb(var(--foreground))] hover:opacity-80 transition-opacity"
-          >
-            <div className="w-10 h-10 rounded-lg bg-[rgb(var(--primary))] flex items-center justify-center text-white text-xl font-bold">
-              🏥
-            </div>
-            <h1 className="hidden sm:block text-xl lg:text-2xl font-bold">
-              {t('common.appName')}
-            </h1>
-          </Link>
+          {/* Left Side: Hamburger + Logo */}
+          <div className="flex items-center gap-3">
+            {/* Hamburger Button - Only visible on mobile/tablet */}
+            <button
+              onClick={onMenuClick}
+              className="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[rgb(var(--gray-very-light))] transition-colors"
+            >
+              <span className="text-2xl">☰</span>
+            </button>
+
+            {/* Logo / App Name */}
+            <Link 
+              href="/" 
+              className="flex items-center gap-2 text-[rgb(var(--foreground))] hover:opacity-80 transition-opacity"
+            >
+              <div className="w-10 h-10 rounded-lg bg-[rgb(var(--primary))] flex items-center justify-center text-white text-xl font-bold">
+                🏥
+              </div>
+              <h1 className="hidden sm:block text-xl lg:text-2xl font-bold">
+                {t('common.appName')}
+              </h1>
+            </Link>
+          </div>
 
           {/* Right Side - Actions */}
           <div className="flex items-center gap-2 lg:gap-3">
