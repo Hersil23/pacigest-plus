@@ -1,0 +1,109 @@
+{
+  "common": {
+    "appName": "PaciGest Plus",
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No",
+    "actions": "Acciones",
+    "status": "Estado",
+    "date": "Fecha",
+    "time": "Hora",
+    "name": "Nombre",
+    "email": "Email",
+    "phone": "Teléfono",
+    "address": "Dirección"
+  },
+  "theme": {
+    "soft": "Soft",
+    "corporate": "Corporativo",
+    "medical": "Médico",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "changeTheme": "Cambiar tema",
+    "changeMode": "Cambiar a modo",
+    "darkMode": "Modo oscuro",
+    "lightMode": "Modo claro"
+  },
+  "header": {
+    "search": "Buscar paciente, cita...",
+    "newAppointment": "Nueva Cita",
+    "notifications": "Notificaciones",
+    "noNotifications": "No hay notificaciones",
+    "settings": "Ajustes",
+    "profile": "Perfil",
+    "logout": "Cerrar sesión",
+    "appointmentsToday": "citas hoy",
+    "next": "Próxima"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "patients": "Pacientes",
+    "appointments": "Citas",
+    "medicalRecords": "Historias Clínicas",
+    "prescriptions": "Recetas",
+    "statistics": "Estadísticas",
+    "settings": "Configuración"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "theme": "Tema del Sistema",
+    "language": "Idioma",
+    "privacy": "Privacidad",
+    "data": "Datos",
+    "preferences": "Preferencias"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar Sesión",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "rememberMe": "Recordarme",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "dontHaveAccount": "¿No tienes cuenta?",
+    "alreadyHaveAccount": "¿Ya tienes cuenta?"
+  },
+  "patients": {
+    "title": "Pacientes",
+    "newPatient": "Nuevo Paciente",
+    "editPatient": "Editar Paciente",
+    "viewPatient": "Ver Paciente",
+    "deletePatient": "Eliminar Paciente",
+    "patientList": "Lista de Pacientes",
+    "totalPatients": "Total de Pacientes",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "dateOfBirth": "Fecha de Nacimiento",
+    "gender": "Género",
+    "bloodType": "Tipo de Sangre",
+    "allergies": "Alergias"
+  },
+  "appointments": {
+    "title": "Citas",
+    "newAppointment": "Nueva Cita",
+    "editAppointment": "Editar Cita",
+    "viewAppointment": "Ver Cita",
+    "cancelAppointment": "Cancelar Cita",
+    "appointmentList": "Lista de Citas",
+    "today": "Hoy",
+    "upcoming": "Próximas",
+    "past": "Pasadas",
+    "status": {
+      "scheduled": "Programada",
+      "confirmed": "Confirmada",
+      "completed": "Completada",
+      "cancelled": "Cancelada"
+    }
+  }
+}

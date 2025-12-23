@@ -1,0 +1,109 @@
+{
+  "common": {
+    "appName": "PaciGest Plus",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "close": "Close",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "time": "Time",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address"
+  },
+  "theme": {
+    "soft": "Soft",
+    "corporate": "Corporate",
+    "medical": "Medical",
+    "light": "Light",
+    "dark": "Dark",
+    "changeTheme": "Change theme",
+    "changeMode": "Change to mode",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode"
+  },
+  "header": {
+    "search": "Search patient, appointment...",
+    "newAppointment": "New Appointment",
+    "notifications": "Notifications",
+    "noNotifications": "No notifications",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout",
+    "appointmentsToday": "appointments today",
+    "next": "Next"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "appointments": "Appointments",
+    "medicalRecords": "Medical Records",
+    "prescriptions": "Prescriptions",
+    "statistics": "Statistics",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "System Theme",
+    "language": "Language",
+    "privacy": "Privacy",
+    "data": "Data",
+    "preferences": "Preferences"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Sign Up",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "patients": {
+    "title": "Patients",
+    "newPatient": "New Patient",
+    "editPatient": "Edit Patient",
+    "viewPatient": "View Patient",
+    "deletePatient": "Delete Patient",
+    "patientList": "Patient List",
+    "totalPatients": "Total Patients",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "dateOfBirth": "Date of Birth",
+    "gender": "Gender",
+    "bloodType": "Blood Type",
+    "allergies": "Allergies"
+  },
+  "appointments": {
+    "title": "Appointments",
+    "newAppointment": "New Appointment",
+    "editAppointment": "Edit Appointment",
+    "viewAppointment": "View Appointment",
+    "cancelAppointment": "Cancel Appointment",
+    "appointmentList": "Appointment List",
+    "today": "Today",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "status": {
+      "scheduled": "Scheduled",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  }
+}
