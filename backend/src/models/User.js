@@ -169,8 +169,8 @@ const userSchema = new mongoose.Schema({
     subscription: {
       plan: {
         type: String,
-        enum: ['premium_individual', 'vip_practice', 'corporate_pro', 'enterprise_health'],
-        default: 'premium_individual'
+        enum: ['trial', 'individual', 'clinic', 'hospital'],
+        default: 'trial'
       },
     status: {
       type: String,

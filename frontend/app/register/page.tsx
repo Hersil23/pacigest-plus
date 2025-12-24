@@ -17,9 +17,10 @@ export default function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    phoneNumber: '',
+    phone: '',
     specialty: '',
     licenseNumber: '',
+    selectedPlan: 'trial',
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,7 +32,38 @@ export default function RegisterPage() {
     }
   }, [isAuthenticated, loading, router]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const plans = [
+    {
+      value: 'trial',
+      name: 'Trial',
+      description: '7 días gratis - Prueba completa',
+      price: 'Gratis',
+      recommended: false,
+    },
+    {
+      value: 'individual',
+      name: 'Individual',
+      description: '1-10 médicos - $30/médico/mes',
+      price: '$30/mes',
+      recommended: true,
+    },
+    {
+      value: 'clinic',
+      name: 'Clínica',
+      description: '11-49 médicos - $20/médico/mes',
+      price: '$20/mes',
+      recommended: false,
+    },
+    {
+      value: 'hospital',
+      name: 'Hospital',
+      description: '50+ médicos - $17/médico/mes',
+      price: '$17/mes',
+      recommended: false,
+    },
+  ];
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -43,22 +75,29 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    // Validar contraseñas
+    // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+    // Validar complejidad de contraseña
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setError('La contraseña debe tener mínimo 8 caracteres, una mayúscula, un número y un carácter especial (@$!%*?&#)');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const { confirmPassword, ...registerData } = formData;
-      await register(registerData);
+      const { confirmPassword, selectedPlan, ...registerData } = formData;
+      await register({
+        ...registerData,
+        subscription: {
+          plan: selectedPlan,
+        },
+      });
     } catch (err: any) {
       setError(err.message || 'Error al registrarse');
     } finally {
@@ -76,7 +115,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[rgb(var(--background))] px-4 py-12">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-4xl">
         
         {/* Logo y Título */}
         <div className="text-center mb-8">
@@ -95,6 +134,50 @@ export default function RegisterPage() {
         <div className="bg-[rgb(var(--card))] rounded-lg shadow-lg border border-[rgb(var(--border))] p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             
+            {/* Selector de Plan */}
+            <div>
+              <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-3">
+                Selecciona tu plan *
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                {plans.map((plan) => (
+                  <label
+                    key={plan.value}
+                    className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all ${
+                      formData.selectedPlan === plan.value
+                        ? 'border-[rgb(var(--primary))] bg-[rgb(var(--primary)/0.05)]'
+                        : 'border-[rgb(var(--border))] hover:border-[rgb(var(--primary)/0.5)]'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="selectedPlan"
+                      value={plan.value}
+                      checked={formData.selectedPlan === plan.value}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    {plan.recommended && (
+                      <span className="absolute -top-2 -right-2 bg-[rgb(var(--primary))] text-white text-xs font-bold px-2 py-1 rounded-full">
+                        POPULAR
+                      </span>
+                    )}
+                    <div className="text-center">
+                      <p className="font-bold text-[rgb(var(--foreground))] mb-1">
+                        {plan.name}
+                      </p>
+                      <p className="text-lg font-bold text-[rgb(var(--primary))] mb-2">
+                        {plan.price}
+                      </p>
+                      <p className="text-xs text-[rgb(var(--gray-medium))]">
+                        {plan.description}
+                      </p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             {/* Nombre y Apellido */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -149,14 +232,14 @@ export default function RegisterPage() {
 
             {/* Teléfono */}
             <div>
-              <label htmlFor="phoneNumber" className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+              <label htmlFor="phone" className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
                 Teléfono *
               </label>
               <input
                 type="tel"
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
+                id="phone"
+                name="phone"
+                value={formData.phone}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 rounded-lg bg-[rgb(var(--background))] text-[rgb(var(--foreground))] border border-[rgb(var(--border))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] transition-all"
@@ -213,6 +296,9 @@ export default function RegisterPage() {
                   className="w-full px-4 py-3 rounded-lg bg-[rgb(var(--background))] text-[rgb(var(--foreground))] border border-[rgb(var(--border))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] transition-all"
                   placeholder="••••••••"
                 />
+                <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
+                  Mínimo 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial
+                </p>
               </div>
 
               <div>
