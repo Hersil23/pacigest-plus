@@ -109,5 +109,148 @@
       "completed": "Completed",
       "cancelled": "Cancelled"
     }
+  },
+  "landing": {
+    "hero": {
+      "title": "Manage your medical practice in a",
+      "titleHighlight": "simple and professional way",
+      "subtitle": "Complete software for managing patients, appointments, medical records and much more. Start your free 7-day trial.",
+      "cta1": "🚀 Try Free for 7 Days",
+      "cta2": "View Demo",
+      "benefit1": "No credit card required",
+      "benefit2": "Setup in 2 minutes",
+      "benefit3": "Spanish support"
+    },
+    "features": {
+      "title": "Everything you need in one place",
+      "subtitle": "Features designed for modern doctors",
+      "patients": {
+        "title": "Patient Management",
+        "description": "Manage your patients' information securely and organized"
+      },
+      "appointments": {
+        "title": "Appointment Scheduling",
+        "description": "Schedule and manage appointments with automatic reminders"
+      },
+      "records": {
+        "title": "Medical Records",
+        "description": "Complete and accessible digital medical records"
+      },
+      "prescriptions": {
+        "title": "Electronic Prescriptions",
+        "description": "Generate and manage medical prescriptions digitally"
+      },
+      "reports": {
+        "title": "Reports and Statistics",
+        "description": "Analyze your practice's performance with real-time data"
+      },
+      "bilingual": {
+        "title": "Bilingual System",
+        "description": "Available in Spanish and English"
+      }
+    },
+    "benefits": {
+      "title": "Why choose PaciGest Plus?",
+      "time": {
+        "title": "Save Time",
+        "description": "Automate repetitive tasks and focus on your patients"
+      },
+      "productivity": {
+        "title": "Increase Productivity",
+        "description": "Manage more patients with less administrative effort"
+      },
+      "security": {
+        "title": "Guaranteed Security",
+        "description": "End-to-end encryption and medical compliance"
+      },
+      "access": {
+        "title": "Access From Anywhere",
+        "description": "Available on web, tablet and mobile"
+      }
+    },
+    "pricing": {
+      "title": "Plans that adapt to your practice",
+      "subtitle": "Per-doctor pricing - more doctors, better price",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly",
+      "save": "Save",
+      "savings": "You save",
+      "perMonth": "/mo",
+      "everyMonths": "every 3 months",
+      "annually": "per year",
+      "example": "Example",
+      "doctors": "doctors",
+      "doctor": "doctor",
+      "popular": "MOST POPULAR",
+      "free": "Free",
+      "days": "days",
+      "priceNote": "Prices are per doctor. Example: 3 doctors in Individual plan = $90/mo (3 × $30)",
+      "trial": {
+        "name": "Trial",
+        "feature1": "Full access for 7 days",
+        "feature2": "Up to 10 patients",
+        "feature3": "All features",
+        "feature4": "Email support",
+        "cta": "Try Free"
+      },
+      "individual": {
+        "name": "Individual",
+        "description": "Perfect for independent doctors",
+        "feature1": "1 doctor",
+        "feature2": "Unlimited patients",
+        "feature3": "All features",
+        "feature4": "Priority support",
+        "feature5": "Automatic backup",
+        "cta": "Get Started"
+      },
+      "clinic": {
+        "name": "Clinic",
+        "range": "11-49 doctors",
+        "description": "$20 per doctor/month",
+        "feature1": "11 to 49 doctors",
+        "feature2": "Unlimited patients",
+        "feature3": "Multi-specialty",
+        "feature4": "24/7 support",
+        "feature5": "Advanced reports",
+        "cta": "Get Started"
+      },
+      "hospital": {
+        "name": "Hospital",
+        "range": "50+ doctors",
+        "description": "$17 per doctor/month",
+        "feature1": "50 or more doctors",
+        "feature2": "Unlimited patients",
+        "feature3": "Multi-location",
+        "feature4": "Dedicated support",
+        "feature5": "Full customization",
+        "cta": "Contact Sales"
+      }
+    },
+    "testimonials": {
+      "title": "What our users say",
+      "doctor1": {
+        "name": "Dr. Carlos Mendoza",
+        "specialty": "General Medicine",
+        "text": "PaciGest Plus has completely transformed the management of my practice. Now I can see more patients without sacrificing quality of care."
+      },
+      "doctor2": {
+        "name": "Dr. Ana López",
+        "specialty": "Pediatrics",
+        "text": "The interface is intuitive and my patients appreciate the automatic reminders. An investment worth every penny."
+      },
+      "doctor3": {
+        "name": "Dr. Miguel Torres",
+        "specialty": "Cardiology",
+        "text": "Excellent system. Data security and access from anywhere are essential in my practice."
+      }
+    },
+    "cta": {
+      "title": "Ready to transform your medical practice?",
+      "subtitle": "Join hundreds of doctors who already trust PaciGest Plus",
+      "button": "Start Free Trial",
+      "noCommitment": "No commitment",
+      "cancelAnytime": "Cancel anytime"
+    }
   }
 }

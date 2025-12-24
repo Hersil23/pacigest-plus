@@ -1,178 +1,568 @@
 "use client";
 
-import MainLayout from "@/components/layout/MainLayout";
-import SearchBar from "@/components/SearchBar";
-import { useLanguage } from "@/contexts/LanguageContext";
-import Link from "next/link";
+import { useState } from 'react';
+import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
+import SettingsDropdown from '@/components/SettingsDropdown';
+import Footer from '@/components/layout/Footer';
+import { FaUsers, FaCalendarAlt, FaFileMedical, FaPrescription, FaChartLine, FaGlobe, FaClock, FaShieldAlt, FaMobile, FaCheck } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
-export default function Home() {
+export default function LandingPage() {
   const { t } = useLanguage();
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
+
+  const features = [
+    {
+      icon: FaUsers,
+      title: t('landing.features.patients.title'),
+      description: t('landing.features.patients.description')
+    },
+    {
+      icon: FaCalendarAlt,
+      title: t('landing.features.appointments.title'),
+      description: t('landing.features.appointments.description')
+    },
+    {
+      icon: FaFileMedical,
+      title: t('landing.features.records.title'),
+      description: t('landing.features.records.description')
+    },
+    {
+      icon: FaPrescription,
+      title: t('landing.features.prescriptions.title'),
+      description: t('landing.features.prescriptions.description')
+    },
+    {
+      icon: FaChartLine,
+      title: t('landing.features.reports.title'),
+      description: t('landing.features.reports.description')
+    },
+    {
+      icon: FaGlobe,
+      title: t('landing.features.bilingual.title'),
+      description: t('landing.features.bilingual.description')
+    }
+  ];
+
+  const benefits = [
+    {
+      icon: FaClock,
+      title: t('landing.benefits.time.title'),
+      description: t('landing.benefits.time.description')
+    },
+    {
+      icon: FaChartLine,
+      title: t('landing.benefits.productivity.title'),
+      description: t('landing.benefits.productivity.description')
+    },
+    {
+      icon: FaShieldAlt,
+      title: t('landing.benefits.security.title'),
+      description: t('landing.benefits.security.description')
+    },
+    {
+      icon: FaMobile,
+      title: t('landing.benefits.access.title'),
+      description: t('landing.benefits.access.description')
+    }
+  ];
+
+  const getDiscountMultiplier = () => {
+    switch(billingPeriod) {
+      case 'quarterly': return 0.9;
+      case 'yearly': return 0.8;
+      default: return 1;
+    }
+  };
+
+  const getPricingDisplay = (pricePerDoctor: number, doctorCount: number) => {
+    const baseTotal = pricePerDoctor * doctorCount;
+    const multiplier = getDiscountMultiplier();
+    const discountedTotal = Math.round(baseTotal * multiplier);
+    
+    const months = billingPeriod === 'quarterly' ? 3 : billingPeriod === 'yearly' ? 12 : 1;
+    const totalCharge = discountedTotal * months;
+    
+    return {
+      monthlyPrice: discountedTotal,
+      totalCharge: totalCharge,
+      savings: billingPeriod !== 'monthly' ? (baseTotal - discountedTotal) * months : 0,
+      discount: billingPeriod === 'quarterly' ? 10 : billingPeriod === 'yearly' ? 20 : 0
+    };
+  };
+
+  const plans = [
+    {
+      name: t('landing.pricing.trial.name'),
+      isFree: true,
+      features: [
+        t('landing.pricing.trial.feature1'),
+        t('landing.pricing.trial.feature2'),
+        t('landing.pricing.trial.feature3'),
+        t('landing.pricing.trial.feature4')
+      ],
+      cta: t('landing.pricing.trial.cta')
+    },
+    {
+      name: t('landing.pricing.individual.name'),
+      pricePerDoctor: 30,
+      doctorCount: 1,
+      description: t('landing.pricing.individual.description'),
+      features: [
+        t('landing.pricing.individual.feature1'),
+        t('landing.pricing.individual.feature2'),
+        t('landing.pricing.individual.feature3'),
+        t('landing.pricing.individual.feature4'),
+        t('landing.pricing.individual.feature5')
+      ],
+      highlight: true,
+      cta: t('landing.pricing.individual.cta')
+    },
+    {
+      name: t('landing.pricing.clinic.name'),
+      pricePerDoctor: 20,
+      doctorCount: 20,
+      doctorRange: t('landing.pricing.clinic.range'),
+      description: t('landing.pricing.clinic.description'),
+      features: [
+        t('landing.pricing.clinic.feature1'),
+        t('landing.pricing.clinic.feature2'),
+        t('landing.pricing.clinic.feature3'),
+        t('landing.pricing.clinic.feature4'),
+        t('landing.pricing.clinic.feature5')
+      ],
+      highlight: false,
+      cta: t('landing.pricing.clinic.cta')
+    },
+    {
+      name: t('landing.pricing.hospital.name'),
+      pricePerDoctor: 17,
+      doctorCount: 50,
+      doctorRange: t('landing.pricing.hospital.range'),
+      description: t('landing.pricing.hospital.description'),
+      features: [
+        t('landing.pricing.hospital.feature1'),
+        t('landing.pricing.hospital.feature2'),
+        t('landing.pricing.hospital.feature3'),
+        t('landing.pricing.hospital.feature4'),
+        t('landing.pricing.hospital.feature5')
+      ],
+      highlight: false,
+      cta: t('landing.pricing.hospital.cta')
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: t('landing.testimonials.doctor1.name'),
+      specialty: t('landing.testimonials.doctor1.specialty'),
+      text: t('landing.testimonials.doctor1.text'),
+      avatar: '👨‍⚕️'
+    },
+    {
+      name: t('landing.testimonials.doctor2.name'),
+      specialty: t('landing.testimonials.doctor2.specialty'),
+      text: t('landing.testimonials.doctor2.text'),
+      avatar: '👩‍⚕️'
+    },
+    {
+      name: t('landing.testimonials.doctor3.name'),
+      specialty: t('landing.testimonials.doctor3.specialty'),
+      text: t('landing.testimonials.doctor3.text'),
+      avatar: '👨‍⚕️'
+    }
+  ];
 
   return (
-    <MainLayout>
-      <div className="max-w-6xl mx-auto space-y-6">
-        
-        {/* Acciones Principales: Búsqueda + Nuevo Paciente */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-          {/* Búsqueda Global */}
-          <div className="flex-1">
-            <SearchBar />
-          </div>
-
-          {/* Botón Nuevo Paciente */}
-          <Link
-            href="/patients/new"
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] transition-colors font-medium shadow-md hover:shadow-lg"
-          >
-            <span className="text-xl">➕</span>
-            <span>Nuevo Paciente</span>
-          </Link>
-        </div>
-
-        {/* Bienvenida */}
-        <div className="bg-gradient-to-r from-[rgb(var(--primary)/0.1)] to-[rgb(var(--accent)/0.1)] rounded-lg p-6 border border-[rgb(var(--border))]">
-          <h2 className="text-2xl lg:text-3xl font-bold text-[rgb(var(--foreground))] mb-2">
-            ¡Bienvenido, Dr. Silva! 👋
-          </h2>
-          <p className="text-[rgb(var(--gray-medium))]">
-            Tienes 8 citas programadas para hoy
-          </p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[rgb(var(--card))] rounded-lg p-6 border border-[rgb(var(--border))] shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 rounded-full bg-[rgb(var(--success)/0.2)] flex items-center justify-center text-2xl">
-                👥
+    <div className="min-h-screen bg-[rgb(var(--background))]">
+      {/* Header Público */}
+      <header className="sticky top-0 z-50 bg-[rgb(var(--sidebar))] border-b border-[rgb(var(--border))] shadow-sm backdrop-blur-lg bg-opacity-90">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-lg bg-[rgb(var(--primary))] flex items-center justify-center text-white text-xl font-bold">
+                🏥
               </div>
-            </div>
-            <p className="text-sm text-[rgb(var(--gray-medium))] mb-1">
-              {t('patients.totalPatients')}
-            </p>
-            <p className="text-3xl font-bold text-[rgb(var(--foreground))]">127</p>
-          </div>
+              <h1 className="text-xl lg:text-2xl font-bold text-[rgb(var(--foreground))]">
+                {t('common.appName')}
+              </h1>
+            </Link>
 
-          <div className="bg-[rgb(var(--card))] rounded-lg p-6 border border-[rgb(var(--border))] shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 rounded-full bg-[rgb(var(--info)/0.2)] flex items-center justify-center text-2xl">
-                📅
-              </div>
-            </div>
-            <p className="text-sm text-[rgb(var(--gray-medium))] mb-1">
-              {t('appointments.today')}
-            </p>
-            <p className="text-3xl font-bold text-[rgb(var(--foreground))]">8</p>
-          </div>
-
-          <div className="bg-[rgb(var(--card))] rounded-lg p-6 border border-[rgb(var(--border))] shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 rounded-full bg-[rgb(var(--warning)/0.2)] flex items-center justify-center text-2xl">
-                ⏰
-              </div>
-            </div>
-            <p className="text-sm text-[rgb(var(--gray-medium))] mb-1">
-              {t('appointments.upcoming')}
-            </p>
-            <p className="text-3xl font-bold text-[rgb(var(--foreground))]">15</p>
-          </div>
-
-          <div className="bg-[rgb(var(--card))] rounded-lg p-6 border border-[rgb(var(--border))] shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 rounded-full bg-[rgb(var(--primary)/0.2)] flex items-center justify-center text-2xl">
-                💊
-              </div>
-            </div>
-            <p className="text-sm text-[rgb(var(--gray-medium))] mb-1">
-              Recetas Activas
-            </p>
-            <p className="text-3xl font-bold text-[rgb(var(--foreground))]">23</p>
-          </div>
-        </div>
-
-        {/* Citas de Hoy */}
-        <div className="bg-[rgb(var(--card))] rounded-lg p-6 border border-[rgb(var(--border))] shadow-sm">
-          <h3 className="text-xl font-bold text-[rgb(var(--foreground))] mb-4">
-            📅 Citas de Hoy
-          </h3>
-          <div className="space-y-3">
-            {[
-              { time: '09:00', patient: 'Juan Pérez', type: 'Consulta General', status: 'confirmed' },
-              { time: '10:30', patient: 'Ana López', type: 'Control', status: 'confirmed' },
-              { time: '11:00', patient: 'Carlos Díaz', type: 'Primera Vez', status: 'scheduled' },
-              { time: '14:00', patient: 'María García', type: 'Seguimiento', status: 'scheduled' },
-            ].map((appointment, index) => (
-              <div 
-                key={index}
-                className="flex items-center justify-between p-4 rounded-lg bg-[rgb(var(--background))] border border-[rgb(var(--border))] hover:border-[rgb(var(--primary))] transition-colors cursor-pointer"
+            <div className="flex items-center gap-3">
+              <SettingsDropdown />
+              <Link
+                href="/login"
+                className="px-4 py-2 text-sm font-medium text-[rgb(var(--foreground))] hover:text-[rgb(var(--primary))] transition-colors"
               >
-                <div className="flex items-center gap-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-[rgb(var(--primary))]">{appointment.time}</p>
+                {t('auth.login')}
+              </Link>
+              <Link
+                href="/register"
+                className="px-4 py-2 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] font-medium transition-colors shadow-md hover:shadow-lg"
+              >
+                {t('auth.register')}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section with Video Background */}
+      <section className="relative py-20 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          >
+            <source src="/videos/hero-video.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-[rgb(var(--background))]"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto text-center"
+          >
+            <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6 drop-shadow-lg">
+              {t('landing.hero.title')}{' '}
+              <span className="text-[rgb(var(--primary))]">{t('landing.hero.titleHighlight')}</span>
+            </h2>
+            <p className="text-xl text-white/90 mb-8 drop-shadow-md">
+              {t('landing.hero.subtitle')}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/register"
+                  className="px-8 py-4 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] font-medium text-lg shadow-lg hover:shadow-xl transition-all inline-block"
+                >
+                  {t('landing.hero.cta1')}
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/login"
+                  className="px-8 py-4 bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-lg hover:bg-white/20 font-medium text-lg transition-all inline-block"
+                >
+                  {t('landing.hero.cta2')}
+                </Link>
+              </motion.div>
+            </div>
+            <p className="text-sm text-white/80 mt-4 drop-shadow-md">
+              ✓ {t('landing.hero.benefit1')}  ✓ {t('landing.hero.benefit2')}  ✓ {t('landing.hero.benefit3')}
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-[rgb(var(--background))]">
+        <div className="container mx-auto px-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h3 className="text-3xl lg:text-4xl font-bold text-[rgb(var(--foreground))] mb-4">
+              {t('landing.features.title')}
+            </h3>
+            <p className="text-lg text-[rgb(var(--gray-medium))]">
+              {t('landing.features.subtitle')}
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -5 }}
+                  className="bg-[rgb(var(--card))] rounded-lg p-6 border border-[rgb(var(--border))] hover:shadow-lg transition-all"
+                >
+                  <div className="w-12 h-12 rounded-lg bg-[rgb(var(--primary)/0.1)] flex items-center justify-center text-[rgb(var(--primary))] text-2xl mb-4">
+                    <Icon />
+                  </div>
+                  <h4 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-2">
+                    {feature.title}
+                  </h4>
+                  <p className="text-[rgb(var(--gray-medium))]">
+                    {feature.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-20 bg-[rgb(var(--card))]">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h3 className="text-3xl lg:text-4xl font-bold text-[rgb(var(--foreground))] mb-4">
+              {t('landing.benefits.title')}
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            {benefits.map((benefit, index) => {
+              const Icon = benefit.icon;
+              return (
+                <motion.div 
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="text-center"
+                >
+                  <div className="w-16 h-16 rounded-full bg-[rgb(var(--primary))] flex items-center justify-center text-white text-3xl mx-auto mb-4">
+                    <Icon />
+                  </div>
+                  <h4 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-2">
+                    {benefit.title}
+                  </h4>
+                  <p className="text-[rgb(var(--gray-medium))]">
+                    {benefit.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-20 bg-[rgb(var(--background))]">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h3 className="text-3xl lg:text-4xl font-bold text-[rgb(var(--foreground))] mb-4">
+              {t('landing.pricing.title')}
+            </h3>
+            <p className="text-lg text-[rgb(var(--gray-medium))] mb-8">
+              {t('landing.pricing.subtitle')}
+            </p>
+
+            <div className="inline-flex bg-[rgb(var(--card))] rounded-lg p-1 border border-[rgb(var(--border))]">
+              <button
+                onClick={() => setBillingPeriod('monthly')}
+                className={`px-6 py-2 rounded-md font-medium transition-all ${
+                  billingPeriod === 'monthly'
+                    ? 'bg-[rgb(var(--primary))] text-white'
+                    : 'text-[rgb(var(--foreground))] hover:bg-[rgb(var(--gray-very-light))]'
+                }`}
+              >
+                {t('landing.pricing.monthly')}
+              </button>
+              <button
+                onClick={() => setBillingPeriod('quarterly')}
+                className={`px-6 py-2 rounded-md font-medium transition-all relative ${
+                  billingPeriod === 'quarterly'
+                    ? 'bg-[rgb(var(--primary))] text-white'
+                    : 'text-[rgb(var(--foreground))] hover:bg-[rgb(var(--gray-very-light))]'
+                }`}
+              >
+                {t('landing.pricing.quarterly')}
+                <span className="absolute -top-2 -right-2 bg-[rgb(var(--success))] text-white text-xs px-2 py-0.5 rounded-full">
+                  -10%
+                </span>
+              </button>
+              <button
+                onClick={() => setBillingPeriod('yearly')}
+                className={`px-6 py-2 rounded-md font-medium transition-all relative ${
+                  billingPeriod === 'yearly'
+                    ? 'bg-[rgb(var(--primary))] text-white'
+                    : 'text-[rgb(var(--foreground))] hover:bg-[rgb(var(--gray-very-light))]'
+                }`}
+              >
+                {t('landing.pricing.yearly')}
+                <span className="absolute -top-2 -right-2 bg-[rgb(var(--success))] text-white text-xs px-2 py-0.5 rounded-full">
+                  -20%
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            {plans.map((plan, index) => {
+              const pricing = plan.isFree ? null : getPricingDisplay(plan.pricePerDoctor!, plan.doctorCount!);
+              
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: plan.highlight ? 1.05 : 1.02 }}
+                  className={`bg-[rgb(var(--card))] rounded-lg p-6 border-2 ${
+                    plan.highlight
+                      ? 'border-[rgb(var(--primary))] shadow-xl'
+                      : 'border-[rgb(var(--border))]'
+                  } transition-all relative`}
+                >
+                  {plan.highlight && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <div className="bg-[rgb(var(--primary))] text-white text-xs font-bold py-1 px-3 rounded-full uppercase">
+                        {t('landing.pricing.popular') || 'MÁS POPULAR'}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <h4 className="text-2xl font-bold text-[rgb(var(--foreground))] mb-2">
+                    {plan.name}
+                  </h4>
+                  
+                  {plan.description && (
+                    <p className="text-sm text-[rgb(var(--gray-medium))] mb-4">
+                      {plan.description}
+                    </p>
+                  )}
+
+                  <div className="mb-6">
+                    {plan.isFree ? (
+                      <>
+                        <span className="text-4xl font-bold text-[rgb(var(--primary))]">
+                          {t('landing.pricing.free') || 'Gratis'}
+                        </span>
+                        <span className="text-[rgb(var(--gray-medium))]"> 7 {t('landing.pricing.days') || 'días'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-sm text-[rgb(var(--gray-medium))] mb-2">
+                          {t('landing.pricing.example')}: {plan.doctorCount} {plan.doctorCount === 1 ? t('landing.pricing.doctor') : t('landing.pricing.doctors')}
+                        </div>
+                        <div>
+                          <span className="text-4xl font-bold text-[rgb(var(--primary))]">
+                            ${pricing?.monthlyPrice}
+                          </span>
+                          <span className="text-[rgb(var(--gray-medium))]">
+                            {t('landing.pricing.perMonth')}
+                          </span>
+                        </div>
+                        {pricing && pricing.discount > 0 && (
+                          <div className="text-xs text-[rgb(var(--success))] mt-1 font-medium">
+                            {t('landing.pricing.savings')} ${pricing.savings} {billingPeriod === 'quarterly' ? t('landing.pricing.everyMonths') : t('landing.pricing.annually')}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  <ul className="space-y-3 mb-6">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-[rgb(var(--gray-medium))]">
+                        <FaCheck className="text-[rgb(var(--success))] mt-1 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href="/register"
+                    className={`block w-full py-3 rounded-lg font-medium text-center transition-all ${
+                      plan.highlight
+                        ? 'bg-[rgb(var(--primary))] text-white hover:bg-[rgb(var(--primary-hover))] shadow-md'
+                        : 'bg-[rgb(var(--background))] text-[rgb(var(--foreground))] border border-[rgb(var(--border))] hover:bg-[rgb(var(--gray-very-light))]'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <div className="text-center mt-8 text-sm text-[rgb(var(--gray-medium))]">
+            <p>💡 {t('landing.pricing.priceNote')}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 bg-[rgb(var(--card))]">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h3 className="text-3xl lg:text-4xl font-bold text-[rgb(var(--foreground))] mb-4">
+              {t('landing.testimonials.title')}
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-[rgb(var(--background))] rounded-lg p-6 border border-[rgb(var(--border))]"
+              >
+                <p className="text-[rgb(var(--foreground))] mb-4 italic">
+                  "{testimonial.text}"
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-[rgb(var(--primary))] flex items-center justify-center text-white text-2xl">
+                    {testimonial.avatar}
                   </div>
                   <div>
-                    <p className="font-semibold text-[rgb(var(--foreground))]">{appointment.patient}</p>
-                    <p className="text-sm text-[rgb(var(--gray-medium))]">{appointment.type}</p>
+                    <p className="font-semibold text-[rgb(var(--foreground))]">
+                      {testimonial.name}
+                    </p>
+                    <p className="text-sm text-[rgb(var(--gray-medium))]">
+                      {testimonial.specialty}
+                    </p>
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  appointment.status === 'confirmed' 
-                    ? 'bg-[rgb(var(--success)/0.2)] text-[rgb(var(--success))]'
-                    : 'bg-[rgb(var(--warning)/0.2)] text-[rgb(var(--warning))]'
-                }`}>
-                  {appointment.status === 'confirmed' ? 'Confirmada' : 'Programada'}
-                </span>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* Accesos Rápidos */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link href="/patients" className="bg-[rgb(var(--card))] rounded-lg p-6 border border-[rgb(var(--border))] shadow-sm hover:shadow-md transition-all hover:border-[rgb(var(--primary))] group">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-[rgb(var(--success))] flex items-center justify-center text-white text-xl group-hover:scale-110 transition-transform">
-                👥
-              </div>
-              <h3 className="text-lg font-semibold text-[rgb(var(--foreground))]">
-                {t('navigation.patients')}
-              </h3>
-            </div>
-            <p className="text-[rgb(var(--gray-medium))]">
-              Gestionar pacientes e historias clínicas
+      {/* CTA Final */}
+      <section className="py-20 bg-gradient-to-r from-[rgb(var(--primary)/0.1)] to-[rgb(var(--accent)/0.1)]">
+        <div className="container mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="text-3xl lg:text-5xl font-bold text-[rgb(var(--foreground))] mb-6">
+              {t('landing.cta.title')}
+            </h3>
+            <p className="text-xl text-[rgb(var(--gray-medium))] mb-8 max-w-2xl mx-auto">
+              {t('landing.cta.subtitle')}
             </p>
-          </Link>
-
-          <Link href="/appointments" className="bg-[rgb(var(--card))] rounded-lg p-6 border border-[rgb(var(--border))] shadow-sm hover:shadow-md transition-all hover:border-[rgb(var(--primary))] group">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-[rgb(var(--info))] flex items-center justify-center text-white text-xl group-hover:scale-110 transition-transform">
-                📅
-              </div>
-              <h3 className="text-lg font-semibold text-[rgb(var(--foreground))]">
-                {t('navigation.appointments')}
-              </h3>
-            </div>
-            <p className="text-[rgb(var(--gray-medium))]">
-              Ver y programar citas médicas
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                href="/register"
+                className="inline-block px-8 py-4 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] font-medium text-lg shadow-lg hover:shadow-xl transition-all"
+              >
+                {t('landing.cta.button')}
+              </Link>
+            </motion.div>
+            <p className="text-sm text-[rgb(var(--gray-medium))] mt-4">
+              {t('landing.cta.noCommitment')} · {t('landing.cta.cancelAnytime')}
             </p>
-          </Link>
-
-          <Link href="/statistics" className="bg-[rgb(var(--card))] rounded-lg p-6 border border-[rgb(var(--border))] shadow-sm hover:shadow-md transition-all hover:border-[rgb(var(--primary))] group">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-[rgb(var(--primary))] flex items-center justify-center text-white text-xl group-hover:scale-110 transition-transform">
-                📊
-              </div>
-              <h3 className="text-lg font-semibold text-[rgb(var(--foreground))]">
-                {t('navigation.statistics')}
-              </h3>
-            </div>
-            <p className="text-[rgb(var(--gray-medium))]">
-              Reportes y análisis de datos
-            </p>
-          </Link>
+          </motion.div>
         </div>
+      </section>
 
-      </div>
-    </MainLayout>
+      <Footer />
+    </div>
   );
 }
