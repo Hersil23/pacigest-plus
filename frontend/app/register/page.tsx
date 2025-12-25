@@ -6,6 +6,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+type BillingCycle = 'monthly' | 'quarterly' | 'yearly';
+
 export default function RegisterPage() {
   const { register, isAuthenticated, loading } = useAuth();
   const { t } = useLanguage();
@@ -21,6 +23,7 @@ export default function RegisterPage() {
     specialty: '',
     licenseNumber: '',
     selectedPlan: 'trial',
+    billingCycle: 'monthly' as BillingCycle,
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,7 +31,7 @@ export default function RegisterPage() {
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      router.push('/');
+      router.push('/dashboard');
     }
   }, [isAuthenticated, loading, router]);
 
@@ -36,37 +39,76 @@ export default function RegisterPage() {
     {
       value: 'trial',
       name: 'Trial',
-      description: '7 días gratis - Prueba completa',
+      description: '7 días gratis',
       price: 'Gratis',
       recommended: false,
     },
     {
       value: 'individual',
       name: 'Individual',
-      description: '1-10 médicos - $30/médico/mes',
+      description: '1-5 médicos - $30/médico',
       price: '$30/mes',
       recommended: true,
     },
     {
       value: 'clinic',
       name: 'Clínica',
-      description: '11-49 médicos - $20/médico/mes',
-      price: '$20/mes',
+      description: '6-25 médicos - $25/médico',
+      price: '$25/mes',
       recommended: false,
     },
     {
       value: 'hospital',
       name: 'Hospital',
-      description: '50+ médicos - $17/médico/mes',
-      price: '$17/mes',
+      description: '26-50 médicos - $22/médico',
+      price: '$22/mes',
       recommended: false,
     },
   ];
+
+  const getDiscount = () => {
+    switch(formData.billingCycle) {
+      case 'quarterly': return 0.9;
+      case 'yearly': return 0.8;
+      default: return 1;
+    }
+  };
+
+  const getPriceDisplay = () => {
+    if (formData.selectedPlan === 'trial') return 'Gratis 7 días';
+    
+    const basePrices: Record<string, number> = {
+      individual: 30,
+      clinic: 25,
+      hospital: 22,
+    };
+    
+    const basePrice = basePrices[formData.selectedPlan] || 0;
+    const finalPrice = Math.round(basePrice * getDiscount());
+    
+    return `$${finalPrice}/médico/mes`;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+    });
+    setError('');
+  };
+
+  const handlePlanChange = (plan: string) => {
+    setFormData({
+      ...formData,
+      selectedPlan: plan,
+    });
+    setError('');
+  };
+
+  const handleBillingCycleChange = (cycle: BillingCycle) => {
+    setFormData({
+      ...formData,
+      billingCycle: cycle,
     });
     setError('');
   };
@@ -91,13 +133,8 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      const { confirmPassword, selectedPlan, ...registerData } = formData;
-      await register({
-        ...registerData,
-        subscription: {
-          plan: selectedPlan,
-        },
-      });
+      const { confirmPassword, ...registerData } = formData;
+      await register(registerData);
     } catch (err: any) {
       setError(err.message || 'Error al registrarse');
     } finally {
@@ -154,7 +191,7 @@ export default function RegisterPage() {
                       name="selectedPlan"
                       value={plan.value}
                       checked={formData.selectedPlan === plan.value}
-                      onChange={handleChange}
+                      onChange={(e) => handlePlanChange(e.target.value)}
                       className="sr-only"
                     />
                     {plan.recommended && (
@@ -175,6 +212,79 @@ export default function RegisterPage() {
                     </div>
                   </label>
                 ))}
+              </div>
+            </div>
+
+            {/* Frecuencia de pago (solo si NO es trial) */}
+            {formData.selectedPlan !== 'trial' && (
+              <div>
+                <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-3">
+                  Frecuencia de pago
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleBillingCycleChange('monthly')}
+                    className={`px-4 py-3 rounded-lg border-2 font-medium transition-all ${
+                      formData.billingCycle === 'monthly'
+                        ? 'border-[rgb(var(--primary))] bg-[rgb(var(--primary)/0.05)] text-[rgb(var(--primary))]'
+                        : 'border-[rgb(var(--border))] text-[rgb(var(--foreground))] hover:border-[rgb(var(--primary)/0.5)]'
+                    }`}
+                  >
+                    Mensual
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleBillingCycleChange('quarterly')}
+                    className={`px-4 py-3 rounded-lg border-2 font-medium transition-all relative ${
+                      formData.billingCycle === 'quarterly'
+                        ? 'border-[rgb(var(--primary))] bg-[rgb(var(--primary)/0.05)] text-[rgb(var(--primary))]'
+                        : 'border-[rgb(var(--border))] text-[rgb(var(--foreground))] hover:border-[rgb(var(--primary)/0.5)]'
+                    }`}
+                  >
+                    Trimestral
+                    <span className="absolute -top-2 -right-2 bg-[rgb(var(--success))] text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                      -10%
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleBillingCycleChange('yearly')}
+                    className={`px-4 py-3 rounded-lg border-2 font-medium transition-all relative ${
+                      formData.billingCycle === 'yearly'
+                        ? 'border-[rgb(var(--primary))] bg-[rgb(var(--primary)/0.05)] text-[rgb(var(--primary))]'
+                        : 'border-[rgb(var(--border))] text-[rgb(var(--foreground))] hover:border-[rgb(var(--primary)/0.5)]'
+                    }`}
+                  >
+                    Anual
+                    <span className="absolute -top-2 -right-2 bg-[rgb(var(--success))] text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                      -20%
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Resumen del plan */}
+            <div className="bg-[rgb(var(--background))] rounded-lg p-4 border border-[rgb(var(--border))]">
+              <h3 className="font-semibold text-[rgb(var(--foreground))] mb-2">Resumen:</h3>
+              <div className="text-sm text-[rgb(var(--gray-medium))]">
+                <p>Plan: <span className="font-semibold text-[rgb(var(--foreground))]">{plans.find(p => p.value === formData.selectedPlan)?.name}</span></p>
+                {formData.selectedPlan !== 'trial' && (
+                  <>
+                    <p>Frecuencia: <span className="font-semibold text-[rgb(var(--foreground))]">
+                      {formData.billingCycle === 'monthly' && 'Mensual'}
+                      {formData.billingCycle === 'quarterly' && 'Trimestral'}
+                      {formData.billingCycle === 'yearly' && 'Anual'}
+                    </span></p>
+                    <p>Precio: <span className="font-semibold text-[rgb(var(--primary))]">{getPriceDisplay()}</span></p>
+                    {formData.billingCycle !== 'monthly' && (
+                      <p className="text-[rgb(var(--success))] font-medium mt-1">
+                        💰 Ahorrando {formData.billingCycle === 'quarterly' ? '10%' : '20%'}
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
             </div>
 

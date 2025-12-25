@@ -12,11 +12,12 @@ export interface RegisterData {
   lastName: string;
   email: string;
   password: string;
-  phoneNumber: string;
+  phone: string;
   specialty?: string;
   licenseNumber?: string;
+  selectedPlan?: string;
+  billingCycle?: string;
 }
-
 export interface AuthResponse {
   success: boolean;
   token?: string;
@@ -63,32 +64,39 @@ class AuthService {
 
   // Register
   async register(userData: RegisterData): Promise<AuthResponse> {
-    try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(userData),
-      });
+  const { selectedPlan, billingCycle, ...restData } = userData;
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al registrarse');
-      }
-
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Register error:', error);
-      throw error;
+  const requestData = {
+    ...restData,
+    subscription: {
+      plan: selectedPlan || 'trial',
+      billingCycle: billingCycle || 'monthly'
     }
+  };
+
+  const response = await fetch(`${API_URL}/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestData),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Error al registrarse');
   }
+
+  // El backend devuelve userId y requiere verificación de email
+  // Por ahora, guardamos el userId para el siguiente paso
+  if (data.userId) {
+    localStorage.setItem('pendingUserId', data.userId);
+    localStorage.setItem('pendingEmail', userData.email);
+  }
+
+  return data;
+}
 
   // Logout
   async logout(): Promise<void> {

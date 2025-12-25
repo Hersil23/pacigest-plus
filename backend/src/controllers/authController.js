@@ -20,16 +20,17 @@ const generateToken = (id) => {
 exports.register = async (req, res) => {
   try {
     const {
-      email,
-      password,
-      firstName,
-      lastName,
-      phone,
-      specialty,
-      licenseNumber,
-      role,
-      language
-    } = req.body;
+  email,
+  password,
+  firstName,
+  lastName,
+  phone,
+  specialty,
+  licenseNumber,
+  role,
+  language,
+  subscription
+} = req.body;
 
     // Verificar si el email ya existe
     const existingUser = await User.findOne({ email });
@@ -63,7 +64,8 @@ exports.register = async (req, res) => {
         language: language || 'es'
       },
       subscription: {
-        plan: 'starter',
+        plan: subscription?.plan || 'trial',
+        billingCycle: subscription?.billingCycle || 'monthly',
         status: 'inactive',
         trialEndsAt: null
       }

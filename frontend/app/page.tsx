@@ -8,9 +8,11 @@ import Footer from '@/components/layout/Footer';
 import { FaUsers, FaCalendarAlt, FaFileMedical, FaPrescription, FaChartLine, FaGlobe, FaClock, FaShieldAlt, FaMobile, FaCheck } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
+type BillingCycle = 'monthly' | 'quarterly' | 'yearly';
+
 export default function LandingPage() {
   const { t } = useLanguage();
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
 
   const features = [
     {
@@ -68,33 +70,40 @@ export default function LandingPage() {
     }
   ];
 
-  const getDiscountMultiplier = () => {
-    switch(billingPeriod) {
+  const getDiscount = () => {
+    switch(billingCycle) {
       case 'quarterly': return 0.9;
       case 'yearly': return 0.8;
       default: return 1;
     }
   };
 
-  const getPricingDisplay = (pricePerDoctor: number, doctorCount: number) => {
-    const baseTotal = pricePerDoctor * doctorCount;
-    const multiplier = getDiscountMultiplier();
-    const discountedTotal = Math.round(baseTotal * multiplier);
+  const getPricing = (basePrice: number, doctors: number) => {
+    const multiplier = getDiscount();
+    const pricePerDoctor = Math.round(basePrice * multiplier);
+    const monthlyTotal = pricePerDoctor * doctors;
     
-    const months = billingPeriod === 'quarterly' ? 3 : billingPeriod === 'yearly' ? 12 : 1;
-    const totalCharge = discountedTotal * months;
+    const months = billingCycle === 'quarterly' ? 3 : billingCycle === 'yearly' ? 12 : 1;
+    const totalCharge = monthlyTotal * months;
+    const savings = billingCycle !== 'monthly' ? (basePrice * doctors - pricePerDoctor * doctors) * months : 0;
     
     return {
-      monthlyPrice: discountedTotal,
-      totalCharge: totalCharge,
-      savings: billingPeriod !== 'monthly' ? (baseTotal - discountedTotal) * months : 0,
-      discount: billingPeriod === 'quarterly' ? 10 : billingPeriod === 'yearly' ? 20 : 0
+      pricePerDoctor,
+      monthlyTotal,
+      totalCharge,
+      savings,
+      discount: billingCycle === 'quarterly' ? 10 : billingCycle === 'yearly' ? 20 : 0
     };
   };
 
   const plans = [
     {
+      id: 'trial',
       name: t('landing.pricing.trial.name'),
+      description: t('landing.pricing.trial.description') || 'Prueba completa',
+      basePrice: 0,
+      doctors: 1,
+      doctorRange: '1 ' + t('landing.pricing.doctor'),
       isFree: true,
       features: [
         t('landing.pricing.trial.feature1'),
@@ -102,13 +111,16 @@ export default function LandingPage() {
         t('landing.pricing.trial.feature3'),
         t('landing.pricing.trial.feature4')
       ],
-      cta: t('landing.pricing.trial.cta')
+      cta: t('landing.pricing.trial.cta'),
+      highlight: false
     },
     {
+      id: 'individual',
       name: t('landing.pricing.individual.name'),
-      pricePerDoctor: 30,
-      doctorCount: 1,
       description: t('landing.pricing.individual.description'),
+      basePrice: 30,
+      doctors: 3,
+      doctorRange: '1-5 ' + t('landing.pricing.doctors'),
       features: [
         t('landing.pricing.individual.feature1'),
         t('landing.pricing.individual.feature2'),
@@ -116,15 +128,16 @@ export default function LandingPage() {
         t('landing.pricing.individual.feature4'),
         t('landing.pricing.individual.feature5')
       ],
-      highlight: true,
-      cta: t('landing.pricing.individual.cta')
+      cta: t('landing.pricing.individual.cta'),
+      highlight: true
     },
     {
+      id: 'clinic',
       name: t('landing.pricing.clinic.name'),
-      pricePerDoctor: 20,
-      doctorCount: 20,
-      doctorRange: t('landing.pricing.clinic.range'),
-      description: t('landing.pricing.clinic.description'),
+      description: t('landing.pricing.clinic.description2') || 'Para clínicas medianas',
+      basePrice: 25,
+      doctors: 12,
+      doctorRange: '6-25 ' + t('landing.pricing.doctors'),
       features: [
         t('landing.pricing.clinic.feature1'),
         t('landing.pricing.clinic.feature2'),
@@ -132,15 +145,16 @@ export default function LandingPage() {
         t('landing.pricing.clinic.feature4'),
         t('landing.pricing.clinic.feature5')
       ],
-      highlight: false,
-      cta: t('landing.pricing.clinic.cta')
+      cta: t('landing.pricing.clinic.cta'),
+      highlight: false
     },
     {
+      id: 'hospital',
       name: t('landing.pricing.hospital.name'),
-      pricePerDoctor: 17,
-      doctorCount: 50,
-      doctorRange: t('landing.pricing.hospital.range'),
-      description: t('landing.pricing.hospital.description'),
+      description: t('landing.pricing.hospital.description2') || 'Para hospitales pequeños',
+      basePrice: 22,
+      doctors: 30,
+      doctorRange: '26-50 ' + t('landing.pricing.doctors'),
       features: [
         t('landing.pricing.hospital.feature1'),
         t('landing.pricing.hospital.feature2'),
@@ -148,8 +162,26 @@ export default function LandingPage() {
         t('landing.pricing.hospital.feature4'),
         t('landing.pricing.hospital.feature5')
       ],
-      highlight: false,
-      cta: t('landing.pricing.hospital.cta')
+      cta: t('landing.pricing.hospital.cta'),
+      highlight: false
+    },
+    {
+      id: 'enterprise',
+      name: 'Enterprise',
+      description: t('landing.pricing.enterprise') || 'Soluciones personalizadas',
+      basePrice: 0,
+      doctors: 0,
+      doctorRange: '51+ ' + t('landing.pricing.doctors'),
+      isEnterprise: true,
+      features: [
+        '51+ ' + t('landing.pricing.doctors'),
+        t('landing.pricing.customSolution') || 'Solución personalizada',
+        t('landing.pricing.dedicatedIntegration') || 'Integración dedicada',
+        t('landing.pricing.accountManager') || 'Gerente de cuenta',
+        'SLA ' + (t('landing.pricing.guaranteed') || 'garantizado')
+      ],
+      cta: t('landing.pricing.contactSales') || 'Contactar Ventas',
+      highlight: false
     }
   ];
 
@@ -356,49 +388,50 @@ export default function LandingPage() {
               {t('landing.pricing.subtitle')}
             </p>
 
-            <div className="inline-flex bg-[rgb(var(--card))] rounded-lg p-1 border border-[rgb(var(--border))]">
+            {/* Billing Cycle Toggle */}
+            <div className="inline-flex bg-[rgb(var(--card))] rounded-lg p-1 border border-[rgb(var(--border))] shadow-md">
               <button
-                onClick={() => setBillingPeriod('monthly')}
-                className={`px-6 py-2 rounded-md font-medium transition-all ${
-                  billingPeriod === 'monthly'
-                    ? 'bg-[rgb(var(--primary))] text-white'
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-6 py-3 rounded-md font-medium transition-all ${
+                  billingCycle === 'monthly'
+                    ? 'bg-[rgb(var(--primary))] text-white shadow-md'
                     : 'text-[rgb(var(--foreground))] hover:bg-[rgb(var(--gray-very-light))]'
                 }`}
               >
                 {t('landing.pricing.monthly')}
               </button>
               <button
-                onClick={() => setBillingPeriod('quarterly')}
-                className={`px-6 py-2 rounded-md font-medium transition-all relative ${
-                  billingPeriod === 'quarterly'
-                    ? 'bg-[rgb(var(--primary))] text-white'
+                onClick={() => setBillingCycle('quarterly')}
+                className={`px-6 py-3 rounded-md font-medium transition-all relative ${
+                  billingCycle === 'quarterly'
+                    ? 'bg-[rgb(var(--primary))] text-white shadow-md'
                     : 'text-[rgb(var(--foreground))] hover:bg-[rgb(var(--gray-very-light))]'
                 }`}
               >
                 {t('landing.pricing.quarterly')}
-                <span className="absolute -top-2 -right-2 bg-[rgb(var(--success))] text-white text-xs px-2 py-0.5 rounded-full">
+                <span className="absolute -top-2 -right-2 bg-[rgb(var(--success))] text-white text-xs px-2 py-0.5 rounded-full font-bold">
                   -10%
                 </span>
               </button>
               <button
-                onClick={() => setBillingPeriod('yearly')}
-                className={`px-6 py-2 rounded-md font-medium transition-all relative ${
-                  billingPeriod === 'yearly'
-                    ? 'bg-[rgb(var(--primary))] text-white'
+                onClick={() => setBillingCycle('yearly')}
+                className={`px-6 py-3 rounded-md font-medium transition-all relative ${
+                  billingCycle === 'yearly'
+                    ? 'bg-[rgb(var(--primary))] text-white shadow-md'
                     : 'text-[rgb(var(--foreground))] hover:bg-[rgb(var(--gray-very-light))]'
                 }`}
               >
                 {t('landing.pricing.yearly')}
-                <span className="absolute -top-2 -right-2 bg-[rgb(var(--success))] text-white text-xs px-2 py-0.5 rounded-full">
+                <span className="absolute -top-2 -right-2 bg-[rgb(var(--success))] text-white text-xs px-2 py-0.5 rounded-full font-bold">
                   -20%
                 </span>
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-[1600px] mx-auto">
             {plans.map((plan, index) => {
-              const pricing = plan.isFree ? null : getPricingDisplay(plan.pricePerDoctor!, plan.doctorCount!);
+              const pricing = plan.isFree || plan.isEnterprise ? null : getPricing(plan.basePrice, plan.doctors);
               
               return (
                 <motion.div
@@ -417,7 +450,7 @@ export default function LandingPage() {
                   {plan.highlight && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <div className="bg-[rgb(var(--primary))] text-white text-xs font-bold py-1 px-3 rounded-full uppercase">
-                        {t('landing.pricing.popular') || 'MÁS POPULAR'}
+                        {t('landing.pricing.popular')}
                       </div>
                     </div>
                   )}
@@ -426,40 +459,56 @@ export default function LandingPage() {
                     {plan.name}
                   </h4>
                   
-                  {plan.description && (
-                    <p className="text-sm text-[rgb(var(--gray-medium))] mb-4">
-                      {plan.description}
-                    </p>
-                  )}
+                  <p className="text-sm text-[rgb(var(--gray-medium))] mb-4 h-10">
+                    {plan.description}
+                  </p>
 
                   <div className="mb-6">
                     {plan.isFree ? (
                       <>
                         <span className="text-4xl font-bold text-[rgb(var(--primary))]">
-                          {t('landing.pricing.free') || 'Gratis'}
+                          {t('landing.pricing.free')}
                         </span>
-                        <span className="text-[rgb(var(--gray-medium))]"> 7 {t('landing.pricing.days') || 'días'}</span>
+                        <span className="text-[rgb(var(--gray-medium))]"> 7 {t('landing.pricing.days')}</span>
+                      </>
+                    ) : plan.isEnterprise ? (
+                      <>
+                        <span className="text-2xl font-bold text-[rgb(var(--primary))]">
+                          {t('landing.pricing.custom') || 'Personalizado'}
+                        </span>
                       </>
                     ) : (
                       <>
                         <div className="text-sm text-[rgb(var(--gray-medium))] mb-2">
-                          {t('landing.pricing.example')}: {plan.doctorCount} {plan.doctorCount === 1 ? t('landing.pricing.doctor') : t('landing.pricing.doctors')}
-                        </div>
-                        <div>
-                          <span className="text-4xl font-bold text-[rgb(var(--primary))]">
-                            ${pricing?.monthlyPrice}
-                          </span>
-                          <span className="text-[rgb(var(--gray-medium))]">
-                            {t('landing.pricing.perMonth')}
-                          </span>
+                          {t('landing.pricing.example')}: {plan.doctors} {plan.doctors === 1 ? t('landing.pricing.doctor') : t('landing.pricing.doctors')}
                         </div>
                         {pricing && pricing.discount > 0 && (
-                          <div className="text-xs text-[rgb(var(--success))] mt-1 font-medium">
-                            {t('landing.pricing.savings')} ${pricing.savings} {billingPeriod === 'quarterly' ? t('landing.pricing.everyMonths') : t('landing.pricing.annually')}
+                          <div className="text-sm text-[rgb(var(--gray-medium))] line-through mb-1">
+                            ${plan.basePrice}/{t('landing.pricing.doctor')}/{t('landing.pricing.perMonth').replace('/', '')}
                           </div>
                         )}
+                        <div>
+                          <span className="text-4xl font-bold text-[rgb(var(--primary))]">
+                            ${pricing?.pricePerDoctor}
+                          </span>
+                          <span className="text-[rgb(var(--gray-medium))]">/{t('landing.pricing.doctor')}{t('landing.pricing.perMonth')}</span>
+                        </div>
+                        {pricing && pricing.discount > 0 && (
+                          <div className="text-xs text-[rgb(var(--success))] mt-2 font-medium">
+                            💰 {t('landing.pricing.savings')} ${pricing.savings} {billingCycle === 'quarterly' ? t('landing.pricing.everyMonths') : t('landing.pricing.annually')}
+                          </div>
+                        )}
+                        <div className="text-xs text-[rgb(var(--gray-medium))] mt-2">
+                          {billingCycle === 'monthly' && (t('landing.pricing.billedMonthly') || 'Facturado mensualmente')}
+                          {billingCycle === 'quarterly' && `Total: $${pricing?.totalCharge} ${t('landing.pricing.everyMonths')}`}
+                          {billingCycle === 'yearly' && `Total: $${pricing?.totalCharge} ${t('landing.pricing.annually')}`}
+                        </div>
                       </>
                     )}
+                  </div>
+
+                  <div className="text-sm text-[rgb(var(--gray-medium))] mb-4 font-medium">
+                    {plan.doctorRange}
                   </div>
 
                   <ul className="space-y-3 mb-6">
@@ -472,7 +521,7 @@ export default function LandingPage() {
                   </ul>
 
                   <Link
-                    href="/register"
+                    href={plan.isEnterprise ? "/contact-sales" : "/register"}
                     className={`block w-full py-3 rounded-lg font-medium text-center transition-all ${
                       plan.highlight
                         ? 'bg-[rgb(var(--primary))] text-white hover:bg-[rgb(var(--primary-hover))] shadow-md'

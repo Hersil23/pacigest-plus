@@ -167,16 +167,33 @@ const userSchema = new mongoose.Schema({
   // SUSCRIPCIÓN Y PAGOS
   // ============================================
     subscription: {
-      plan: {
-        type: String,
-        enum: ['trial', 'individual', 'clinic', 'hospital'],
-        default: 'trial'
-      },
-    status: {
-      type: String,
-      enum: ['active', 'inactive', 'trial', 'cancelled', 'expired'],
-      default: 'trial'
-    },
+  plan: {
+    type: String,
+    enum: ['trial', 'individual', 'clinic', 'hospital'],
+    default: 'trial'
+  },
+  billingCycle: {
+    type: String,
+    enum: ['monthly', 'quarterly', 'yearly'],
+    default: 'monthly'
+  },
+  pricePerDoctor: {
+    type: Number,
+    default: 0
+  },
+  totalAmount: {
+    type: Number,
+    default: 0
+  },
+  discount: {
+    type: Number,
+    default: 0
+  },
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'trial', 'cancelled', 'expired'],
+    default: 'trial'
+  },
     startDate: {
       type: Date,
       default: Date.now

@@ -114,143 +114,155 @@
     "hero": {
       "title": "Gestiona tu consultorio médico de forma",
       "titleHighlight": "simple y profesional",
-    "subtitle": "Software completo para la gestión de pacientes, citas, historias clínicas y mucho más. Comienza tu prueba gratuita de 7 días.",
-    "cta1": "🚀 Probar Gratis 7 Días",
-    "cta2": "Ver Demo",
-    "benefit1": "Sin tarjeta de crédito",
-    "benefit2": "Configuración en 2 minutos",
-    "benefit3": "Soporte en español"
-  },
-  "features": {
-    "title": "Todo lo que necesitas en un solo lugar",
-    "subtitle": "Características diseñadas para médicos modernos",
-    "patients": {
-      "title": "Gestión de Pacientes",
-      "description": "Administra la información de tus pacientes de forma segura y organizada"
+      "subtitle": "Software completo para la gestión de pacientes, citas, historias clínicas y mucho más. Comienza tu prueba gratuita de 7 días.",
+      "cta1": "🚀 Probar Gratis 7 Días",
+      "cta2": "Ver Demo",
+      "benefit1": "Sin tarjeta de crédito",
+      "benefit2": "Configuración en 2 minutos",
+      "benefit3": "Soporte en español"
     },
-    "appointments": {
-      "title": "Agenda de Citas",
-      "description": "Programa y gestiona citas con recordatorios automáticos"
+    "features": {
+      "title": "Todo lo que necesitas en un solo lugar",
+      "subtitle": "Características diseñadas para médicos modernos",
+      "patients": {
+        "title": "Gestión de Pacientes",
+        "description": "Administra la información de tus pacientes de forma segura y organizada"
+      },
+      "appointments": {
+        "title": "Agenda de Citas",
+        "description": "Programa y gestiona citas con recordatorios automáticos"
+      },
+      "records": {
+        "title": "Historias Clínicas",
+        "description": "Historias clínicas digitales completas y accesibles"
+      },
+      "prescriptions": {
+        "title": "Recetas Electrónicas",
+        "description": "Genera y gestiona recetas médicas de forma digital"
+      },
+      "reports": {
+        "title": "Reportes y Estadísticas",
+        "description": "Analiza el rendimiento de tu consultorio con datos en tiempo real"
+      },
+      "bilingual": {
+        "title": "Sistema Bilingüe",
+        "description": "Disponible en Español e Inglés"
+      }
     },
-    "records": {
-      "title": "Historias Clínicas",
-      "description": "Historias clínicas digitales completas y accesibles"
+    "benefits": {
+      "title": "¿Por qué elegir PaciGest Plus?",
+      "time": {
+        "title": "Ahorra Tiempo",
+        "description": "Automatiza tareas repetitivas y enfócate en tus pacientes"
+      },
+      "productivity": {
+        "title": "Aumenta Productividad",
+        "description": "Gestiona más pacientes con menos esfuerzo administrativo"
+      },
+      "security": {
+        "title": "Seguridad Garantizada",
+        "description": "Encriptación end-to-end y cumplimiento de normativas médicas"
+      },
+      "access": {
+        "title": "Acceso Desde Cualquier Lugar",
+        "description": "Disponible en web, tablet y móvil"
+      }
     },
-    "prescriptions": {
-      "title": "Recetas Electrónicas",
-      "description": "Genera y gestiona recetas médicas de forma digital"
+    "pricing": {
+      "title": "Planes que se adaptan a tu práctica",
+      "subtitle": "Precios por médico - mientras más médicos, mejor precio",
+      "monthly": "Mensual",
+      "quarterly": "Trimestral",
+      "yearly": "Anual",
+      "save": "Ahorra",
+      "savings": "Ahorras",
+      "perMonth": "/mes",
+      "everyMonths": "cada 3 meses",
+      "annually": "al año",
+      "example": "Ejemplo",
+      "doctors": "médicos",
+      "doctor": "médico",
+      "popular": "MÁS POPULAR",
+      "free": "Gratis",
+      "days": "días",
+      "custom": "Personalizado",
+      "billedMonthly": "Facturado mensualmente",
+      "description2": "Para clínicas medianas",
+      "customSolution": "Solución personalizada",
+      "dedicatedIntegration": "Integración dedicada",
+      "accountManager": "Gerente de cuenta",
+      "guaranteed": "garantizado",
+      "contactSales": "Contactar Ventas",
+      "priceNote": "Los precios son por médico. Ejemplo: 3 médicos en plan Individual = $90/mes (3 × $30)",
+      "trial": {
+        "name": "Trial",
+        "description": "Prueba completa",
+        "feature1": "Acceso completo 7 días",
+        "feature2": "Hasta 10 pacientes",
+        "feature3": "Todas las funcionalidades",
+        "feature4": "Soporte por email",
+        "cta": "Probar Gratis"
+      },
+      "individual": {
+        "name": "Individual",
+        "description": "Perfecto para médicos independientes",
+        "feature1": "1 a 5 médicos",
+        "feature2": "Pacientes ilimitados",
+        "feature3": "Todas las funcionalidades",
+        "feature4": "Soporte prioritario",
+        "feature5": "Backup automático",
+        "cta": "Comenzar Ahora"
+      },
+      "clinic": {
+        "name": "Clínica",
+        "range": "6-25 médicos",
+        "description": "$25 por médico/mes",
+        "description2": "Para clínicas medianas",
+        "feature1": "6 a 25 médicos",
+        "feature2": "Pacientes ilimitados",
+        "feature3": "Multi-especialidad",
+        "feature4": "Soporte 24/7",
+        "feature5": "Reportes avanzados",
+        "cta": "Comenzar Ahora"
+      },
+      "hospital": {
+        "name": "Hospital",
+        "range": "26-50 médicos",
+        "description": "$22 por médico/mes",
+        "description2": "Para hospitales pequeños",
+        "feature1": "26 a 50 médicos",
+        "feature2": "Pacientes ilimitados",
+        "feature3": "Multi-sede",
+        "feature4": "Soporte dedicado",
+        "feature5": "Personalización completa",
+        "cta": "Comenzar Ahora"
+      },
+      "enterprise": "Soluciones personalizadas"
     },
-    "reports": {
-      "title": "Reportes y Estadísticas",
-      "description": "Analiza el rendimiento de tu consultorio con datos en tiempo real"
+    "testimonials": {
+      "title": "Lo que dicen nuestros usuarios",
+      "doctor1": {
+        "name": "Dr. Carlos Mendoza",
+        "specialty": "Medicina General",
+        "text": "PaciGest Plus ha transformado completamente la gestión de mi consultorio. Ahora puedo atender más pacientes sin sacrificar la calidad de atención."
+      },
+      "doctor2": {
+        "name": "Dra. Ana López",
+        "specialty": "Pediatría",
+        "text": "La interfaz es intuitiva y mis pacientes aprecian los recordatorios automáticos. Una inversión que vale cada centavo."
+      },
+      "doctor3": {
+        "name": "Dr. Miguel Torres",
+        "specialty": "Cardiología",
+        "text": "Excelente sistema. La seguridad de los datos y el acceso desde cualquier lugar son imprescindibles en mi práctica."
+      }
     },
-    "bilingual": {
-      "title": "Sistema Bilingüe",
-      "description": "Disponible en Español e Inglés"
+    "cta": {
+      "title": "¿Listo para transformar tu práctica médica?",
+      "subtitle": "Únete a cientos de médicos que ya confían en PaciGest Plus",
+      "button": "Comenzar Prueba Gratuita",
+      "noCommitment": "Sin compromiso",
+      "cancelAnytime": "Cancela cuando quieras"
     }
-  },
-  "benefits": {
-    "title": "¿Por qué elegir PaciGest Plus?",
-    "time": {
-      "title": "Ahorra Tiempo",
-      "description": "Automatiza tareas repetitivas y enfócate en tus pacientes"
-    },
-    "productivity": {
-      "title": "Aumenta Productividad",
-      "description": "Gestiona más pacientes con menos esfuerzo administrativo"
-    },
-    "security": {
-      "title": "Seguridad Garantizada",
-      "description": "Encriptación end-to-end y cumplimiento de normativas médicas"
-    },
-    "access": {
-      "title": "Acceso Desde Cualquier Lugar",
-      "description": "Disponible en web, tablet y móvil"
-    }
-  },
-  "pricing": {
-    "title": "Planes que se adaptan a tu práctica",
-    "subtitle": "Precios por médico - mientras más médicos, mejor precio",
-    "monthly": "Mensual",
-    "quarterly": "Trimestral",
-    "yearly": "Anual",
-    "save": "Ahorra",
-    "savings": "Ahorras",
-    "perMonth": "/mes",
-    "everyMonths": "cada 3 meses",
-    "annually": "al año",
-    "example": "Ejemplo",
-    "doctors": "médicos",
-    "doctor": "médico",
-    "priceNote": "Los precios son por médico. Ejemplo: 3 médicos en plan Individual = $90/mes (3 × $30)",
-"popular": "MÁS POPULAR",
-"free": "Gratis",
-"days": "días",
-    "trial": {
-      "name": "Trial",
-      "feature1": "Acceso completo 7 días",
-      "feature2": "Hasta 10 pacientes",
-      "feature3": "Todas las funcionalidades",
-      "feature4": "Soporte por email",
-      "cta": "Probar Gratis"
-    },
-    "individual": {
-      "name": "Individual",
-      "description": "Perfecto para médicos independientes",
-      "feature1": "1 médico",
-      "feature2": "Pacientes ilimitados",
-      "feature3": "Todas las funcionalidades",
-      "feature4": "Soporte prioritario",
-      "feature5": "Backup automático",
-      "cta": "Comenzar Ahora"
-    },
-    "clinic": {
-      "name": "Clínica",
-      "range": "11-49 médicos",
-      "description": "$20 por médico/mes",
-      "feature1": "De 11 a 49 médicos",
-      "feature2": "Pacientes ilimitados",
-      "feature3": "Multi-especialidad",
-      "feature4": "Soporte 24/7",
-      "feature5": "Reportes avanzados",
-      "cta": "Comenzar Ahora"
-    },
-    "hospital": {
-      "name": "Hospital",
-      "range": "50+ médicos",
-      "description": "$17 por médico/mes",
-      "feature1": "50 o más médicos",
-      "feature2": "Pacientes ilimitados",
-      "feature3": "Multi-sede",
-      "feature4": "Soporte dedicado",
-      "feature5": "Personalización completa",
-      "cta": "Contactar Ventas"
-    }
-  },
-  "testimonials": {
-    "title": "Lo que dicen nuestros usuarios",
-    "doctor1": {
-      "name": "Dr. Carlos Mendoza",
-      "specialty": "Medicina General",
-      "text": "PaciGest Plus ha transformado completamente la gestión de mi consultorio. Ahora puedo atender más pacientes sin sacrificar la calidad de atención."
-    },
-    "doctor2": {
-      "name": "Dra. Ana López",
-      "specialty": "Pediatría",
-      "text": "La interfaz es intuitiva y mis pacientes aprecian los recordatorios automáticos. Una inversión que vale cada centavo."
-    },
-    "doctor3": {
-      "name": "Dr. Miguel Torres",
-      "specialty": "Cardiología",
-      "text": "Excelente sistema. La seguridad de los datos y el acceso desde cualquier lugar son imprescindibles en mi práctica."
-    }
-  },
-  "cta": {
-    "title": "¿Listo para transformar tu práctica médica?",
-    "subtitle": "Únete a cientos de médicos que ya confían en PaciGest Plus",
-    "button": "Comenzar Prueba Gratuita",
-    "noCommitment": "Sin compromiso",
-    "cancelAnytime": "Cancela cuando quieras"
   }
-}
 }

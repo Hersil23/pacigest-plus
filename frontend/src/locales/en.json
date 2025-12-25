@@ -185,9 +185,18 @@
       "popular": "MOST POPULAR",
       "free": "Free",
       "days": "days",
+      "custom": "Custom",
+      "billedMonthly": "Billed monthly",
+      "description2": "For medium clinics",
+      "customSolution": "Custom solution",
+      "dedicatedIntegration": "Dedicated integration",
+      "accountManager": "Account manager",
+      "guaranteed": "guaranteed",
+      "contactSales": "Contact Sales",
       "priceNote": "Prices are per doctor. Example: 3 doctors in Individual plan = $90/mo (3 × $30)",
       "trial": {
         "name": "Trial",
+        "description": "Complete trial",
         "feature1": "Full access for 7 days",
         "feature2": "Up to 10 patients",
         "feature3": "All features",
@@ -197,7 +206,7 @@
       "individual": {
         "name": "Individual",
         "description": "Perfect for independent doctors",
-        "feature1": "1 doctor",
+        "feature1": "1 to 5 doctors",
         "feature2": "Unlimited patients",
         "feature3": "All features",
         "feature4": "Priority support",
@@ -206,9 +215,10 @@
       },
       "clinic": {
         "name": "Clinic",
-        "range": "11-49 doctors",
-        "description": "$20 per doctor/month",
-        "feature1": "11 to 49 doctors",
+        "range": "6-25 doctors",
+        "description": "$25 per doctor/month",
+        "description2": "For medium clinics",
+        "feature1": "6 to 25 doctors",
         "feature2": "Unlimited patients",
         "feature3": "Multi-specialty",
         "feature4": "24/7 support",
@@ -217,15 +227,17 @@
       },
       "hospital": {
         "name": "Hospital",
-        "range": "50+ doctors",
-        "description": "$17 per doctor/month",
-        "feature1": "50 or more doctors",
+        "range": "26-50 doctors",
+        "description": "$22 per doctor/month",
+        "description2": "For small hospitals",
+        "feature1": "26 to 50 doctors",
         "feature2": "Unlimited patients",
         "feature3": "Multi-location",
         "feature4": "Dedicated support",
         "feature5": "Full customization",
-        "cta": "Contact Sales"
-      }
+        "cta": "Get Started"
+      },
+      "enterprise": "Custom solutions"
     },
     "testimonials": {
       "title": "What our users say",

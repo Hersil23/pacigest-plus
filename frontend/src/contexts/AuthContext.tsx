@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (response.user) {
         setUser(response.user);
-        router.push('/');
+        router.push('/dashboard');
       }
     } catch (error: any) {
       throw new Error(error.message || 'Error al iniciar sesión');
@@ -79,9 +79,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response: AuthResponse = await authService.register(userData);
       
+      // Si el registro fue exitoso pero requiere verificación de email
+      if (response.userId) {
+        // El authService ya guardó userId y email en localStorage
+        router.push('/verify-email');
+        return;
+      }
+      
+      // Si por alguna razón viene con usuario directamente (no debería pasar)
       if (response.user) {
         setUser(response.user);
-        router.push('/');
+        router.push('/dashboard');
       }
     } catch (error: any) {
       throw new Error(error.message || 'Error al registrarse');
