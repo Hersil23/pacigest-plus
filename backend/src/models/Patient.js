@@ -180,13 +180,13 @@ const patientSchema = new mongoose.Schema({
   },
 
   // ============================================
-// IDIOMA DEL PACIENTE
-// ============================================
-language: {
-  type: String,
-  enum: ['es', 'en'],
-  default: 'es'
-},
+  // IDIOMA DEL PACIENTE
+  // ============================================
+  language: {
+    type: String,
+    enum: ['es', 'en'],
+    default: 'es'
+  },
 
   // ============================================
   // NÚMERO DE EXPEDIENTE
@@ -207,6 +207,14 @@ language: {
     type: String,
     enum: ['active', 'inactive', 'deceased', 'transferred'],
     default: 'active'
+  },
+
+  // ============================================
+  // SOFT DELETE
+  // ============================================
+  deletedAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true // Crea automáticamente createdAt y updatedAt
@@ -215,13 +223,25 @@ language: {
 // ============================================
 // MIDDLEWARE PARA GENERAR NÚMERO DE EXPEDIENTE
 // ============================================
-patientSchema.pre('save', async function() {
+patientSchema.pre('save', async function(next) {
   if (!this.medicalRecordNumber) {
     // Genera número único: PAC-YYYYMMDD-XXXX
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const count = await mongoose.model('Patient').countDocuments();
     this.medicalRecordNumber = `PAC-${date}-${String(count + 1).padStart(4, '0')}`;
   }
+  next();
+});
+
+// ============================================
+// MIDDLEWARE PARA SOFT DELETE
+// ============================================
+// Excluir registros eliminados en queries automáticamente
+patientSchema.pre(/^find/, function(next) {
+  if (!this.getOptions().includeDeleted) {
+    this.where({ deletedAt: null });
+  }
+  next();
 });
 
 // ============================================
@@ -231,6 +251,7 @@ patientSchema.index({ doctorIds: 1, isActive: 1 });
 patientSchema.index({ medicalRecordNumber: 1 });
 patientSchema.index({ email: 1 });
 patientSchema.index({ createdAt: -1 });
+patientSchema.index({ deletedAt: 1 });
 
 // ============================================
 // MÉTODO VIRTUAL PARA CALCULAR EDAD
@@ -255,6 +276,43 @@ patientSchema.virtual('bmi').get(function() {
   const heightInMeters = this.height / 100;
   return (this.weight / (heightInMeters * heightInMeters)).toFixed(2);
 });
+
+// ============================================
+// MÉTODOS DE INSTANCIA
+// ============================================
+// Soft delete
+patientSchema.methods.softDelete = async function() {
+  this.deletedAt = new Date();
+  this.isActive = false;
+  this.status = 'inactive';
+  return await this.save();
+};
+
+// Restaurar
+patientSchema.methods.restore = async function() {
+  this.deletedAt = null;
+  this.isActive = true;
+  this.status = 'active';
+  return await this.save();
+};
+
+// Force delete (eliminar permanentemente)
+patientSchema.methods.forceDelete = async function() {
+  return await this.deleteOne();
+};
+
+// ============================================
+// MÉTODOS ESTÁTICOS
+// ============================================
+// Encontrar solo eliminados
+patientSchema.statics.findDeleted = function(filter = {}) {
+  return this.find({ ...filter, deletedAt: { $ne: null } });
+};
+
+// Encontrar incluyendo eliminados
+patientSchema.statics.findWithDeleted = function(filter = {}) {
+  return this.find(filter).setOptions({ includeDeleted: true });
+};
 
 // Asegurar que los virtuales se incluyan al convertir a JSON
 patientSchema.set('toJSON', { virtuals: true });

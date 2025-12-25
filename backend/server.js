@@ -40,12 +40,15 @@ app.get('/', (req, res) => {
       medicalRecords: '/api/medical-records',
       prescriptions: '/api/prescriptions',
       medicalFiles: '/api/medical-files',
-      stats: '/api/stats'
+      stats: '/api/stats',
+      dashboard: '/api/dashboard'
     }
   });
 });
 
+// ============================================
 // RUTAS DEL API
+// ============================================
 app.use('/api/auth', require('./src/routes/auth.routes'));
 app.use('/api/users', require('./src/routes/user.routes'));
 app.use('/api/patients', require('./src/routes/patient.routes'));
@@ -55,6 +58,8 @@ app.use('/api/prescriptions', require('./src/routes/prescription.routes'));
 app.use('/api/medical-files', require('./src/routes/medicalFile.routes'));
 app.use('/api/stats', require('./src/routes/stats.routes'));
 app.use('/api/payments', require('./src/routes/payment.routes'));
+app.use('/api/dashboard', require('./src/routes/dashboard.routes')); // ← NUEVA RUTA
+
 // ============================================
 // MANEJO DE ERRORES 404
 // ============================================

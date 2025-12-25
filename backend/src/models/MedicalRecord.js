@@ -111,9 +111,28 @@ const medicalRecordSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+
+  // ============================================
+  // SOFT DELETE
+  // ============================================
+  deletedAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
+});
+
+// ============================================
+// MIDDLEWARE PARA SOFT DELETE
+// ============================================
+// Excluir registros eliminados en queries automáticamente
+medicalRecordSchema.pre(/^find/, function(next) {
+  if (!this.getOptions().includeDeleted) {
+    this.where({ deletedAt: null });
+  }
+  next();
 });
 
 // ============================================
@@ -122,6 +141,7 @@ const medicalRecordSchema = new mongoose.Schema({
 medicalRecordSchema.index({ patientId: 1, consultationDate: -1 });
 medicalRecordSchema.index({ doctorId: 1, consultationDate: -1 });
 medicalRecordSchema.index({ createdAt: -1 });
+medicalRecordSchema.index({ deletedAt: 1 });
 
 // ============================================
 // MÉTODO VIRTUAL PARA IMC
@@ -131,6 +151,41 @@ medicalRecordSchema.virtual('bmi').get(function() {
   const heightInMeters = this.vitalSigns.height / 100;
   return (this.vitalSigns.weight / (heightInMeters * heightInMeters)).toFixed(2);
 });
+
+// ============================================
+// MÉTODOS DE INSTANCIA
+// ============================================
+// Soft delete
+medicalRecordSchema.methods.softDelete = async function() {
+  this.deletedAt = new Date();
+  this.isActive = false;
+  return await this.save();
+};
+
+// Restaurar
+medicalRecordSchema.methods.restore = async function() {
+  this.deletedAt = null;
+  this.isActive = true;
+  return await this.save();
+};
+
+// Force delete (eliminar permanentemente)
+medicalRecordSchema.methods.forceDelete = async function() {
+  return await this.deleteOne();
+};
+
+// ============================================
+// MÉTODOS ESTÁTICOS
+// ============================================
+// Encontrar solo eliminados
+medicalRecordSchema.statics.findDeleted = function(filter = {}) {
+  return this.find({ ...filter, deletedAt: { $ne: null } });
+};
+
+// Encontrar incluyendo eliminados
+medicalRecordSchema.statics.findWithDeleted = function(filter = {}) {
+  return this.find(filter).setOptions({ includeDeleted: true });
+};
 
 medicalRecordSchema.set('toJSON', { virtuals: true });
 medicalRecordSchema.set('toObject', { virtuals: true });

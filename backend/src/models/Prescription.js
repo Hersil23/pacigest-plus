@@ -117,6 +117,14 @@ const prescriptionSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+
+  // ============================================
+  // SOFT DELETE
+  // ============================================
+  deletedAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
@@ -125,13 +133,25 @@ const prescriptionSchema = new mongoose.Schema({
 // ============================================
 // MIDDLEWARE PARA GENERAR NÚMERO DE RECETA
 // ============================================
-prescriptionSchema.pre('save', async function() {
+prescriptionSchema.pre('save', async function(next) {
   if (!this.prescriptionNumber) {
     // Genera número único: RX-YYYYMMDD-XXXX
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const count = await mongoose.model('Prescription').countDocuments();
     this.prescriptionNumber = `RX-${date}-${String(count + 1).padStart(4, '0')}`;
   }
+  next();
+});
+
+// ============================================
+// MIDDLEWARE PARA SOFT DELETE
+// ============================================
+// Excluir registros eliminados en queries automáticamente
+prescriptionSchema.pre(/^find/, function(next) {
+  if (!this.getOptions().includeDeleted) {
+    this.where({ deletedAt: null });
+  }
+  next();
 });
 
 // ============================================
@@ -141,6 +161,44 @@ prescriptionSchema.index({ patientId: 1, prescriptionDate: -1 });
 prescriptionSchema.index({ doctorId: 1, prescriptionDate: -1 });
 prescriptionSchema.index({ prescriptionNumber: 1 });
 prescriptionSchema.index({ createdAt: -1 });
+prescriptionSchema.index({ deletedAt: 1 });
+
+// ============================================
+// MÉTODOS DE INSTANCIA
+// ============================================
+// Soft delete
+prescriptionSchema.methods.softDelete = async function() {
+  this.deletedAt = new Date();
+  this.isActive = false;
+  this.status = 'cancelled';
+  return await this.save();
+};
+
+// Restaurar
+prescriptionSchema.methods.restore = async function() {
+  this.deletedAt = null;
+  this.isActive = true;
+  this.status = 'active';
+  return await this.save();
+};
+
+// Force delete (eliminar permanentemente)
+prescriptionSchema.methods.forceDelete = async function() {
+  return await this.deleteOne();
+};
+
+// ============================================
+// MÉTODOS ESTÁTICOS
+// ============================================
+// Encontrar solo eliminados
+prescriptionSchema.statics.findDeleted = function(filter = {}) {
+  return this.find({ ...filter, deletedAt: { $ne: null } });
+};
+
+// Encontrar incluyendo eliminados
+prescriptionSchema.statics.findWithDeleted = function(filter = {}) {
+  return this.find(filter).setOptions({ includeDeleted: true });
+};
 
 const Prescription = mongoose.model('Prescription', prescriptionSchema);
 

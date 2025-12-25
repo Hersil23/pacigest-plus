@@ -166,34 +166,34 @@ const userSchema = new mongoose.Schema({
   // ============================================
   // SUSCRIPCIÓN Y PAGOS
   // ============================================
-    subscription: {
-  plan: {
-    type: String,
-    enum: ['trial', 'individual', 'clinic', 'hospital'],
-    default: 'trial'
-  },
-  billingCycle: {
-    type: String,
-    enum: ['monthly', 'quarterly', 'yearly'],
-    default: 'monthly'
-  },
-  pricePerDoctor: {
-    type: Number,
-    default: 0
-  },
-  totalAmount: {
-    type: Number,
-    default: 0
-  },
-  discount: {
-    type: Number,
-    default: 0
-  },
-  status: {
-    type: String,
-    enum: ['active', 'inactive', 'trial', 'cancelled', 'expired'],
-    default: 'trial'
-  },
+  subscription: {
+    plan: {
+      type: String,
+      enum: ['trial', 'individual', 'clinic', 'hospital'],
+      default: 'trial'
+    },
+    billingCycle: {
+      type: String,
+      enum: ['monthly', 'quarterly', 'yearly'],
+      default: 'monthly'
+    },
+    pricePerDoctor: {
+      type: Number,
+      default: 0
+    },
+    totalAmount: {
+      type: Number,
+      default: 0
+    },
+    discount: {
+      type: Number,
+      default: 0
+    },
+    status: {
+      type: String,
+      enum: ['active', 'inactive', 'trial', 'cancelled', 'expired'],
+      default: 'trial'
+    },
     startDate: {
       type: Date,
       default: Date.now
@@ -267,29 +267,37 @@ const userSchema = new mongoose.Schema({
   // CAMPOS DEL SISTEMA
   // ============================================
   lastLogin: {
-  type: Date
-},
-emailVerified: {
-  type: Boolean,
-  default: false
-},
-emailVerificationToken: {
-  type: String,
-  select: false
-},
-emailVerificationExpires: {
-  type: Date,
-  select: false
-},
-// Token de recuperación de contraseña
-passwordResetToken: {
-  type: String,
-  select: false
-},
-passwordResetExpires: {
-  type: Date,
-  select: false
-},
+    type: Date
+  },
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailVerificationToken: {
+    type: String,
+    select: false
+  },
+  emailVerificationExpires: {
+    type: Date,
+    select: false
+  },
+  // Token de recuperación de contraseña
+  passwordResetToken: {
+    type: String,
+    select: false
+  },
+  passwordResetExpires: {
+    type: Date,
+    select: false
+  },
+  
+  // ============================================
+  // SOFT DELETE
+  // ============================================
+  deletedAt: {
+    type: Date,
+    default: null
+  }
 }, {
   timestamps: true // Crea automáticamente createdAt y updatedAt
 });
@@ -300,14 +308,60 @@ passwordResetExpires: {
 userSchema.index({ email: 1 });
 userSchema.index({ role: 1, isActive: 1 });
 userSchema.index({ createdAt: -1 });
+userSchema.index({ deletedAt: 1 });
 
 // ============================================
-// MÉTODO PARA OCULTAR CONTRASEÑA AL DEVOLVER
+// MIDDLEWARE PARA SOFT DELETE
 // ============================================
+// Excluir registros eliminados en queries automáticamente
+userSchema.pre(/^find/, function(next) {
+  // Solo aplicar si no se especifica explícitamente incluir eliminados
+  if (!this.getOptions().includeDeleted) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+// ============================================
+// MÉTODOS DE INSTANCIA
+// ============================================
+// Soft delete
+userSchema.methods.softDelete = async function() {
+  this.deletedAt = new Date();
+  this.isActive = false;
+  return await this.save();
+};
+
+// Restaurar
+userSchema.methods.restore = async function() {
+  this.deletedAt = null;
+  this.isActive = true;
+  return await this.save();
+};
+
+// Force delete (eliminar permanentemente)
+userSchema.methods.forceDelete = async function() {
+  return await this.deleteOne();
+};
+
+// Ocultar contraseña al devolver
 userSchema.methods.toJSON = function() {
   const user = this.toObject();
   delete user.password;
   return user;
+};
+
+// ============================================
+// MÉTODOS ESTÁTICOS
+// ============================================
+// Encontrar solo eliminados
+userSchema.statics.findDeleted = function(filter = {}) {
+  return this.find({ ...filter, deletedAt: { $ne: null } });
+};
+
+// Encontrar incluyendo eliminados
+userSchema.statics.findWithDeleted = function(filter = {}) {
+  return this.find(filter).setOptions({ includeDeleted: true });
 };
 
 const User = mongoose.model('User', userSchema);
