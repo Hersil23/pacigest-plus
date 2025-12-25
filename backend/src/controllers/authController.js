@@ -101,6 +101,12 @@ exports.register = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
   try {
     const { userId, verificationToken } = req.body;
+    // AGREGA:
+console.log('🔍 DEBUG - Verificación recibida:');
+console.log('  userId recibido:', userId);
+console.log('  token recibido:', verificationToken);
+console.log('  tipo userId:', typeof userId);
+console.log('  tipo token:', typeof verificationToken);
 
     if (!userId || !verificationToken) {
       return res.status(400).json({
@@ -110,7 +116,14 @@ exports.verifyEmail = async (req, res) => {
     }
 
     // Buscar usuario
-    const user = await User.findById(userId);
+    const user = await User.findById(userId)
+  .select('+emailVerificationToken +emailVerificationExpires');
+    console.log('🔍 Usuario encontrado:', user ? 'SÍ' : 'NO');
+if (user) {
+  console.log('  Token en BD:', user.emailVerificationToken);
+  console.log('  Token expiró:', user.emailVerificationExpires);
+  console.log('  Fecha actual:', new Date());
+}
 
     if (!user) {
       return res.status(404).json({
