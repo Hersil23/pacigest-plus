@@ -4,7 +4,7 @@ const authController = require('../controllers/authController');
 const { protect } = require('../middlewares/auth');
 const { authLimiter, registerLimiter, emailLimiter, passwordResetLimiter } = require('../middlewares/rateLimiter');
 // Rutas públicas (sin autenticación)
-router.post('/register', registerLimiter, authController.register);           // Registrar nuevo usuario
+router.post('/register', authController.register);           // Registrar nuevo usuario
 router.post('/verify-email', emailLimiter, authController.verifyEmail);    // Verificar email
 router.post('/login', authLimiter, authController.login);                 // Iniciar sesión
 router.post('/forgot-password', passwordResetLimiter, authController.forgotPassword);

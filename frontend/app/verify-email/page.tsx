@@ -16,19 +16,25 @@ export default function VerifyEmailPage() {
   const [email, setEmail] = useState('');
   const [serverCode, setServerCode] = useState('');
 
-  useEffect(() => {
-    // Obtener datos del registro
-    const pendingUserId = localStorage.getItem('pendingUserId');
-    const pendingEmail = localStorage.getItem('pendingEmail');
-    
-    if (!pendingUserId || !pendingEmail) {
-      router.push('/register');
-      return;
-    }
-    
-    setUserId(pendingUserId);
-    setEmail(pendingEmail);
-  }, [router]);
+useEffect(() => {
+  // Obtener datos del registro
+  const pendingUserId = localStorage.getItem('pendingUserId');
+  const pendingEmail = localStorage.getItem('pendingEmail');
+  const code = localStorage.getItem('verificationCode');
+  
+  if (!pendingUserId || !pendingEmail) {
+    router.push('/register');
+    return;
+  }
+  
+  setUserId(pendingUserId);
+  setEmail(pendingEmail);
+  
+  // SOLO PARA TESTING - mostrar código del servidor
+  if (code) {
+    setServerCode(code);
+  }
+}, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

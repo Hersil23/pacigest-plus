@@ -29,6 +29,9 @@ export interface AuthResponse {
     role: string;
   };
   message?: string;
+  userId?: string;
+  email?: string;
+  verificationToken?: string;
 }
 
 // Servicio de autenticación
@@ -89,11 +92,16 @@ class AuthService {
   }
 
   // El backend devuelve userId y requiere verificación de email
-  // Por ahora, guardamos el userId para el siguiente paso
-  if (data.userId) {
-    localStorage.setItem('pendingUserId', data.userId);
-    localStorage.setItem('pendingEmail', userData.email);
+// Por ahora, guardamos el userId para el siguiente paso
+if (data.userId) {
+  localStorage.setItem('pendingUserId', data.userId);
+  localStorage.setItem('pendingEmail', userData.email);
+  
+  // SOLO PARA TESTING - El backend devuelve el código
+  if (data.verificationToken) {
+    localStorage.setItem('verificationCode', data.verificationToken);
   }
+}
 
   return data;
 }
