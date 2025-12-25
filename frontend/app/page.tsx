@@ -241,56 +241,84 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section with Video Background */}
-      <section className="relative py-20 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-          >
-            <source src="/videos/hero-video.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-[rgb(var(--background))]"></div>
-        </div>
+      <section className="relative min-h-[600px] sm:min-h-[650px] lg:min-h-[700px] overflow-hidden bg-black">
+        {/* Video Background - Local */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute top-0 left-0 w-full h-full object-cover"
+          style={{
+            objectFit: 'cover',
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0
+          }}
+        >
+          <source src="/videos/hero-video.mp4" type="video/mp4" />
+        </video>
         
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto text-center"
-          >
-            <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6 drop-shadow-lg">
-              {t('landing.hero.title')}{' '}
-              <span className="text-[rgb(var(--primary))]">{t('landing.hero.titleHighlight')}</span>
-            </h2>
-            <p className="text-xl text-white/90 mb-8 drop-shadow-md">
-              {t('landing.hero.subtitle')}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link
-                  href="/register"
-                  className="px-8 py-4 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] font-medium text-lg shadow-lg hover:shadow-xl transition-all inline-block"
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-[rgb(var(--background))] z-10" />
+        
+        {/* Contenido Hero */}
+        <div className="relative z-20 flex items-center justify-center min-h-[600px] sm:min-h-[650px] lg:min-h-[700px]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="max-w-4xl mx-auto text-center"
+            >
+              {/* Título */}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-5 lg:mb-6 drop-shadow-2xl">
+                {t('landing.hero.title')}{' '}
+                <span className="text-[rgb(var(--primary))]">{t('landing.hero.titleHighlight')}</span>
+              </h2>
+              
+              {/* Subtítulo */}
+              <p className="text-base sm:text-lg lg:text-xl text-white/95 mb-6 sm:mb-7 lg:mb-8 drop-shadow-xl px-2 sm:px-0 max-w-3xl mx-auto leading-relaxed">
+                {t('landing.hero.subtitle')}
+              </p>
+              
+              {/* Botones CTA */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-lg mx-auto px-4 sm:px-0">
+                <motion.div 
+                  whileHover={{ scale: 1.05 }} 
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto"
                 >
-                  {t('landing.hero.cta1')}
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link
-                  href="/login"
-                  className="px-8 py-4 bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-lg hover:bg-white/20 font-medium text-lg transition-all inline-block"
+                  <Link
+                    href="/register"
+                    className="block w-full sm:inline-block px-8 py-3.5 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] font-semibold text-base sm:text-lg shadow-2xl hover:shadow-3xl transition-all text-center"
+                  >
+                    {t('landing.hero.cta1')}
+                  </Link>
+                </motion.div>
+                
+                <motion.div 
+                  whileHover={{ scale: 1.05 }} 
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto"
                 >
-                  {t('landing.hero.cta2')}
-                </Link>
-              </motion.div>
-            </div>
-            <p className="text-sm text-white/80 mt-4 drop-shadow-md">
-              ✓ {t('landing.hero.benefit1')}  ✓ {t('landing.hero.benefit2')}  ✓ {t('landing.hero.benefit3')}
-            </p>
-          </motion.div>
+                  <Link
+                    href="/login"
+                    className="block w-full sm:inline-block px-8 py-3.5 bg-white/15 backdrop-blur-md text-white border-2 border-white/40 rounded-lg hover:bg-white/25 font-semibold text-base sm:text-lg transition-all shadow-xl text-center"
+                  >
+                    {t('landing.hero.cta2')}
+                  </Link>
+                </motion.div>
+              </div>
+              
+              {/* Benefits */}
+              <p className="text-xs sm:text-sm text-white/90 mt-4 sm:mt-5 drop-shadow-xl px-2">
+                ✓ {t('landing.hero.benefit1')}  ✓ {t('landing.hero.benefit2')}  ✓ {t('landing.hero.benefit3')}
+              </p>
+            </motion.div>
+          </div>
         </div>
       </section>
 
