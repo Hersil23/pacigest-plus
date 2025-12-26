@@ -223,26 +223,26 @@ const patientSchema = new mongoose.Schema({
 // ============================================
 // MIDDLEWARE PARA GENERAR NÚMERO DE EXPEDIENTE
 // ============================================
-patientSchema.pre('save', async function(next) {
+patientSchema.pre('save', async function() {
   if (!this.medicalRecordNumber) {
     // Genera número único: PAC-YYYYMMDD-XXXX
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const count = await mongoose.model('Patient').countDocuments();
     this.medicalRecordNumber = `PAC-${date}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
+  // NO LLAMAR next() en funciones async - Mongoose lo maneja automáticamente
 });
 
 // ============================================
 // MIDDLEWARE PARA SOFT DELETE
 // ============================================
 // Excluir registros eliminados en queries automáticamente
-patientSchema.pre(/^find/, function(next) {
-  if (!this.getOptions().includeDeleted) {
-    this.where({ deletedAt: null });
-  }
-  next();
-});
+//patientSchema.pre(/^find/, function(next) {
+ // if (!this.getOptions().includeDeleted) {
+ //   this.where({ deletedAt: null });
+ // }
+ // next();
+//});
 
 // ============================================
 // ÍNDICES PARA OPTIMIZACIÓN

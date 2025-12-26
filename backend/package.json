@@ -18,9 +18,12 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
+    "express-validator": "^7.3.1",
+    "install": "^0.13.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.0.2",
     "node-cron": "^4.2.1",
+    "npm": "^11.7.0",
     "resend": "^6.6.0",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0"

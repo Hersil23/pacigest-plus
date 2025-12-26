@@ -305,22 +305,24 @@ const userSchema = new mongoose.Schema({
 // ============================================
 // ÍNDICES PARA OPTIMIZACIÓN
 // ============================================
-userSchema.index({ email: 1 });
-userSchema.index({ role: 1, isActive: 1 });
-userSchema.index({ createdAt: -1 });
-userSchema.index({ deletedAt: 1 });
+//userSchema.index({ email: 1 });
+//userSchema.index({ role: 1, isActive: 1 });
+//userSchema.index({ createdAt: -1 });
+//userSchema.index({ deletedAt: 1 });
 
-// ============================================
-// MIDDLEWARE PARA SOFT DELETE
-// ============================================
-// Excluir registros eliminados en queries automáticamente
-userSchema.pre(/^find/, function(next) {
-  // Solo aplicar si no se especifica explícitamente incluir eliminados
-  if (!this.getOptions().includeDeleted) {
-    this.where({ deletedAt: null });
-  }
-  next();
-});
+// Middleware mejorado - más seguro
+//userSchema.pre(/^find/, function(next) {
+//  try {
+//    const options = this.getOptions();
+//    if (!options || !options.includeDeleted) {
+//      this.where({ deletedAt: null });
+//    }
+ // } catch (error) {
+    // Si falla, continuar sin filtrar
+//    console.warn('Warning: Could not apply soft delete filter', error.message);
+//  }
+//  next();
+//});
 
 // ============================================
 // MÉTODOS DE INSTANCIA

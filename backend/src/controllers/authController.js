@@ -17,20 +17,20 @@ const generateToken = (id) => {
 // ============================================
 // REGISTRAR NUEVO USUARIO
 // ============================================
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
   try {
     const {
-  email,
-  password,
-  firstName,
-  lastName,
-  phone,
-  specialty,
-  licenseNumber,
-  role,
-  language,
-  subscription
-} = req.body;
+      email,
+      password,
+      firstName,
+      lastName,
+      phone,
+      specialty,
+      licenseNumber,
+      role,
+      language,
+      subscription
+    } = req.body;
 
     // Verificar si el email ya existe
     const existingUser = await User.findOne({ email });
@@ -49,7 +49,7 @@ exports.register = async (req, res) => {
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
 
     // Crear usuario CON trial INACTIVO hasta que verifique email
-    const user = await User.create({
+    const user = new User({
       email,
       password: hashedPassword,
       firstName,
@@ -71,6 +71,9 @@ exports.register = async (req, res) => {
       }
     });
 
+    // Guardar usuario
+    await user.save();
+
     // Enviar email de verificación
     await sendVerificationEmail(email, firstName, verificationToken, user.preferences.language);
     logger.logEmail(email, 'Verificación de email', true);
@@ -87,26 +90,22 @@ exports.register = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al registrar usuario',
-      error: error.message
-    });
+    next(error);
   }
 };
 
 // ============================================
 // VERIFICAR EMAIL
 // ============================================
-exports.verifyEmail = async (req, res) => {
+exports.verifyEmail = async (req, res, next) => {
   try {
     const { userId, verificationToken } = req.body;
-    // AGREGA:
-console.log('🔍 DEBUG - Verificación recibida:');
-console.log('  userId recibido:', userId);
-console.log('  token recibido:', verificationToken);
-console.log('  tipo userId:', typeof userId);
-console.log('  tipo token:', typeof verificationToken);
+    
+    console.log('🔍 DEBUG - Verificación recibida:');
+    console.log('  userId recibido:', userId);
+    console.log('  token recibido:', verificationToken);
+    console.log('  tipo userId:', typeof userId);
+    console.log('  tipo token:', typeof verificationToken);
 
     if (!userId || !verificationToken) {
       return res.status(400).json({
@@ -117,13 +116,14 @@ console.log('  tipo token:', typeof verificationToken);
 
     // Buscar usuario
     const user = await User.findById(userId)
-  .select('+emailVerificationToken +emailVerificationExpires');
+      .select('+emailVerificationToken +emailVerificationExpires');
+    
     console.log('🔍 Usuario encontrado:', user ? 'SÍ' : 'NO');
-if (user) {
-  console.log('  Token en BD:', user.emailVerificationToken);
-  console.log('  Token expiró:', user.emailVerificationExpires);
-  console.log('  Fecha actual:', new Date());
-}
+    if (user) {
+      console.log('  Token en BD:', user.emailVerificationToken);
+      console.log('  Token expiró:', user.emailVerificationExpires);
+      console.log('  Fecha actual:', new Date());
+    }
 
     if (!user) {
       return res.status(404).json({
@@ -203,18 +203,14 @@ if (user) {
     });
 
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al verificar email',
-      error: error.message
-    });
+    next(error);
   }
 };
 
 // ============================================
 // LOGIN
 // ============================================
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -274,18 +270,14 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al iniciar sesión',
-      error: error.message
-    });
+    next(error);
   }
 };
 
 // ============================================
 // OBTENER USUARIO ACTUAL
 // ============================================
-exports.getCurrentUser = async (req, res) => {
+exports.getCurrentUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
 
@@ -295,18 +287,14 @@ exports.getCurrentUser = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al obtener usuario',
-      error: error.message
-    });
+    next(error);
   }
 };
 
 // ============================================
 // ACTUALIZAR PERFIL
 // ============================================
-exports.updateProfile = async (req, res) => {
+exports.updateProfile = async (req, res, next) => {
   try {
     const fieldsToUpdate = {
       firstName: req.body.firstName,
@@ -340,18 +328,14 @@ exports.updateProfile = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al actualizar perfil',
-      error: error.message
-    });
+    next(error);
   }
 };
 
 // ============================================
 // CAMBIAR CONTRASEÑA
 // ============================================
-exports.changePassword = async (req, res) => {
+exports.changePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
@@ -381,17 +365,14 @@ exports.changePassword = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al cambiar contraseña',
-      error: error.message
-    });
+    next(error);
   }
 };
+
 // ============================================
 // SOLICITAR RECUPERACIÓN DE CONTRASEÑA
 // ============================================
-exports.forgotPassword = async (req, res) => {
+exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
 
@@ -437,18 +418,14 @@ exports.forgotPassword = async (req, res) => {
 
   } catch (error) {
     logger.logError('Error en forgot password', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al procesar solicitud',
-      error: error.message
-    });
+    next(error);
   }
 };
 
 // ============================================
 // RESTABLECER CONTRASEÑA
 // ============================================
-exports.resetPassword = async (req, res) => {
+exports.resetPassword = async (req, res, next) => {
   try {
     const { email, resetToken, newPassword } = req.body;
 
@@ -502,10 +479,6 @@ exports.resetPassword = async (req, res) => {
 
   } catch (error) {
     logger.logError('Error en reset password', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al restablecer contraseña',
-      error: error.message
-    });
+    next(error);
   }
 };
