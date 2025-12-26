@@ -22,7 +22,11 @@
     "name": "Nombre",
     "email": "Email",
     "phone": "Teléfono",
-    "address": "Dirección"
+    "address": "Dirección",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "page": "Página",
+    "of": "de"
   },
   "theme": {
     "soft": "Soft",
@@ -76,6 +80,8 @@
   },
   "patients": {
     "title": "Pacientes",
+    "subtitle": "Gestiona tus pacientes",
+    "addNew": "Nuevo Paciente",
     "newPatient": "Nuevo Paciente",
     "editPatient": "Editar Paciente",
     "viewPatient": "Ver Paciente",
@@ -87,7 +93,34 @@
     "dateOfBirth": "Fecha de Nacimiento",
     "gender": "Género",
     "bloodType": "Tipo de Sangre",
-    "allergies": "Alergias"
+    "allergies": "Alergias",
+    "search": "Buscar pacientes...",
+    "noResults": "No se encontraron pacientes",
+    "stats": {
+      "total": "Total",
+      "active": "Activos",
+      "inactive": "Inactivos",
+      "newMonth": "Nuevos este mes"
+    },
+    "filter": {
+      "all": "Todos",
+      "active": "Activos",
+      "inactive": "Inactivos"
+    },
+    "table": {
+      "record": "Expediente",
+      "name": "Nombre",
+      "age": "Edad",
+      "phone": "Teléfono",
+      "status": "Estado",
+      "actions": "Acciones",
+      "view": "Ver",
+      "years": "años"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    }
   },
   "appointments": {
     "title": "Citas",

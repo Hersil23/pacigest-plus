@@ -22,7 +22,11 @@
     "name": "Name",
     "email": "Email",
     "phone": "Phone",
-    "address": "Address"
+    "address": "Address",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of"
   },
   "theme": {
     "soft": "Soft",
@@ -80,6 +84,8 @@
   },
   "patients": {
     "title": "Patients",
+    "subtitle": "Manage your patients",
+    "addNew": "New Patient",
     "newPatient": "New Patient",
     "editPatient": "Edit Patient",
     "viewPatient": "View Patient",
@@ -91,7 +97,34 @@
     "dateOfBirth": "Date of Birth",
     "gender": "Gender",
     "bloodType": "Blood Type",
-    "allergies": "Allergies"
+    "allergies": "Allergies",
+    "search": "Search patients...",
+    "noResults": "No patients found",
+    "stats": {
+      "total": "Total",
+      "active": "Active",
+      "inactive": "Inactive",
+      "newMonth": "New this month"
+    },
+    "filter": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "record": "Record",
+      "name": "Name",
+      "age": "Age",
+      "phone": "Phone",
+      "status": "Status",
+      "actions": "Actions",
+      "view": "View",
+      "years": "years"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
   },
   "appointments": {
     "title": "Appointments",
