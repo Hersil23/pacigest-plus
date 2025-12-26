@@ -7,6 +7,7 @@ import { Patient, PatientStats } from '@/types/patient';
 import { FaPlus, FaSearch, FaFilter, FaUserPlus } from 'react-icons/fa';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute';
+
 export default function PatientsPage() {
   const { t } = useLanguage();
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -19,6 +20,12 @@ export default function PatientsPage() {
 
   // Cargar pacientes
   const loadPatients = async () => {
+    // No hacer nada si no hay token
+    if (typeof window !== 'undefined' && !localStorage.getItem('token')) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const params: any = {
@@ -41,6 +48,11 @@ export default function PatientsPage() {
 
   // Cargar estadísticas
   const loadStats = async () => {
+    // No hacer nada si no hay token
+    if (typeof window !== 'undefined' && !localStorage.getItem('token')) {
+      return;
+    }
+
     try {
       const response = await patientsApi.getStats();
       setStats(response.data);
@@ -49,16 +61,16 @@ export default function PatientsPage() {
     }
   };
 
-useEffect(() => {
-  // Solo cargar datos si está dentro de ProtectedRoute
-  // (ProtectedRoute maneja la redirección)
-  const timer = setTimeout(() => {
-    loadPatients();
-    loadStats();
-  }, 100);
-  
-  return () => clearTimeout(timer);
-}, [page, search, statusFilter]);
+  useEffect(() => {
+    // Solo cargar datos si está dentro de ProtectedRoute
+    // (ProtectedRoute maneja la redirección)
+    const timer = setTimeout(() => {
+      loadPatients();
+      loadStats();
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [page, search, statusFilter]);
 
   // Calcular edad
   const calculateAge = (dateOfBirth: string) => {
