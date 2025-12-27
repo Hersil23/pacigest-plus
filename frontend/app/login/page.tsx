@@ -17,14 +17,11 @@ export default function LoginPage() {
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Redirigir si ya está autenticado
-  useEffect(() => {
-    if (!loading && isAuthenticated) {
-      router.push('/');
-    }
-  }, [isAuthenticated, loading, router]);
-
+useEffect(() => {
+  if (!loading && isAuthenticated) {
+    router.push('/panel');  // ✅ Redirige al panel
+  }
+}, [isAuthenticated, loading, router]);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,

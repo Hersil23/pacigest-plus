@@ -62,12 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/panel');
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    router.push('/login');
-  };
-
+const logout = () => {
+  localStorage.removeItem('token');
+  setUser(null);
+  router.push('/');  // ✅ Redirige a landing page
+};
   return (
     <AuthContext.Provider 
       value={{ 
