@@ -1,6 +1,7 @@
 export interface Patient {
   _id: string;
-  // Datos de consulta
+  
+  // Datos de consulta (auto-generados)
   consultationDate: string;
   consultationTime: string;
   
@@ -15,12 +16,11 @@ export interface Patient {
   lastName: string;
   secondLastName?: string;
   dateOfBirth: string;
-  age?: number; // calculado
+  age?: number; // calculado automáticamente
   gender: 'M' | 'F' | 'Otro';
   email: string;
   phone: string;
   secondaryPhone?: string;
-  photoUrl?: string;
   
   // Dirección
   address: {
@@ -40,7 +40,7 @@ export interface Patient {
     validUntil?: string;
   };
   
-  // Representante legal (si es menor)
+  // Representante legal (solo si es menor de 18)
   legalRepresentative?: {
     documentType: 'cedula' | 'pasaporte';
     documentNumber: string;
@@ -78,7 +78,7 @@ export interface Patient {
     others: string;
   };
   
-  // Signos vitales
+  // Signos vitales (consulta actual)
   vitalSigns: {
     bloodPressure: string;
     temperature: number;
@@ -86,7 +86,7 @@ export interface Patient {
     respiratoryRate: number;
     weight: number;
     height: number;
-    bmi?: number; // calculado
+    bmi?: number; // calculado automáticamente
   };
   
   // Motivo de consulta
@@ -140,7 +140,6 @@ export interface Patient {
   
   // Información por especialidad (condicional)
   specialtyData?: {
-    // Odontología
     dentistry?: {
       lastCleaning: string;
       dentalPain: boolean;
@@ -153,7 +152,6 @@ export interface Patient {
       bruxism: boolean;
       observations: string;
     };
-    // Dermatología
     dermatology?: {
       skinType: 'seca' | 'grasa' | 'mixta' | 'sensible' | 'normal';
       skinAllergies: string;
@@ -163,7 +161,6 @@ export interface Patient {
       moleChanges: boolean;
       observations: string;
     };
-    // Cardiología
     cardiology?: {
       usualBloodPressure: string;
       chestPain: 'nunca' | 'ocasional' | 'frecuente' | 'constante';
@@ -182,9 +179,19 @@ export interface Patient {
   // Notas del médico
   doctorNotes: string;
   
-  // Archivos
+  // Archivos y fotos
   files: {
-    patientPhoto?: string;
+    // Foto del paciente (OBLIGATORIA)
+    patientPhoto: string; // base64 o URL
+    
+    // Fotos clínicas (hasta 20 fotos con descripción)
+    clinicalPhotos?: {
+      url: string; // base64 o URL
+      description: string;
+      uploadedAt: string;
+    }[];
+    
+    // Estudios médicos (opcionales)
     labResults?: string[];
     xrays?: string[];
     reports?: string[];
@@ -192,15 +199,15 @@ export interface Patient {
     others?: string[];
   };
   
-  // Consentimiento
+  // Consentimiento informado
   consent: {
     accepted: boolean;
-    signature: string;
+    signature: string; // base64 de la firma digital
     signedBy: string;
     signedAt: string;
   };
   
-  // PDF generado
+  // PDF generado automáticamente
   clinicalHistoryPDF?: {
     url: string;
     generatedAt: string;
@@ -208,18 +215,30 @@ export interface Patient {
   };
   
   // Metadatos
-  medicalRecordNumber?: string;
+  medicalRecordNumber?: string; // generado por backend
   createdBy: string;
   createdAt: string;
   updatedAt: string;
   status: 'active' | 'inactive';
 }
 
-export interface PatientFormData extends Omit<Patient, '_id' | 'createdAt' | 'updatedAt' | 'medicalRecordNumber' | 'age' | 'bmi'> {}
+// Interface para el formulario (sin campos auto-generados)
+export interface PatientFormData extends Omit<
+  Patient, 
+  '_id' | 'createdAt' | 'updatedAt' | 'medicalRecordNumber' | 'age' | 'bmi' | 'clinicalHistoryPDF'
+> {}
 
+// Estadísticas de pacientes
 export interface PatientStats {
   total: number;
   active: number;
   inactive: number;
   newThisMonth: number;
+}
+
+// Interface para foto clínica
+export interface ClinicalPhoto {
+  url: string;
+  description: string;
+  uploadedAt: string;
 }

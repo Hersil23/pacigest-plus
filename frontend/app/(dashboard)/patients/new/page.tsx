@@ -1,33 +1,38 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { patientsApi } from '@/lib/api';
-import { PatientFormData } from '@/types/patient';
-import { FaArrowLeft, FaSave, FaUser, FaHeartbeat, FaStethoscope, FaFileMedical, FaNotesMedical } from 'react-icons/fa';
+import { PatientFormData, ClinicalPhoto } from '@/types/patient';
+import { FaArrowLeft, FaSave, FaUser, FaHeartbeat, FaStethoscope, FaFileMedical, FaNotesMedical, FaCamera, FaSignature, FaTrash, FaPlus } from 'react-icons/fa';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
+// Avatar por defecto
+const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23e0e0e0' width='200' height='200'/%3E%3Cpath fill='%23999' d='M100 100c13.807 0 25-11.193 25-25S113.807 50 100 50s-25 11.193-25 25 11.193 25 25 25zm0 12.5c-16.667 0-50 8.363-50 25v12.5h100v-12.5c0-16.637-33.333-25-50-25z'/%3E%3C/svg%3E";
+
 export default function NewPatientPage() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
+  
+  // Refs
+  const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const patientPhotoInputRef = useRef<HTMLInputElement>(null);
+  const clinicalPhotoInputRef = useRef<HTMLInputElement>(null);
 
   // Estado del formulario
   const [formData, setFormData] = useState<PatientFormData>({
-    // Datos de consulta (auto)
     consultationDate: new Date().toISOString().split('T')[0],
     consultationTime: new Date().toTimeString().slice(0, 5),
-    
-    // Identificación
     documentType: 'cedula',
     documentNumber: '',
     documentCountry: 'Venezuela',
-    
-    // Datos personales
     firstName: '',
     secondName: '',
     lastName: '',
@@ -37,8 +42,6 @@ export default function NewPatientPage() {
     email: '',
     phone: '',
     secondaryPhone: '',
-    
-    // Dirección
     address: {
       street: '',
       city: '',
@@ -46,8 +49,6 @@ export default function NewPatientPage() {
       zipCode: '',
       country: 'Venezuela'
     },
-    
-    // Seguro
     insurance: {
       hasInsurance: false,
       provider: '',
@@ -55,24 +56,18 @@ export default function NewPatientPage() {
       planType: '',
       validUntil: ''
     },
-    
-    // Contacto de emergencia
     emergencyContact: {
       name: '',
       relationship: '',
       phone: '',
       email: ''
     },
-    
-    // Datos médicos críticos
     bloodType: 'O+',
     allergies: {
       medications: '',
       food: '',
       others: ''
     },
-    
-    // Signos vitales
     vitalSigns: {
       bloodPressure: '',
       temperature: 0,
@@ -81,8 +76,6 @@ export default function NewPatientPage() {
       weight: 0,
       height: 0
     },
-    
-    // Motivo de consulta
     consultation: {
       reason: '',
       symptoms: '',
@@ -92,8 +85,6 @@ export default function NewPatientPage() {
       recentConsultations: false,
       consultationDetails: ''
     },
-    
-    // Historial médico
     medicalHistory: {
       chronicDiseases: '',
       currentMedications: '',
@@ -122,35 +113,35 @@ export default function NewPatientPage() {
         dietObservations: ''
       }
     },
-    
-    // Referencia
     referral: {
       wasReferred: false,
       referringDoctor: '',
       specialty: '',
       reason: ''
     },
-    
-    // Notas del médico
     doctorNotes: '',
-    
-    // Archivos
-    files: {},
-    
-    // Consentimiento
+    files: {
+      patientPhoto: '',
+      clinicalPhotos: []
+    },
     consent: {
       accepted: false,
       signature: '',
       signedBy: '',
       signedAt: ''
     },
-    
-    // Metadatos
-    createdBy: '',
+    createdBy: user?._id || '',
     status: 'active'
   });
 
-  // Calcular edad automáticamente
+  const [calculatedAge, setCalculatedAge] = useState(0);
+  const [calculatedBMI, setCalculatedBMI] = useState('0');
+  const [showRepresentative, setShowRepresentative] = useState(false);
+  const [patientPhotoPreview, setPatientPhotoPreview] = useState<string>(DEFAULT_AVATAR);
+  const [clinicalPhotos, setClinicalPhotos] = useState<ClinicalPhoto[]>([]);
+  const [currentPhotoDescription, setCurrentPhotoDescription] = useState('');
+
+  // Calcular edad
   useEffect(() => {
     if (formData.dateOfBirth) {
       const today = new Date();
@@ -160,20 +151,12 @@ export default function NewPatientPage() {
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
         age--;
       }
-      // Guardamos edad para mostrar, pero no la enviamos al backend
       setCalculatedAge(age);
+      setShowRepresentative(age < 18 && age > 0);
     }
   }, [formData.dateOfBirth]);
 
-  const [calculatedAge, setCalculatedAge] = useState(0);
-  const [showRepresentative, setShowRepresentative] = useState(false);
-
-  // Mostrar/ocultar representante legal si es menor de edad
-  useEffect(() => {
-    setShowRepresentative(calculatedAge < 18 && calculatedAge > 0);
-  }, [calculatedAge]);
-
-  // Calcular IMC automáticamente
+  // Calcular IMC
   useEffect(() => {
     const { weight, height } = formData.vitalSigns;
     if (weight > 0 && height > 0) {
@@ -183,13 +166,10 @@ export default function NewPatientPage() {
     }
   }, [formData.vitalSigns.weight, formData.vitalSigns.height]);
 
-  const [calculatedBMI, setCalculatedBMI] = useState('0');
-
-  // Manejar cambios en inputs
+  // Manejar cambios
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     
-    // Manejar checkboxes
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       
@@ -213,7 +193,6 @@ export default function NewPatientPage() {
       return;
     }
     
-    // Manejar inputs anidados
     if (name.includes('.')) {
       const keys = name.split('.');
       setFormData(prev => {
@@ -225,7 +204,6 @@ export default function NewPatientPage() {
           current = current[keys[i]];
         }
         
-        // Convertir a número si es necesario
         const finalValue = type === 'number' ? parseFloat(value) || 0 : value;
         current[keys[keys.length - 1]] = finalValue;
         
@@ -236,16 +214,166 @@ export default function NewPatientPage() {
     }
   };
 
+  // Upload foto del paciente
+  const handlePatientPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La foto no debe superar 5MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setPatientPhotoPreview(base64);
+        setFormData(prev => ({
+          ...prev,
+          files: {
+            ...prev.files,
+            patientPhoto: base64
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Upload fotos clínicas
+  const handleClinicalPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (clinicalPhotos.length >= 20) {
+        alert('Máximo 20 fotos clínicas permitidas');
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La foto no debe superar 5MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newPhoto: ClinicalPhoto = {
+          url: reader.result as string,
+          description: currentPhotoDescription || 'Sin descripción',
+          uploadedAt: new Date().toISOString()
+        };
+        
+        const updatedPhotos = [...clinicalPhotos, newPhoto];
+        setClinicalPhotos(updatedPhotos);
+        setFormData(prev => ({
+          ...prev,
+          files: {
+            ...prev.files,
+            clinicalPhotos: updatedPhotos
+          }
+        }));
+        setCurrentPhotoDescription('');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Eliminar foto clínica
+  const removeClinicalPhoto = (index: number) => {
+    const updatedPhotos = clinicalPhotos.filter((_, i) => i !== index);
+    setClinicalPhotos(updatedPhotos);
+    setFormData(prev => ({
+      ...prev,
+      files: {
+        ...prev.files,
+        clinicalPhotos: updatedPhotos
+      }
+    }));
+  };
+
+  // Canvas firma - iniciar dibujo
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = signatureCanvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    setIsDrawing(true);
+  };
+
+  // Canvas firma - dibujar
+  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    
+    const canvas = signatureCanvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  };
+
+  // Canvas firma - terminar dibujo
+  const stopDrawing = () => {
+    if (isDrawing) {
+      const canvas = signatureCanvasRef.current;
+      if (canvas) {
+        const signatureData = canvas.toDataURL();
+        setFormData(prev => ({
+          ...prev,
+          consent: {
+            ...prev.consent,
+            signature: signatureData,
+            signedAt: new Date().toISOString()
+          }
+        }));
+      }
+      setIsDrawing(false);
+    }
+  };
+
+  // Limpiar firma
+  const clearSignature = () => {
+    const canvas = signatureCanvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        setFormData(prev => ({
+          ...prev,
+          consent: {
+            ...prev.consent,
+            signature: '',
+            signedAt: ''
+          }
+        }));
+      }
+    }
+  };
+
   // Enviar formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.consent.signature) {
+      alert('La firma digital es obligatoria');
+      window.scrollTo(0, document.body.scrollHeight);
+      return;
+    }
+    
     setError(null);
     setLoading(true);
 
     try {
       const response = await patientsApi.create(formData);
-      // Redirigir a página de éxito con datos del paciente
-      router.push(`/patients/${response.data._id}/success`);
+      router.push(`/patients`);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al crear historia clínica');
       window.scrollTo(0, 0);
@@ -258,6 +386,7 @@ export default function NewPatientPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-[rgb(var(--background))] p-6">
         <div className="max-w-5xl mx-auto">
+          
           {/* Header */}
           <div className="mb-6">
             <Link
@@ -269,46 +398,113 @@ export default function NewPatientPage() {
             </Link>
             
             <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">
-              📋 Nueva Historia Clínica
+              📋 Nueva Historia Clínica Completa
             </h1>
             <p className="text-[rgb(var(--gray-medium))] mt-1">
               Complete toda la información del paciente
             </p>
           </div>
 
-          {/* Progress Bar */}
-          <div className="bg-[rgb(var(--card))] rounded-lg p-4 mb-6 border border-[rgb(var(--border))]">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-[rgb(var(--foreground))]">Progreso del formulario</span>
-              <span className="text-sm font-bold text-[rgb(var(--primary))]">{progress}%</span>
-            </div>
-            <div className="w-full bg-[rgb(var(--background))] rounded-full h-2">
-              <div 
-                className="bg-[rgb(var(--primary))] h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-          </div>
           {/* Error Message */}
           {error && (
             <div className="bg-[rgb(var(--error)/0.1)] border border-[rgb(var(--error))] text-[rgb(var(--error))] px-4 py-3 rounded-lg mb-6">
               ❌ {error}
             </div>
           )}
+
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-6">
             
-            {/* ============================================ */}
-            {/* SECCIÓN 1: INFORMACIÓN BÁSICA DEL PACIENTE */}
-            {/* ============================================ */}
-            
+            {/* FOTO DEL PACIENTE */}
+            <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
+              <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                <FaCamera className="text-[rgb(var(--primary))]" />
+                Foto del Paciente (Opcional)
+              </h2>
+              
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <img 
+                    src={patientPhotoPreview} 
+                    alt="Paciente" 
+                    className="w-40 h-40 object-cover rounded-lg border-2 border-[rgb(var(--primary))]"
+                  />
+                  {patientPhotoPreview !== DEFAULT_AVATAR && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPatientPhotoPreview(DEFAULT_AVATAR);
+                        setFormData(prev => ({ ...prev, files: { ...prev.files, patientPhoto: '' }}));
+                      }}
+                      className="absolute -top-2 -right-2 bg-[rgb(var(--error))] text-white rounded-full p-2 hover:bg-[rgb(var(--error))/0.8]"
+                    >
+                      <FaTrash />
+                    </button>
+                  )}
+                </div>
+                
+                <input
+                  ref={patientPhotoInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePatientPhotoUpload}
+                  className="hidden"
+                />
+                
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'image/*';
+                      input.setAttribute('capture', 'user');
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert('La foto no debe superar 5MB');
+                            return;
+                          }
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const base64 = reader.result as string;
+                            setPatientPhotoPreview(base64);
+                            setFormData(prev => ({
+                              ...prev,
+                              files: { ...prev.files, patientPhoto: base64 }
+                            }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      };
+                      input.click();
+                    }}
+                    className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[rgb(var(--success))/0.8] flex items-center gap-2"
+                  >
+                    <FaCamera /> Tomar Foto
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => patientPhotoInputRef.current?.click()}
+                    className="px-4 py-2 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] flex items-center gap-2"
+                  >
+                    <FaCamera /> Subir Foto
+                  </button>
+                </div>
+                <p className="text-xs text-[rgb(var(--gray-medium))]">Máximo 5MB - JPG, PNG</p>
+              </div>
+            </div>
+
+            {/* SECCIÓN 1: INFORMACIÓN BÁSICA */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaUser className="text-[rgb(var(--primary))]" />
                 1. Información Básica del Paciente
               </h2>
               
-              {/* Datos de consulta (Auto) */}
+              {/* Datos de consulta */}
               <div className="bg-[rgb(var(--background))] rounded-lg p-4 mb-4">
                 <p className="text-sm text-[rgb(var(--gray-medium))] mb-2">Datos de la Consulta:</p>
                 <div className="grid grid-cols-2 gap-4">
@@ -447,6 +643,7 @@ export default function NewPatientPage() {
                     </p>
                   )}
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
                     Género <span className="text-[rgb(var(--error))]">*</span>
@@ -493,7 +690,149 @@ export default function NewPatientPage() {
                 </div>
               </div>
 
-              {/* Tipo de Sangre y Alergias */}
+              {/* Dirección */}
+              <h3 className="font-semibold text-[rgb(var(--foreground))] mb-3 mt-6">Dirección</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Calle/Avenida <span className="text-[rgb(var(--error))]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="address.street"
+                    value={formData.address.street}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Ciudad <span className="text-[rgb(var(--error))]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="address.city"
+                    value={formData.address.city}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Estado/Provincia <span className="text-[rgb(var(--error))]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="address.state"
+                    value={formData.address.state}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
+                </div>
+              </div>
+
+              {/* Seguro Médico */}
+              <h3 className="font-semibold text-[rgb(var(--foreground))] mb-3 mt-6">Seguro Médico</h3>
+              <div className="space-y-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="insurance.hasInsurance"
+                    checked={formData.insurance.hasInsurance}
+                    onChange={handleChange}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm font-medium text-[rgb(var(--foreground))]">
+                    ¿Tiene seguro médico?
+                  </span>
+                </label>
+                
+                {formData.insurance.hasInsurance && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                        Aseguradora <span className="text-[rgb(var(--error))]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="insurance.provider"
+                        value={formData.insurance.provider}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                        Número de Póliza <span className="text-[rgb(var(--error))]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="insurance.policyNumber"
+                        value={formData.insurance.policyNumber}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Contacto de Emergencia */}
+              <h3 className="font-semibold text-[rgb(var(--foreground))] mb-3 mt-6">Contacto de Emergencia</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Nombre Completo <span className="text-[rgb(var(--error))]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="emergencyContact.name"
+                    value={formData.emergencyContact.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Relación <span className="text-[rgb(var(--error))]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="emergencyContact.relationship"
+                    value={formData.emergencyContact.relationship}
+                    onChange={handleChange}
+                    required
+                    placeholder="Padre, madre, esposo/a..."
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Teléfono <span className="text-[rgb(var(--error))]">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="emergencyContact.phone"
+                    value={formData.emergencyContact.phone}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
+                </div>
+              </div>
+
+              {/* Datos Médicos Críticos */}
               <h3 className="font-semibold text-[rgb(var(--foreground))] mb-3 mt-6">Datos Médicos Críticos</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -532,17 +871,44 @@ export default function NewPatientPage() {
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Alergias a Alimentos <span className="text-[rgb(var(--error))]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="allergies.food"
+                    value={formData.allergies.food}
+                    onChange={handleChange}
+                    required
+                    placeholder='Si ninguna, escribir "Ninguna"'
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Otras Alergias <span className="text-[rgb(var(--error))]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="allergies.others"
+                    value={formData.allergies.others}
+                    onChange={handleChange}
+                    required
+                    placeholder='Polen, latex, etc. Si ninguna: "Ninguna"'
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* ============================================ */}
-            {/* SECCIÓN 1.5: SIGNOS VITALES */}
-            {/* ============================================ */}
-            
+            {/* SECCIÓN 2: SIGNOS VITALES */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaHeartbeat className="text-[rgb(var(--error))]" />
-                1.5. Signos Vitales (Consulta Actual)
+                2. Signos Vitales (Consulta Actual)
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -594,21 +960,6 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Frecuencia Respiratoria (rpm) <span className="text-[rgb(var(--error))]">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="vitalSigns.respiratoryRate"
-                    value={formData.vitalSigns.respiratoryRate || ''}
-                    onChange={handleChange}
-                    required
-                    placeholder="18"
-                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
                     Peso (kg) <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
@@ -644,14 +995,11 @@ export default function NewPatientPage() {
               </div>
             </div>
 
-            {/* ============================================ */}
-            {/* SECCIÓN 2: MOTIVO DE CONSULTA */}
-            {/* ============================================ */}
-            
+            {/* SECCIÓN 3: MOTIVO DE CONSULTA */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaStethoscope className="text-[rgb(var(--primary))]" />
-                2. Motivo de Consulta
+                3. Motivo de Consulta
               </h2>
               
               <div className="space-y-4">
@@ -700,53 +1048,190 @@ export default function NewPatientPage() {
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* SECCIÓN 4: HISTORIAL MÉDICO */}
+            <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
+              <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                <FaFileMedical className="text-[rgb(var(--warning))]" />
+                4. Historial Médico
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Enfermedades Crónicas <span className="text-[rgb(var(--error))]">*</span>
+                  </label>
+                  <textarea
+                    name="medicalHistory.chronicDiseases"
+                    value={formData.medicalHistory.chronicDiseases}
+                    onChange={handleChange}
+                    required
+                    rows={2}
+                    placeholder='Diabetes, hipertensión, asma, etc. Si ninguna: "Ninguna"'
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
+                </div>
 
                 <div>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="consultation.previousTreatment"
-                      checked={formData.consultation.previousTreatment}
-                      onChange={handleChange}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm font-medium text-[rgb(var(--foreground))]">
-                      ¿Ha recibido tratamiento para este problema?
-                    </span>
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Medicamentos Actuales <span className="text-[rgb(var(--error))]">*</span>
                   </label>
-                  
-                  {formData.consultation.previousTreatment && (
-                    <textarea
-                      name="consultation.treatmentDetails"
-                      value={formData.consultation.treatmentDetails}
-                      onChange={handleChange}
-                      required
-                      rows={2}
-                      placeholder="Describa el tratamiento recibido"
-                      className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))] mt-2"
-                    />
-                  )}
+                  <textarea
+                    name="medicalHistory.currentMedications"
+                    value={formData.medicalHistory.currentMedications}
+                    onChange={handleChange}
+                    required
+                    rows={2}
+                    placeholder='Nombre y dosis. Si ninguno: "Ninguno"'
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                    Antecedentes Familiares <span className="text-[rgb(var(--error))]">*</span>
+                  </label>
+                  <textarea
+                    name="medicalHistory.familyHistory"
+                    value={formData.medicalHistory.familyHistory}
+                    onChange={handleChange}
+                    required
+                    rows={2}
+                    placeholder='Enfermedades hereditarias. Si ninguna: "Ninguna"'
+                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  />
                 </div>
               </div>
             </div>
-{/* ============================================ */}
-            {/* SECCIÓN 6: NOTAS DEL MÉDICO */}
-            {/* ============================================ */}
-            
+
+            {/* FOTOS CLÍNICAS */}
+            <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
+              <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                <FaCamera className="text-[rgb(var(--info))]" />
+                5. Evidencia Clínica - Fotos (Opcional - Máx. 20)
+              </h2>
+              
+              <div className="space-y-4">
+                <div className="flex gap-4 items-end">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                      Descripción de la foto
+                    </label>
+                    <input
+                      type="text"
+                      value={currentPhotoDescription}
+                      onChange={(e) => setCurrentPhotoDescription(e.target.value)}
+                      placeholder="Ej: Lesión en brazo derecho"
+                      className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                    />
+                  </div>
+                  
+                  <input
+                    ref={clinicalPhotoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleClinicalPhotoUpload}
+                    className="hidden"
+                  />
+                  
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'image/*';
+                      input.setAttribute('capture', 'environment');
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                          if (clinicalPhotos.length >= 20) {
+                            alert('Máximo 20 fotos clínicas permitidas');
+                            return;
+                          }
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert('La foto no debe superar 5MB');
+                            return;
+                          }
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const newPhoto: ClinicalPhoto = {
+                              url: reader.result as string,
+                              description: currentPhotoDescription || 'Sin descripción',
+                              uploadedAt: new Date().toISOString()
+                            };
+                            const updatedPhotos = [...clinicalPhotos, newPhoto];
+                            setClinicalPhotos(updatedPhotos);
+                            setFormData(prev => ({
+                              ...prev,
+                              files: { ...prev.files, clinicalPhotos: updatedPhotos }
+                            }));
+                            setCurrentPhotoDescription('');
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      };
+                      input.click();
+                    }}
+                    disabled={clinicalPhotos.length >= 20}
+                    className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[rgb(var(--success))/0.8] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <FaCamera /> Tomar
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => clinicalPhotoInputRef.current?.click()}
+                    disabled={clinicalPhotos.length >= 20}
+                    className="px-4 py-2 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <FaPlus /> Subir
+                  </button>
+                </div>
+
+                <p className="text-xs text-[rgb(var(--gray-medium))]">
+                  {clinicalPhotos.length}/20 fotos • Máximo 5MB por foto
+                </p>
+
+                {/* Grid de fotos */}
+                {clinicalPhotos.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    {clinicalPhotos.map((photo, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={photo.url}
+                          alt={photo.description}
+                          className="w-full h-32 object-cover rounded-lg border border-[rgb(var(--border))]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeClinicalPhoto(index)}
+                          className="absolute -top-2 -right-2 bg-[rgb(var(--error))] text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <FaTrash className="text-xs" />
+                        </button>
+                        <p className="text-xs text-[rgb(var(--foreground))] mt-1 truncate">
+                          {photo.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* NOTAS DEL MÉDICO */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaNotesMedical className="text-[rgb(var(--success))]" />
-                6. Observaciones del Médico
+                6. Diagnóstico y Plan del Médico
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  Espacio para destacar aspectos importantes de la consulta <span className="text-[rgb(var(--error))]">*</span>
+                  Impresiones, diagnóstico, plan de tratamiento <span className="text-[rgb(var(--error))]">*</span>
                 </label>
-                <p className="text-xs text-[rgb(var(--gray-medium))] mb-2">
-                  Incluya: impresiones diagnósticas, hallazgos relevantes, plan de tratamiento, 
-                  exámenes solicitados, medicamentos prescritos, recomendaciones, próxima cita, etc.
-                </p>
                 <textarea
                   name="doctorNotes"
                   value={formData.doctorNotes}
@@ -755,75 +1240,85 @@ export default function NewPatientPage() {
                   rows={8}
                   minLength={50}
                   className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  placeholder="Escriba aquí sus observaciones médicas..."
+                  placeholder="Escriba aquí sus observaciones médicas, diagnóstico y plan..."
                 />
-                <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
-                  Mínimo 50 caracteres
-                </p>
               </div>
             </div>
 
-            {/* ============================================ */}
-            {/* SECCIÓN 7: CONSENTIMIENTO */}
-            {/* ============================================ */}
-            
+            {/* CONSENTIMIENTO Y FIRMA */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
-                📋 7. Consentimiento Informado
+                <FaSignature className="text-[rgb(var(--accent))]" />
+                7. Consentimiento Informado
               </h2>
               
-              <div className="bg-[rgb(var(--background))] rounded-lg p-4 mb-4">
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="consent.accepted"
-                    checked={formData.consent.accepted}
-                    onChange={handleChange}
-                    required
-                    className="w-5 h-5 mt-1"
-                  />
-                  <span className="text-sm text-[rgb(var(--foreground))]">
-                    Acepto que la información proporcionada es verídica y autorizo el uso de mis datos 
-                    para fines médicos conforme a las leyes de protección de datos vigentes. 
-                    <span className="text-[rgb(var(--error))]"> *</span>
-                  </span>
-                </label>
-              </div>
-
-              {formData.consent.accepted && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                      Nombre completo (firma) <span className="text-[rgb(var(--error))]">*</span>
-                    </label>
+              <div className="space-y-4">
+                <div className="bg-[rgb(var(--background))] rounded-lg p-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
                     <input
-                      type="text"
-                      name="consent.signedBy"
-                      value={formData.consent.signedBy}
+                      type="checkbox"
+                      name="consent.accepted"
+                      checked={formData.consent.accepted}
                       onChange={handleChange}
                       required
-                      placeholder="Nombre del paciente o representante"
-                      className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                      className="w-5 h-5 mt-1"
                     />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                      Fecha
-                    </label>
-                    <input
-                      type="text"
-                      value={new Date().toLocaleDateString()}
-                      disabled
-                      className="w-full px-4 py-2 bg-[rgb(var(--gray-very-light))] border border-[rgb(var(--border))] rounded-lg text-[rgb(var(--gray-medium))]"
-                    />
-                  </div>
+                    <span className="text-sm text-[rgb(var(--foreground))]">
+                      Acepto que la información proporcionada es verídica y autorizo el uso de mis datos 
+                      para fines médicos conforme a las leyes de protección de datos vigentes.
+                      <span className="text-[rgb(var(--error))]"> *</span>
+                    </span>
+                  </label>
                 </div>
-              )}
+
+                {formData.consent.accepted && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                        Nombre completo (quien firma) <span className="text-[rgb(var(--error))]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="consent.signedBy"
+                        value={formData.consent.signedBy}
+                        onChange={handleChange}
+                        required
+                        placeholder="Nombre del paciente o representante"
+                        className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                        Firma Digital <span className="text-[rgb(var(--error))]">*</span>
+                      </label>
+                      <div className="border-2 border-dashed border-[rgb(var(--border))] rounded-lg p-2">
+                        <canvas
+                          ref={signatureCanvasRef}
+                          width={600}
+                          height={200}
+                          onMouseDown={startDrawing}
+                          onMouseMove={draw}
+                          onMouseUp={stopDrawing}
+                          onMouseLeave={stopDrawing}
+                          className="w-full border border-[rgb(var(--border))] rounded cursor-crosshair bg-white"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={clearSignature}
+                        className="mt-2 text-sm text-[rgb(var(--error))] hover:underline"
+                      >
+                        Limpiar firma
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
-            {/* Botones de Acción */}
-            <div className="flex flex-col sm:flex-row gap-4 sticky bottom-0 bg-[rgb(var(--background))] p-4 -mx-6 border-t border-[rgb(var(--border))]">
+            {/* Botones */}
+            <div className="flex flex-col sm:flex-row gap-4 sticky bottom-0 bg-[rgb(var(--background))] p-4 border-t border-[rgb(var(--border))]">
               <button
                 type="submit"
                 disabled={loading || !formData.consent.accepted}
@@ -837,7 +1332,7 @@ export default function NewPatientPage() {
                 ) : (
                   <>
                     <FaSave />
-                    <span>💾 Guardar Historia Clínica</span>
+                    <span>💾 Guardar Historia Clínica Completa</span>
                   </>
                 )}
               </button>
