@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const response = await authApi.login(email, password);
     localStorage.setItem('token', response.token);
     setUser(response.data);
-    router.push('/dashboard');
+    router.push('/panel');
   };
 
   const logout = () => {

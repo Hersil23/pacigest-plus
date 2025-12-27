@@ -39,7 +39,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await login(formData);
+      await login(formData.email, formData.password);
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión');
     } finally {

@@ -181,5 +181,18 @@ export const authApi = {
     }
 
     return response.json();
+  },
+
+  logout: async () => {
+    const response = await fetch(`${API_URL}/auth/logout`, {
+      method: 'POST',
+      headers: getHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al cerrar sesión');
+    }
+
+    return response.json();
   }
 };
