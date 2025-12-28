@@ -180,7 +180,8 @@ export const authApi = {
       throw new Error('Error al obtener usuario actual');
     }
 
-    return response.json();
+    const result = await response.json();
+    return result.data; // ✅ Extraer solo el objeto user
   },
 
   logout: async () => {

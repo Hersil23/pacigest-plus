@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
 export default function VerifyEmailPage() {
   const { t } = useLanguage();
+  const { verifyEmail } = useAuth();
   const router = useRouter();
   
   const [verificationCode, setVerificationCode] = useState('');
@@ -16,25 +18,25 @@ export default function VerifyEmailPage() {
   const [email, setEmail] = useState('');
   const [serverCode, setServerCode] = useState('');
 
-useEffect(() => {
-  // Obtener datos del registro
-  const pendingUserId = localStorage.getItem('pendingUserId');
-  const pendingEmail = localStorage.getItem('pendingEmail');
-  const code = localStorage.getItem('verificationCode');
-  
-  if (!pendingUserId || !pendingEmail) {
-    router.push('/register');
-    return;
-  }
-  
-  setUserId(pendingUserId);
-  setEmail(pendingEmail);
-  
-  // SOLO PARA TESTING - mostrar código del servidor
-  if (code) {
-    setServerCode(code);
-  }
-}, [router]);
+  useEffect(() => {
+    // Obtener datos del registro
+    const pendingUserId = localStorage.getItem('pendingUserId');
+    const pendingEmail = localStorage.getItem('pendingEmail');
+    const code = localStorage.getItem('verificationCode');
+    
+    if (!pendingUserId || !pendingEmail) {
+      router.push('/register');
+      return;
+    }
+    
+    setUserId(pendingUserId);
+    setEmail(pendingEmail);
+    
+    // SOLO PARA TESTING - mostrar código del servidor
+    if (code) {
+      setServerCode(code);
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,31 +50,8 @@ useEffect(() => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/verify-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          verificationToken: verificationCode,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al verificar email');
-      }
-
-      // Guardar token
-      localStorage.setItem('token', data.token);
-      localStorage.removeItem('pendingUserId');
-      localStorage.removeItem('pendingEmail');
-
-      // Redirigir al dashboard
-      router.push('/dashboard');
-
+      await verifyEmail(userId, verificationCode);
+      // La redirección se maneja en AuthContext
     } catch (err: any) {
       setError(err.message || 'Error al verificar email');
     } finally {

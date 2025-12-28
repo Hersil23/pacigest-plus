@@ -9,6 +9,7 @@ import { PatientFormData, ClinicalPhoto } from '@/types/patient';
 import { FaArrowLeft, FaSave, FaUser, FaHeartbeat, FaStethoscope, FaFileMedical, FaNotesMedical, FaCamera, FaSignature, FaTrash, FaPlus } from 'react-icons/fa';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import Odontogram from '@/components/Odontogram';
 
 // Avatar por defecto
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23e0e0e0' width='200' height='200'/%3E%3Cpath fill='%23999' d='M100 100c13.807 0 25-11.193 25-25S113.807 50 100 50s-25 11.193-25 25 11.193 25 25 25zm0 12.5c-16.667 0-50 8.363-50 25v12.5h100v-12.5c0-16.637-33.333-25-50-25z'/%3E%3C/svg%3E";
@@ -16,6 +17,7 @@ const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/
 export default function NewPatientPage() {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const isOdontologist = (user?.specialty || '').toLowerCase().includes('odont');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,6 +122,10 @@ export default function NewPatientPage() {
       reason: ''
     },
     doctorNotes: '',
+    odontogram: {
+      teeth: [],
+      lastUpdate: new Date()
+    },
     files: {
       patientPhoto: '',
       clinicalPhotos: []
@@ -501,7 +507,7 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaUser className="text-[rgb(var(--primary))]" />
-                1. Información Básica del Paciente
+                Información Básica del Paciente
               </h2>
               
               {/* Datos de consulta */}
@@ -908,7 +914,7 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaHeartbeat className="text-[rgb(var(--error))]" />
-                2. Signos Vitales (Consulta Actual)
+                Signos Vitales (Consulta Actual)
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -999,7 +1005,7 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaStethoscope className="text-[rgb(var(--primary))]" />
-                3. Motivo de Consulta
+                Motivo de Consulta
               </h2>
               
               <div className="space-y-4">
@@ -1055,7 +1061,7 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaFileMedical className="text-[rgb(var(--warning))]" />
-                4. Historial Médico
+                Historial Médico
               </h2>
               
               <div className="space-y-4">
@@ -1106,11 +1112,31 @@ export default function NewPatientPage() {
               </div>
             </div>
 
+            {/* ODONTOGRAMA (SOLO ODONTÓLOGOS) */}
+            {isOdontologist && (
+              <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
+                <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                  🦷 Odontograma Digital
+                </h2>
+                
+                <Odontogram
+                  teeth={formData.odontogram?.teeth || []}
+                  onChange={(teeth) => setFormData(prev => ({
+                    ...prev,
+                    odontogram: {
+                      teeth,
+                      lastUpdate: new Date()
+                    }
+                  }))}
+                />
+              </div>
+            )}
+
             {/* FOTOS CLÍNICAS */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaCamera className="text-[rgb(var(--info))]" />
-                5. Evidencia Clínica - Fotos (Opcional - Máx. 20)
+                Evidencia Clínica - Fotos (Opcional - Máx. 20)
               </h2>
               
               <div className="space-y-4">
@@ -1225,7 +1251,7 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaNotesMedical className="text-[rgb(var(--success))]" />
-                6. Diagnóstico y Plan del Médico
+                Diagnóstico y Plan del Médico
               </h2>
               
               <div>
@@ -1249,7 +1275,7 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaSignature className="text-[rgb(var(--accent))]" />
-                7. Consentimiento Informado
+                Consentimiento Informado
               </h2>
               
               <div className="space-y-4">

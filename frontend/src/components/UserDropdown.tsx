@@ -25,6 +25,14 @@ export default function UserDropdown() {
 
   if (!user) return null;
 
+  // Determinar título según género
+  const getDoctorTitle = () => {
+    if (!user.gender) return 'Dr(a).';
+    return user.gender === 'F' ? 'Dra.' : 'Dr.';
+  };
+
+  const doctorTitle = getDoctorTitle();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[rgb(var(--card))] text-[rgb(var(--foreground))] hover:bg-[rgb(var(--gray-very-light))] border border-[rgb(var(--border))] transition-colors">
@@ -32,11 +40,11 @@ export default function UserDropdown() {
           <FaUserMd />
         </div>
         <span className="hidden md:inline text-sm font-medium">
-          Dr. {user.firstName} {user.lastName}
+          {doctorTitle} {user.firstName} {user.lastName}
         </span>
       </DropdownMenuTrigger>
-      
-      <DropdownMenuContent className="w-64 bg-[rgb(var(--card))] border-[rgb(var(--border))]">
+
+      <DropdownMenuContent className="w-64 bg-[rgb(var(--card))] border-[rgb(var(--border))]"> 
         {/* Información del Usuario */}
         <DropdownMenuLabel className="text-[rgb(var(--foreground))]">
           <div className="flex items-center gap-3">
@@ -44,7 +52,7 @@ export default function UserDropdown() {
               <FaUserMd />
             </div>
             <div>
-              <p className="font-semibold">Dr. {user.firstName} {user.lastName}</p>
+              <p className="font-semibold">{doctorTitle} {user.firstName} {user.lastName}</p>
               <p className="text-xs text-[rgb(var(--gray-medium))] font-normal">{user.email}</p>
             </div>
           </div>
@@ -68,7 +76,7 @@ export default function UserDropdown() {
             <FaUser className="text-base" />
             <span>{t('header.profile')}</span>
           </button>
-          
+
           <button className="w-full px-4 py-2 text-left text-sm text-[rgb(var(--foreground))] hover:bg-[rgb(var(--gray-very-light))] transition-colors flex items-center gap-3">
             <FaCog className="text-base" />
             <span>{t('settings.title')}</span>
@@ -84,7 +92,7 @@ export default function UserDropdown() {
 
         {/* Cerrar Sesión */}
         <div className="py-1">
-          <button 
+          <button
             onClick={handleLogout}
             className="w-full px-4 py-2 text-left text-sm text-[rgb(var(--error))] hover:bg-[rgb(var(--error)/0.1)] transition-colors flex items-center gap-3 font-medium"
           >

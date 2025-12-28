@@ -178,7 +178,16 @@ export interface Patient {
   
   // Notas del médico
   doctorNotes: string;
-  
+  // Odontograma (solo para odontólogos)
+odontogram?: {
+  teeth: {
+    number: number; // 11-48 (FDI)
+    status: 'sano' | 'caries' | 'obturacion' | 'ausente' | 'fractura' | 'corona' | 'implante' | 'endodoncia' | 'porExtraer';
+    surfaces?: ('oclusal' | 'vestibular' | 'palatina' | 'mesial' | 'distal')[];
+    notes?: string;
+  }[];
+  lastUpdate?: Date;
+};
   // Archivos y fotos
   files: {
     // Foto del paciente (OBLIGATORIA)

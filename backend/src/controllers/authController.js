@@ -74,9 +74,14 @@ exports.register = async (req, res, next) => {
     // Guardar usuario
     await user.save();
 
-    // Enviar email de verificación
-    await sendVerificationEmail(email, firstName, verificationToken, user.preferences.language);
-    logger.logEmail(email, 'Verificación de email', true);
+    // Enviar email de verificación (si Resend está configurado)
+    try {
+      await sendVerificationEmail(email, firstName, verificationToken, user.preferences.language);
+      logger.logEmail(email, 'Verificación de email', true);
+    } catch (emailError) {
+      logger.logError('Error enviando email de verificación', emailError);
+    }
+
     logger.logInfo(`Usuario registrado: ${email}`, { userId: user._id, role: user.role });
 
     res.status(201).json({
@@ -85,8 +90,8 @@ exports.register = async (req, res, next) => {
       userId: user._id,
       email: user.email,
       // SOLO PARA TESTING - Quitar en producción
-      verificationToken: verificationToken,
-      note: 'Revisa tu email para el código de verificación'
+      verificationCode: verificationToken,
+      note: 'Código mostrado solo para desarrollo'
     });
 
   } catch (error) {
@@ -187,8 +192,13 @@ exports.verifyEmail = async (req, res, next) => {
     await createDemoData(user._id);
 
     // Enviar email de bienvenida
-    await sendWelcomeEmail(user.email, user.firstName, user.subscription.trialEndsAt, user.preferences.language);
-    logger.logEmail(user.email, 'Email de bienvenida', true);
+    try {
+      await sendWelcomeEmail(user.email, user.firstName, user.subscription.trialEndsAt, user.preferences.language);
+      logger.logEmail(user.email, 'Email de bienvenida', true);
+    } catch (emailError) {
+      logger.logError('Error enviando email de bienvenida', emailError);
+    }
+
     logger.logAudit('EMAIL_VERIFIED', user._id, { email: user.email, trialEndsAt: user.subscription.trialEndsAt });
 
     // Generar token
