@@ -181,7 +181,7 @@ export const authApi = {
     }
 
     const result = await response.json();
-    return result.data; // ✅ Extraer solo el objeto user
+    return result.data;
   },
 
   logout: async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaTooth, FaTimes } from 'react-icons/fa';
 
 interface Tooth {
@@ -43,8 +43,8 @@ export default function Odontogram({ teeth, onChange }: OdontogramProps) {
   const [selectedTooth, setSelectedTooth] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Inicializar dientes si está vacío
-  const initializeTeeth = () => {
+  // Inicializar dientes vacíos en useEffect para evitar actualización durante render
+  useEffect(() => {
     if (teeth.length === 0) {
       const allTeeth: Tooth[] = [];
       // Cuadrantes: 18-11, 21-28, 38-31, 48-41
@@ -53,19 +53,15 @@ export default function Odontogram({ teeth, onChange }: OdontogramProps) {
       for (let i = 48; i >= 41; i--) allTeeth.push({ number: i, status: 'sano' });
       for (let i = 31; i <= 38; i++) allTeeth.push({ number: i, status: 'sano' });
       onChange(allTeeth);
-      return allTeeth;
     }
-    return teeth;
-  };
-
-  const currentTeeth = initializeTeeth();
+  }, []); // Solo ejecutar una vez al montar
 
   const getTooth = (number: number): Tooth => {
-    return currentTeeth.find(t => t.number === number) || { number, status: 'sano' };
+    return teeth.find(t => t.number === number) || { number, status: 'sano' };
   };
 
   const updateTooth = (number: number, updates: Partial<Tooth>) => {
-    const newTeeth = currentTeeth.map(t =>
+    const newTeeth = teeth.map(t =>
       t.number === number ? { ...t, ...updates } : t
     );
     onChange(newTeeth);
