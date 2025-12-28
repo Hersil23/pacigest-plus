@@ -159,6 +159,35 @@ const patientSchema = new mongoose.Schema({
   },
 
   // ============================================
+  // ODONTOGRAMA (SOLO ODONTÓLOGOS)
+  // ============================================
+  odontogram: {
+    teeth: [{
+      number: {
+        type: Number,
+        min: 11,
+        max: 48
+      },
+      status: {
+        type: String,
+        enum: ['sano', 'caries', 'obturacion', 'ausente', 'fractura', 'corona', 'implante', 'endodoncia', 'porExtraer'],
+        default: 'sano'
+      },
+      surfaces: [{
+        type: String,
+        enum: ['oclusal', 'vestibular', 'palatina', 'mesial', 'distal']
+      }],
+      notes: {
+        type: String,
+        trim: true
+      }
+    }],
+    lastUpdate: {
+      type: Date
+    }
+  },
+
+  // ============================================
   // SEGURO MÉDICO
   // ============================================
   insuranceInfo: {
