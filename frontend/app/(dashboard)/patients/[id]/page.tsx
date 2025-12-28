@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { patientsApi } from '@/lib/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Link from 'next/link';
-import { FaArrowLeft, FaEdit, FaPrint, FaFilePdf, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt, FaHeartbeat, FaTooth } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaPrint, FaFilePdf, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt, FaHeartbeat, FaTooth, FaStethoscope } from 'react-icons/fa';
 
 interface Patient {
   _id: string;
@@ -43,6 +43,12 @@ interface Patient {
     smoker: boolean;
     alcohol: boolean;
   };
+  consultation?: {
+    reason?: string;
+    symptoms?: string;
+    symptomsDuration?: string;
+  };
+  doctorNotes?: string;
   odontogram?: {
     teeth: {
       number: number;
@@ -184,13 +190,13 @@ export default function PatientDetailPage() {
               </div>
               
               <div className="flex gap-3">
-                <button className="px-4 py-2 bg-[rgb(var(--warning))] text-white rounded-lg hover:bg-[rgb(var(--warning))/0.8] flex items-center gap-2">
+                <button className="px-4 py-2 bg-[#f59e0b] text-white rounded-lg hover:bg-[#d97706] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg">
                   <FaEdit /> Editar
                 </button>
-                <button className="px-4 py-2 bg-[rgb(var(--info))] text-white rounded-lg hover:bg-[rgb(var(--info))/0.8] flex items-center gap-2">
+                <button className="px-4 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg">
                   <FaPrint /> Imprimir
                 </button>
-                <button className="px-4 py-2 bg-[rgb(var(--error))] text-white rounded-lg hover:bg-[rgb(var(--error))/0.8] flex items-center gap-2">
+                <button className="px-4 py-2 bg-[#ef4444] text-white rounded-lg hover:bg-[#dc2626] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg">
                   <FaFilePdf /> PDF
                 </button>
               </div>
@@ -268,6 +274,54 @@ export default function PatientDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Información de Consulta */}
+          {(patient.consultation?.reason || patient.consultation?.symptoms || patient.doctorNotes) && (
+            <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
+              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                <FaStethoscope className="text-[rgb(var(--primary))]" />
+                Información de Consulta
+              </h2>
+              
+              <div className="space-y-4">
+                {patient.consultation?.reason && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Motivo de Consulta:</h3>
+                    <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg border border-[rgb(var(--border))]">
+                      {patient.consultation.reason}
+                    </p>
+                  </div>
+                )}
+
+                {patient.consultation?.symptoms && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Síntomas:</h3>
+                    <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg border border-[rgb(var(--border))]">
+                      {patient.consultation.symptoms}
+                    </p>
+                  </div>
+                )}
+
+                {patient.consultation?.symptomsDuration && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Duración de Síntomas:</h3>
+                    <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg border border-[rgb(var(--border))]">
+                      {patient.consultation.symptomsDuration}
+                    </p>
+                  </div>
+                )}
+
+                {patient.doctorNotes && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">📋 Notas del Médico:</h3>
+                    <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--warning)/0.1)] p-4 rounded-lg border-2 border-[rgb(var(--warning))]">
+                      {patient.doctorNotes}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Odontograma */}
           {patient.odontogram && patient.odontogram.teeth && patient.odontogram.teeth.length > 0 && (

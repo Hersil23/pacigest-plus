@@ -159,6 +159,44 @@ const patientSchema = new mongoose.Schema({
   },
 
   // ============================================
+  // INFORMACIÓN DE CONSULTA
+  // ============================================
+  consultation: {
+    reason: {
+      type: String,
+      trim: true
+    },
+    symptoms: {
+      type: String,
+      trim: true
+    },
+    symptomsDuration: {
+      type: String,
+      trim: true
+    },
+    previousTreatment: {
+      type: Boolean,
+      default: false
+    },
+    treatmentDetails: {
+      type: String,
+      trim: true
+    },
+    recentConsultations: {
+      type: Boolean,
+      default: false
+    }
+  },
+
+  // ============================================
+  // NOTAS DEL MÉDICO
+  // ============================================
+  doctorNotes: {
+    type: String,
+    trim: true
+  },
+
+  // ============================================
   // ODONTOGRAMA (SOLO ODONTÓLOGOS)
   // ============================================
   odontogram: {

@@ -365,7 +365,7 @@ export default function NewPatientPage() {
   };
 
   // Enviar formulario
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.consent.signature) {
@@ -378,8 +378,16 @@ export default function NewPatientPage() {
     setLoading(true);
 
     try {
-      const response = await patientsApi.create(formData);
-      router.push(`/patients`);
+      // Transformar payload: extraer weight y height de vitalSigns
+      const payload = {
+        ...formData,
+        weight: formData.vitalSigns.weight,
+        height: formData.vitalSigns.height,
+        vitalSigns: undefined // Eliminar vitalSigns del payload
+      };
+
+      const response = await patientsApi.create(payload);
+      router.push('/patients');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al crear historia clínica');
       window.scrollTo(0, 0);
