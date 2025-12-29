@@ -671,7 +671,16 @@ export default function PatientDetailPage() {
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-2">
+                     <div className="flex items-center gap-2">
+                        <Link
+                          href={`/patients/${patient._id}/consultations/${consultation._id}/print`}
+                          target="_blank"
+                          className="p-2 text-[rgb(var(--info))] hover:bg-[rgb(var(--info)/0.1)] rounded-lg transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                          title="Imprimir consulta"
+                        >
+                          <FaPrint />
+                        </Link>
                         <Link
                           href={`/patients/${patient._id}/consultations/${consultation._id}/edit`}
                           className="p-2 text-[rgb(var(--primary))] hover:bg-[rgb(var(--primary)/0.1)] rounded-lg transition-colors"
@@ -831,82 +840,6 @@ export default function PatientDetailPage() {
             </div>
           )}
 
-          {/* Fotos Clínicas CON GESTIÓN */}
-          <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] flex items-center gap-2">
-                <FaCamera className="text-[rgb(var(--info))]" />
-                Evidencia Clínica ({patient.clinicalPhotos?.length || 0} fotos)
-              </h2>
-              
-              <div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => e.target.files && handleUploadClinicalPhotos(e.target.files)}
-                  className="hidden"
-                  id="upload-clinical-photos"
-                />
-                <label
-                  htmlFor="upload-clinical-photos"
-                  className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[#16a34a] transition-colors flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg"
-                >
-                  <FaPlus /> Agregar Fotos
-                </label>
-              </div>
-            </div>
-            
-            {patient.clinicalPhotos && patient.clinicalPhotos.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {patient.clinicalPhotos.map((photo) => (
-                  <div key={photo._id} className="group relative">
-                    <img
-                      src={photo.url}
-                      alt={photo.description}
-                      className="w-full h-40 object-cover rounded-lg border border-[rgb(var(--border))] cursor-pointer hover:scale-105 transition-transform"
-                      onClick={() => window.open(photo.url, '_blank')}
-                    />
-                    <button
-                      onClick={() => handleDeleteClinicalPhoto(photo._id)}
-                      className="absolute -top-2 -right-2 p-2 bg-[rgb(var(--error))] text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-[#dc2626]"
-                      title="Eliminar foto"
-                    >
-                      <FaTrash className="text-xs" />
-                    </button>
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                      <p className="text-xs truncate">{photo.description}</p>
-                      <p className="text-[10px] text-gray-300">{new Date(photo.uploadedAt).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-[rgb(var(--gray-medium))]">
-                <FaCamera className="text-4xl mx-auto mb-2 opacity-30" />
-                <p>No hay fotos clínicas. Haz click en "Agregar Fotos" para subir.</p>
-              </div>
-            )}
-          </div>
-
-          {/* Firma Digital */}
-          {patient.signature && (
-            <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
-              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
-                <FaSignature className="text-[rgb(var(--accent))]" />
-                Firma del Paciente
-              </h2>
-              
-              <div className="bg-white border-2 border-dashed border-[rgb(var(--border))] rounded-lg p-4 inline-block">
-                <img
-                  src={patient.signature}
-                  alt="Firma del paciente"
-                  className="max-w-md h-32 object-contain"
-                />
-              </div>
-            </div>
-          )}
-          
           {/* Odontograma */}
           {patient.odontogram && patient.odontogram.teeth && patient.odontogram.teeth.length > 0 && (
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
@@ -979,6 +912,82 @@ export default function PatientDetailPage() {
             </div>
           )}
 
+          
+          {/* Fotos Clínicas CON GESTIÓN */}
+          <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] flex items-center gap-2">
+                <FaCamera className="text-[rgb(var(--info))]" />
+                Evidencia Clínica ({patient.clinicalPhotos?.length || 0} fotos)
+              </h2>
+              
+              <div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => e.target.files && handleUploadClinicalPhotos(e.target.files)}
+                  className="hidden"
+                  id="upload-clinical-photos"
+                />
+                <label
+                  htmlFor="upload-clinical-photos"
+                  className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[#16a34a] transition-colors flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg"
+                >
+                  <FaPlus /> Agregar Fotos
+                </label>
+              </div>
+            </div>
+            
+            {patient.clinicalPhotos && patient.clinicalPhotos.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {patient.clinicalPhotos.map((photo) => (
+                  <div key={photo._id} className="group relative">
+                    <img
+                      src={photo.url}
+                      alt={photo.description}
+                      className="w-full h-40 object-cover rounded-lg border border-[rgb(var(--border))] cursor-pointer hover:scale-105 transition-transform"
+                      onClick={() => window.open(photo.url, '_blank')}
+                    />
+                    <button
+                      onClick={() => handleDeleteClinicalPhoto(photo._id)}
+                      className="absolute -top-2 -right-2 p-2 bg-[rgb(var(--error))] text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-[#dc2626]"
+                      title="Eliminar foto"
+                    >
+                      <FaTrash className="text-xs" />
+                    </button>
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-xs truncate">{photo.description}</p>
+                      <p className="text-[10px] text-gray-300">{new Date(photo.uploadedAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-[rgb(var(--gray-medium))]">
+                <FaCamera className="text-4xl mx-auto mb-2 opacity-30" />
+                <p>No hay fotos clínicas. Haz click en "Agregar Fotos" para subir.</p>
+              </div>
+            )}
+          </div>
+
+         {/* Firma Digital */}
+          {patient.signature && (
+            <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
+              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                <FaSignature className="text-[rgb(var(--accent))]" />
+                Firma del Paciente
+              </h2>
+              
+              <div className="bg-white border-2 border-dashed border-[rgb(var(--border))] rounded-lg p-4 inline-block">
+                <img
+                  src={patient.signature}
+                  alt="Firma del paciente"
+                  className="max-w-md h-32 object-contain"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </ProtectedRoute>

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true }); // mergeParams para acceder a :patientId
 const Patient = require('../models/Patient');
-const { protect } = require('../middleware/auth');
+const { protect } = require('../middlewares/auth');
 
 // ============================================
 // CREAR NUEVA CONSULTA

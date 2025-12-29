@@ -40,17 +40,16 @@ const prescriptionRoutes = require('./routes/prescription.routes');
 const medicalFileRoutes = require('./routes/medicalFile.routes');
 const appointmentRoutes = require('./routes/appointment.routes');
 const statsRoutes = require('./routes/stats.routes');
-const consultationRoutes = require('./routes/consultations'); // ← NUEVO
 
-// Usar rutas
+
+// Usar rutas - ORDEN IMPORTANTE
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/patients', patientRoutes);
+app.use('/api/patients', patientRoutes); // ← DESPUÉS (ruta general)
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/medical-files', medicalFileRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/stats', statsRoutes);
-app.use('/api/patients/:patientId/consultations', consultationRoutes); // ← NUEVO
 
 module.exports = app;

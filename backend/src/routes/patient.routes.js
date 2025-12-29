@@ -91,6 +91,16 @@ router.get('/stats', checkPermission('canViewPatients'), patientController.getPa
 // Soporta: ?search=juan&status=active&page=1&limit=10
 router.get('/', checkPermission('canViewPatients'), patientController.getPatients);
 
+// ============================================
+// RUTAS DE CONSULTAS (ANTES de /:id)
+// ============================================
+const consultationRoutes = require('./consultations');
+router.use('/:patientId/consultations', consultationRoutes);
+
+// ============================================
+// RUTAS INDIVIDUALES DE PACIENTES (DESPUÉS)
+// ============================================
+
 // Obtener un paciente por ID
 router.get('/:id', checkPermission('canViewPatients'), patientController.getPatientById);
 
