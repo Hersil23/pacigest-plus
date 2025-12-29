@@ -60,7 +60,8 @@ app.use('/api/prescriptions', require('./src/routes/prescription.routes'));
 app.use('/api/medical-files', require('./src/routes/medicalFile.routes'));
 app.use('/api/stats', require('./src/routes/stats.routes'));
 app.use('/api/payments', require('./src/routes/payment.routes'));
-app.use('/api/dashboard', require('./src/routes/dashboard.routes')); // ← NUEVA RUTA
+app.use('/api/dashboard', require('./src/routes/dashboard.routes'));// ← NUEVA RUTA
+app.use('/api/photos', require('./src/routes/photoRoutes')); 
 
 // ============================================
 // MANEJO DE ERRORES 404

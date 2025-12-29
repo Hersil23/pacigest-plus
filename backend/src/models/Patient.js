@@ -226,6 +226,34 @@ const patientSchema = new mongoose.Schema({
   },
 
   // ============================================
+  // FOTOS Y DOCUMENTOS (BUNNY.NET CDN)
+  // ============================================
+  patientPhoto: {
+    type: String, // URL de bunny.net
+    default: null
+  },
+
+  clinicalPhotos: [{
+    url: {
+      type: String, // URL de bunny.net
+      required: true
+    },
+    description: {
+      type: String,
+      trim: true
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+
+  signature: {
+    type: String, // URL de bunny.net
+    default: null
+  },
+  
+  // ============================================
   // SEGURO MÉDICO
   // ============================================
   insuranceInfo: {
