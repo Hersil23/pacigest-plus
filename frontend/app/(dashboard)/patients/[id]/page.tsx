@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { patientsApi } from '@/lib/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Link from 'next/link';
-import { FaArrowLeft, FaEdit, FaPrint, FaFilePdf, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt, FaHeartbeat, FaTooth, FaStethoscope } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaPrint, FaFilePdf, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt, FaHeartbeat, FaTooth, FaStethoscope, FaCamera, FaSignature } from 'react-icons/fa';
 
 interface Patient {
   _id: string;
@@ -49,6 +49,15 @@ interface Patient {
     symptomsDuration?: string;
   };
   doctorNotes?: string;
+  // ✅ CAMPOS NUEVOS DE FOTOS
+  patientPhoto?: string;
+  clinicalPhotos?: {
+    _id: string;
+    url: string;
+    description: string;
+    uploadedAt: string;
+  }[];
+  signature?: string;
   odontogram?: {
     teeth: {
       number: number;
@@ -100,6 +109,11 @@ export default function PatientDetailPage() {
       setLoading(true);
       const response = await patientsApi.getById(params.id as string);
       setPatient(response.data);
+      console.log('📸 DATOS DEL PACIENTE:', {
+        patientPhoto: response.data.patientPhoto,
+        clinicalPhotos: response.data.clinicalPhotos,
+        signature: response.data.signature
+      });
     } catch (err: any) {
       setError(err.message || 'Error al cargar paciente');
     } finally {
@@ -179,14 +193,29 @@ export default function PatientDetailPage() {
               <span>Volver a pacientes</span>
             </Link>
             
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">
-                  {patient.firstName} {patient.secondName} {patient.lastName} {patient.secondLastName}
-                </h1>
-                <p className="text-[rgb(var(--gray-medium))] mt-1">
-                  Expediente: {patient.medicalRecordNumber} • {patient.age} años
-                </p>
+            <div className="flex items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                {/* Foto del paciente */}
+                {patient.patientPhoto ? (
+                  <img 
+                    src={patient.patientPhoto} 
+                    alt={`${patient.firstName} ${patient.lastName}`}
+                    className="w-24 h-24 rounded-full object-cover border-4 border-[rgb(var(--primary))] shadow-lg"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-[rgb(var(--gray-light))] flex items-center justify-center border-4 border-[rgb(var(--border))]">
+                    <FaUser className="text-4xl text-[rgb(var(--gray-medium))]" />
+                  </div>
+                )}
+                
+                <div>
+                  <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">
+                    {patient.firstName} {patient.secondName} {patient.lastName} {patient.secondLastName}
+                  </h1>
+                  <p className="text-[rgb(var(--gray-medium))] mt-1">
+                    Expediente: {patient.medicalRecordNumber} • {patient.age} años
+                  </p>
+                </div>
               </div>
               
               <div className="flex gap-3">
@@ -322,7 +351,51 @@ export default function PatientDetailPage() {
               </div>
             </div>
           )}
+{/* Fotos Clínicas */}
+          {patient.clinicalPhotos && patient.clinicalPhotos.length > 0 && (
+            <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
+              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                <FaCamera className="text-[rgb(var(--info))]" />
+                Evidencia Clínica ({patient.clinicalPhotos.length} fotos)
+              </h2>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {patient.clinicalPhotos.map((photo) => (
+                  <div key={photo._id} className="group relative">
+                    <img
+                      src={photo.url}
+                      alt={photo.description}
+                      className="w-full h-40 object-cover rounded-lg border border-[rgb(var(--border))] cursor-pointer hover:scale-105 transition-transform"
+                      onClick={() => window.open(photo.url, '_blank')}
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-xs truncate">{photo.description}</p>
+                      <p className="text-[10px] text-gray-300">{new Date(photo.uploadedAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
+          {/* Firma Digital */}
+          {patient.signature && (
+            <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
+              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                <FaSignature className="text-[rgb(var(--accent))]" />
+                Firma del Paciente
+              </h2>
+              
+              <div className="bg-white border-2 border-dashed border-[rgb(var(--border))] rounded-lg p-4 inline-block">
+                <img
+                  src={patient.signature}
+                  alt="Firma del paciente"
+                  className="max-w-md h-32 object-contain"
+                />
+              </div>
+            </div>
+          )}
+          
           {/* Odontograma */}
           {patient.odontogram && patient.odontogram.teeth && patient.odontogram.teeth.length > 0 && (
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">

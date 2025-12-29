@@ -364,37 +364,95 @@ export default function NewPatientPage() {
     }
   };
 
-  // Enviar formulario
+ // Enviar formulario
 const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.consent.signature) {
-      alert('La firma digital es obligatoria');
-      window.scrollTo(0, document.body.scrollHeight);
-      return;
-    }
-    
-    setError(null);
-    setLoading(true);
+  e.preventDefault();
+  
+  if (!formData.consent.signature) {
+    alert('La firma digital es obligatoria');
+    window.scrollTo(0, document.body.scrollHeight);
+    return;
+  }
+  
+  setError(null);
+  setLoading(true);
 
+  try {
+    const token = localStorage.getItem('token');
+    
+    // 1. CREAR EL PACIENTE PRIMERO (sin fotos)
+    const payload = {
+      ...formData,
+      weight: formData.vitalSigns.weight,
+      height: formData.vitalSigns.height,
+      vitalSigns: undefined,
+      files: undefined // Eliminar files del payload inicial
+    };
+
+    const response = await patientsApi.create(payload);
+    const patientId = response.data._id;
+
+    // 2. SUBIR FOTO DEL PACIENTE (si existe)
+    if (formData.files.patientPhoto && formData.files.patientPhoto !== DEFAULT_AVATAR) {
+      try {
+        await fetch(`http://localhost:5000/api/photos/patients/${patientId}/photo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ photoData: formData.files.patientPhoto })
+        });
+      } catch (err) {
+        console.error('Error subiendo foto del paciente:', err);
+      }
+    }
+
+    // 3. SUBIR FOTOS CLÍNICAS (si existen)
+    if (formData.files.clinicalPhotos.length > 0) {
+      try {
+        const photos = formData.files.clinicalPhotos.map(photo => ({
+          photoData: photo.url,
+          description: photo.description
+        }));
+        
+        await fetch(`http://localhost:5000/api/photos/patients/${patientId}/clinical-photos`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ photos })
+        });
+      } catch (err) {
+        console.error('Error subiendo fotos clínicas:', err);
+      }
+    }
+
+    // 4. SUBIR FIRMA DIGITAL
     try {
-      // Transformar payload: extraer weight y height de vitalSigns
-      const payload = {
-        ...formData,
-        weight: formData.vitalSigns.weight,
-        height: formData.vitalSigns.height,
-        vitalSigns: undefined // Eliminar vitalSigns del payload
-      };
-
-      const response = await patientsApi.create(payload);
-      router.push('/patients');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al crear historia clínica');
-      window.scrollTo(0, 0);
-    } finally {
-      setLoading(false);
+      await fetch(`http://localhost:5000/api/photos/patients/${patientId}/signature`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ signatureData: formData.consent.signature })
+      });
+    } catch (err) {
+      console.error('Error subiendo firma:', err);
     }
-  };
+
+    // 5. REDIRIGIR AL LISTADO
+    router.push('/patients');
+    
+  } catch (err: any) {
+    setError(err.response?.data?.message || 'Error al crear historia clínica');
+    window.scrollTo(0, 0);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <ProtectedRoute>
