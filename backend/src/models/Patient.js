@@ -159,19 +159,28 @@ const patientSchema = new mongoose.Schema({
   },
 
   // ============================================
-  // INFORMACIÓN DE CONSULTA
+  // HISTORIAL DE CONSULTAS (ARRAY) - NUEVO SISTEMA
   // ============================================
-  consultation: {
+  consultations: [{
+    consultationDate: {
+      type: Date,
+      default: Date.now
+    },
     reason: {
       type: String,
-      trim: true
+      required: true,
+      trim: true,
+      minlength: [20, 'El motivo debe tener al menos 20 caracteres']
     },
     symptoms: {
       type: String,
-      trim: true
+      required: true,
+      trim: true,
+      minlength: [30, 'Los síntomas deben tener al menos 30 caracteres']
     },
     symptomsDuration: {
       type: String,
+      required: true,
       trim: true
     },
     previousTreatment: {
@@ -185,11 +194,48 @@ const patientSchema = new mongoose.Schema({
     recentConsultations: {
       type: Boolean,
       default: false
+    },
+    consultationDetails: {
+      type: String,
+      trim: true
+    },
+    doctorNotes: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: [50, 'Las notas del médico deben tener al menos 50 caracteres']
+    },
+    vitalSigns: {
+      bloodPressure: String,
+      temperature: Number,
+      heartRate: Number,
+      respiratoryRate: Number
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now
     }
+  }],
+
+  // ============================================
+  // CONSULTA ÚNICA (DEPRECATED - Se mantiene por compatibilidad)
+  // ============================================
+  consultation: {
+    reason: String,
+    symptoms: String,
+    symptomsDuration: String,
+    previousTreatment: Boolean,
+    treatmentDetails: String,
+    recentConsultations: Boolean,
+    consultationDetails: String
   },
 
   // ============================================
-  // NOTAS DEL MÉDICO
+  // NOTAS GENERALES DEL MÉDICO (No por consulta)
   // ============================================
   doctorNotes: {
     type: String,
@@ -325,19 +371,7 @@ patientSchema.pre('save', async function() {
     const count = await mongoose.model('Patient').countDocuments();
     this.medicalRecordNumber = `PAC-${date}-${String(count + 1).padStart(4, '0')}`;
   }
-  // NO LLAMAR next() en funciones async - Mongoose lo maneja automáticamente
 });
-
-// ============================================
-// MIDDLEWARE PARA SOFT DELETE
-// ============================================
-// Excluir registros eliminados en queries automáticamente
-//patientSchema.pre(/^find/, function(next) {
- // if (!this.getOptions().includeDeleted) {
- //   this.where({ deletedAt: null });
- // }
- // next();
-//});
 
 // ============================================
 // ÍNDICES PARA OPTIMIZACIÓN

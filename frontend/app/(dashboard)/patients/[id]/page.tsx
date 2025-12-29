@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { patientsApi } from '@/lib/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Link from 'next/link';
-import { FaArrowLeft, FaEdit, FaPrint, FaFilePdf, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt, FaHeartbeat, FaTooth, FaStethoscope, FaCamera, FaSignature } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaPrint, FaFilePdf, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt, FaHeartbeat, FaTooth, FaStethoscope, FaCamera, FaSignature, FaTrash, FaUpload, FaPlus } from 'react-icons/fa';
 
 interface Patient {
   _id: string;
@@ -49,7 +49,6 @@ interface Patient {
     symptomsDuration?: string;
   };
   doctorNotes?: string;
-  // ✅ CAMPOS NUEVOS DE FOTOS
   patientPhoto?: string;
   clinicalPhotos?: {
     _id: string;
@@ -109,16 +108,143 @@ export default function PatientDetailPage() {
       setLoading(true);
       const response = await patientsApi.getById(params.id as string);
       setPatient(response.data);
-      console.log('📸 DATOS DEL PACIENTE:', {
-        patientPhoto: response.data.patientPhoto,
-        clinicalPhotos: response.data.clinicalPhotos,
-        signature: response.data.signature
-      });
     } catch (err: any) {
       setError(err.message || 'Error al cargar paciente');
     } finally {
       setLoading(false);
     }
+  };
+
+  // ============================================
+  // GESTIÓN DE FOTOS
+  // ============================================
+
+  const handleDeletePatientPhoto = async () => {
+    if (!confirm('¿Estás seguro de eliminar la foto del paciente?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/photos/patients/${params.id}/photo`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        alert('Foto eliminada exitosamente');
+        loadPatient();
+      } else {
+        alert('Error al eliminar la foto');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al eliminar la foto');
+    }
+  };
+
+  const handleUploadPatientPhoto = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La foto no debe superar 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:5000/api/photos/patients/${params.id}/photo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ photoData: reader.result })
+        });
+
+        if (response.ok) {
+          alert('Foto subida exitosamente');
+          loadPatient();
+        } else {
+          alert('Error al subir la foto');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al subir la foto');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeleteClinicalPhoto = async (photoId: string) => {
+    if (!confirm('¿Estás seguro de eliminar esta foto clínica?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/photos/patients/${params.id}/clinical-photos/${photoId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        alert('Foto eliminada exitosamente');
+        loadPatient();
+      } else {
+        alert('Error al eliminar la foto');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al eliminar la foto');
+    }
+  };
+
+  const handleUploadClinicalPhotos = async (files: FileList) => {
+    const photos: { photoData: string; description: string }[] = [];
+    let processed = 0;
+
+    Array.from(files).forEach((file) => {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`La foto ${file.name} supera 5MB`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        photos.push({
+          photoData: reader.result as string,
+          description: file.name
+        });
+        
+        processed++;
+        
+        if (processed === files.length) {
+          try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/photos/patients/${params.id}/clinical-photos`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ photos })
+            });
+
+            if (response.ok) {
+              alert(`${photos.length} foto(s) subida(s) exitosamente`);
+              loadPatient();
+            } else {
+              alert('Error al subir las fotos');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Error al subir las fotos');
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const renderTooth = (number: number) => {
@@ -193,20 +319,152 @@ export default function PatientDetailPage() {
               <span>Volver a pacientes</span>
             </Link>
             
-            <div className="flex items-center justify-between gap-6">
+            {/* MÓVIL: Layout vertical */}
+            <div className="flex flex-col gap-4 md:hidden">
+              {/* Foto y nombre */}
               <div className="flex items-center gap-4">
-                {/* Foto del paciente */}
-                {patient.patientPhoto ? (
-                  <img 
-                    src={patient.patientPhoto} 
-                    alt={`${patient.firstName} ${patient.lastName}`}
-                    className="w-24 h-24 rounded-full object-cover border-4 border-[rgb(var(--primary))] shadow-lg"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-full bg-[rgb(var(--gray-light))] flex items-center justify-center border-4 border-[rgb(var(--border))]">
-                    <FaUser className="text-4xl text-[rgb(var(--gray-medium))]" />
-                  </div>
-                )}
+                <div className="relative group flex-shrink-0 w-24 h-24">
+                  {patient.patientPhoto ? (
+                    <>
+                      <img 
+                        src={patient.patientPhoto} 
+                        alt={`${patient.firstName} ${patient.lastName}`}
+                        className="w-full h-full rounded-full object-cover border-4 border-[rgb(var(--primary))] shadow-lg aspect-square"
+                      />
+                      <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => e.target.files?.[0] && handleUploadPatientPhoto(e.target.files[0])}
+                          className="hidden"
+                          id="change-patient-photo-mobile"
+                        />
+                        <label
+                          htmlFor="change-patient-photo-mobile"
+                          className="p-1.5 bg-[rgb(var(--primary))] text-white rounded-full cursor-pointer hover:bg-[rgb(var(--primary-hover))] transition-colors"
+                          title="Cambiar foto"
+                        >
+                          <FaCamera className="text-xs" />
+                        </label>
+                        <button
+                          onClick={handleDeletePatientPhoto}
+                          className="p-1.5 bg-[rgb(var(--error))] text-white rounded-full hover:bg-[#dc2626] transition-colors"
+                          title="Eliminar foto"
+                        >
+                          <FaTrash className="text-xs" />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-full h-full rounded-full bg-[rgb(var(--gray-light))] flex items-center justify-center border-4 border-[rgb(var(--border))] aspect-square">
+                        <FaUser className="text-4xl text-[rgb(var(--gray-medium))]" />
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => e.target.files?.[0] && handleUploadPatientPhoto(e.target.files[0])}
+                        className="hidden"
+                        id="add-patient-photo-mobile"
+                      />
+                      <label
+                        htmlFor="add-patient-photo-mobile"
+                        className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                        title="Agregar foto"
+                      >
+                        <FaCamera className="text-xl text-white" />
+                      </label>
+                    </>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-xl font-bold text-[rgb(var(--foreground))] truncate">
+                    {patient.firstName} {patient.lastName}
+                  </h1>
+                  <p className="text-xs text-[rgb(var(--gray-medium))] truncate">
+                    {patient.medicalRecordNumber}
+                  </p>
+                  <p className="text-xs text-[rgb(var(--gray-medium))]">
+                    {patient.age} años
+                  </p>
+                </div>
+              </div>
+              
+              {/* Botones en móvil */}
+              <div className="grid grid-cols-3 gap-2">
+                <Link 
+                  href={`/patients/${patient._id}/edit`}
+                  className="px-3 py-2 bg-[#f59e0b] text-white rounded-lg hover:bg-[#d97706] transition-colors flex items-center justify-center gap-1 text-xs shadow-md"
+                >
+                  <FaEdit /> Editar
+                </Link>
+                <button className="px-3 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors flex items-center justify-center gap-1 text-xs shadow-md">
+                  <FaPrint /> Imprimir
+                </button>
+                <button className="px-3 py-2 bg-[#ef4444] text-white rounded-lg hover:bg-[#dc2626] transition-colors flex items-center justify-center gap-1 text-xs shadow-md">
+                  <FaFilePdf /> PDF
+                </button>
+              </div>
+            </div>
+
+            {/* TABLET Y DESKTOP: Layout horizontal */}
+            <div className="hidden md:flex items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="relative group flex-shrink-0 w-24 h-24">
+                  {patient.patientPhoto ? (
+                    <>
+                      <img 
+                        src={patient.patientPhoto} 
+                        alt={`${patient.firstName} ${patient.lastName}`}
+                        className="w-full h-full rounded-full object-cover border-4 border-[rgb(var(--primary))] shadow-lg aspect-square"
+                      />
+                      <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => e.target.files?.[0] && handleUploadPatientPhoto(e.target.files[0])}
+                          className="hidden"
+                          id="change-patient-photo"
+                        />
+                        <label
+                          htmlFor="change-patient-photo"
+                          className="p-2 bg-[rgb(var(--primary))] text-white rounded-full cursor-pointer hover:bg-[rgb(var(--primary-hover))] transition-colors"
+                          title="Cambiar foto"
+                        >
+                          <FaCamera className="text-sm" />
+                        </label>
+                        <button
+                          onClick={handleDeletePatientPhoto}
+                          className="p-2 bg-[rgb(var(--error))] text-white rounded-full hover:bg-[#dc2626] transition-colors"
+                          title="Eliminar foto"
+                        >
+                          <FaTrash className="text-sm" />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-full h-full rounded-full bg-[rgb(var(--gray-light))] flex items-center justify-center border-4 border-[rgb(var(--border))] aspect-square">
+                        <FaUser className="text-4xl text-[rgb(var(--gray-medium))]" />
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => e.target.files?.[0] && handleUploadPatientPhoto(e.target.files[0])}
+                        className="hidden"
+                        id="add-patient-photo"
+                      />
+                      <label
+                        htmlFor="add-patient-photo"
+                        className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                        title="Agregar foto"
+                      >
+                        <FaCamera className="text-2xl text-white" />
+                      </label>
+                    </>
+                  )}
+                </div>
                 
                 <div>
                   <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">
@@ -219,9 +477,12 @@ export default function PatientDetailPage() {
               </div>
               
               <div className="flex gap-3">
-                <button className="px-4 py-2 bg-[#f59e0b] text-white rounded-lg hover:bg-[#d97706] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg">
+                <Link 
+                  href={`/patients/${patient._id}/edit`}
+                  className="px-4 py-2 bg-[#f59e0b] text-white rounded-lg hover:bg-[#d97706] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
+                >
                   <FaEdit /> Editar
-                </button>
+                </Link>
                 <button className="px-4 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg">
                   <FaPrint /> Imprimir
                 </button>
@@ -351,14 +612,34 @@ export default function PatientDetailPage() {
               </div>
             </div>
           )}
-{/* Fotos Clínicas */}
-          {patient.clinicalPhotos && patient.clinicalPhotos.length > 0 && (
-            <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
-              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+
+          {/* Fotos Clínicas CON GESTIÓN */}
+          <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] flex items-center gap-2">
                 <FaCamera className="text-[rgb(var(--info))]" />
-                Evidencia Clínica ({patient.clinicalPhotos.length} fotos)
+                Evidencia Clínica ({patient.clinicalPhotos?.length || 0} fotos)
               </h2>
               
+              <div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => e.target.files && handleUploadClinicalPhotos(e.target.files)}
+                  className="hidden"
+                  id="upload-clinical-photos"
+                />
+                <label
+                  htmlFor="upload-clinical-photos"
+                  className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[#16a34a] transition-colors flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg"
+                >
+                  <FaPlus /> Agregar Fotos
+                </label>
+              </div>
+            </div>
+            
+            {patient.clinicalPhotos && patient.clinicalPhotos.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {patient.clinicalPhotos.map((photo) => (
                   <div key={photo._id} className="group relative">
@@ -368,6 +649,13 @@ export default function PatientDetailPage() {
                       className="w-full h-40 object-cover rounded-lg border border-[rgb(var(--border))] cursor-pointer hover:scale-105 transition-transform"
                       onClick={() => window.open(photo.url, '_blank')}
                     />
+                    <button
+                      onClick={() => handleDeleteClinicalPhoto(photo._id)}
+                      className="absolute -top-2 -right-2 p-2 bg-[rgb(var(--error))] text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-[#dc2626]"
+                      title="Eliminar foto"
+                    >
+                      <FaTrash className="text-xs" />
+                    </button>
                     <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
                       <p className="text-xs truncate">{photo.description}</p>
                       <p className="text-[10px] text-gray-300">{new Date(photo.uploadedAt).toLocaleDateString()}</p>
@@ -375,8 +663,13 @@ export default function PatientDetailPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="text-center py-8 text-[rgb(var(--gray-medium))]">
+                <FaCamera className="text-4xl mx-auto mb-2 opacity-30" />
+                <p>No hay fotos clínicas. Haz click en "Agregar Fotos" para subir.</p>
+              </div>
+            )}
+          </div>
 
           {/* Firma Digital */}
           {patient.signature && (
@@ -404,7 +697,6 @@ export default function PatientDetailPage() {
                 Odontograma
               </h2>
 
-              {/* Leyenda */}
               <div className="bg-[rgb(var(--background))] rounded-lg p-4 border border-[rgb(var(--border))] mb-6">
                 <h3 className="text-sm font-semibold text-[rgb(var(--foreground))] mb-3">Leyenda:</h3>
                 <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
@@ -423,7 +715,6 @@ export default function PatientDetailPage() {
                 </div>
               </div>
 
-              {/* Dientes */}
               <div className="space-y-8">
                 <div>
                   <p className="text-center text-sm font-semibold text-[rgb(var(--gray-medium))] mb-3">MAXILAR SUPERIOR</p>
@@ -448,7 +739,6 @@ export default function PatientDetailPage() {
                 </div>
               </div>
 
-              {/* Resumen de dientes modificados */}
               <div className="mt-6 bg-[rgb(var(--background))] rounded-lg p-4 border border-[rgb(var(--border))]">
                 <h3 className="text-sm font-semibold text-[rgb(var(--foreground))] mb-3">Diagnóstico Dental:</h3>
                 <div className="space-y-2">

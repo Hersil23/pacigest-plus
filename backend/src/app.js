@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
     version: '1.0.0'
   });
 });
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({
@@ -39,6 +40,7 @@ const prescriptionRoutes = require('./routes/prescription.routes');
 const medicalFileRoutes = require('./routes/medicalFile.routes');
 const appointmentRoutes = require('./routes/appointment.routes');
 const statsRoutes = require('./routes/stats.routes');
+const consultationRoutes = require('./routes/consultations'); // ← NUEVO
 
 // Usar rutas
 app.use('/api/auth', authRoutes);
@@ -49,4 +51,6 @@ app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/medical-files', medicalFileRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/patients/:patientId/consultations', consultationRoutes); // ← NUEVO
+
 module.exports = app;
