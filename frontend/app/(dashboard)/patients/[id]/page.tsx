@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { patientsApi } from '@/lib/api';
+import { patientsApi, consultationsApi } from '@/lib/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Link from 'next/link';
-import { FaArrowLeft, FaEdit, FaPrint, FaFilePdf, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt, FaHeartbeat, FaTooth, FaStethoscope, FaCamera, FaSignature, FaTrash, FaUpload, FaPlus } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaPrint, FaFilePdf, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt, FaHeartbeat, FaTooth, FaStethoscope, FaCamera, FaSignature, FaTrash, FaUpload, FaPlus, FaClock, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 interface Patient {
   _id: string;
@@ -65,7 +65,25 @@ interface Patient {
     }[];
     lastUpdate: string;
   };
+  consultations?: Consultation[];
   createdAt: string;
+}
+
+interface Consultation {
+  _id: string;
+  consultationDate: string;
+  reason: string;
+  symptoms: string;
+  symptomsDuration: string;
+  doctorNotes: string;
+  vitalSigns?: {
+    bloodPressure?: string;
+    temperature?: number;
+    heartRate?: number;
+    respiratoryRate?: number;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 const TOOTH_COLORS: Record<string, string> = {
@@ -98,9 +116,14 @@ export default function PatientDetailPage() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [consultations, setConsultations] = useState<Consultation[]>([]);
+  const [loadingConsultations, setLoadingConsultations] = useState(false);
+  const [expandedConsultation, setExpandedConsultation] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(5);
 
   useEffect(() => {
     loadPatient();
+    loadConsultations();
   }, [params.id]);
 
   const loadPatient = async () => {
@@ -112,6 +135,31 @@ export default function PatientDetailPage() {
       setError(err.message || 'Error al cargar paciente');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadConsultations = async () => {
+    try {
+      setLoadingConsultations(true);
+      const response = await consultationsApi.getAll(params.id as string, 'all');
+      setConsultations(response.data || []);
+    } catch (err: any) {
+      console.error('Error al cargar consultas:', err);
+    } finally {
+      setLoadingConsultations(false);
+    }
+  };
+
+  const handleDeleteConsultation = async (consultationId: string) => {
+    if (!confirm('¿Estás seguro de eliminar esta consulta? Esta acción no se puede deshacer.')) return;
+
+    try {
+      await consultationsApi.delete(params.id as string, consultationId);
+      alert('Consulta eliminada exitosamente');
+      loadConsultations();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al eliminar la consulta');
     }
   };
 
@@ -565,13 +613,183 @@ export default function PatientDetailPage() {
             </div>
           </div>
 
-          {/* Información de Consulta */}
+          {/* HISTORIAL DE CONSULTAS - NUEVO */}
+          <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] flex items-center gap-2">
+                <FaStethoscope className="text-[rgb(var(--primary))]" />
+                Historial de Consultas ({consultations.length})
+              </h2>
+              
+              <Link
+                href={`/patients/${patient._id}/consultations/new`}
+                className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[#16a34a] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
+              >
+                <FaPlus /> Nueva Consulta
+              </Link>
+            </div>
+
+            {loadingConsultations ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[rgb(var(--primary))] mx-auto mb-2"></div>
+                <p className="text-[rgb(var(--gray-medium))]">Cargando consultas...</p>
+              </div>
+            ) : consultations.length === 0 ? (
+              <div className="text-center py-8 text-[rgb(var(--gray-medium))]">
+                <FaStethoscope className="text-4xl mx-auto mb-2 opacity-30" />
+                <p>No hay consultas registradas.</p>
+                <p className="text-sm mt-2">Haz clic en "Nueva Consulta" para agregar la primera.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {consultations.slice(0, visibleCount).map((consultation, index) => (
+                  <div 
+                    key={consultation._id}
+                    className="border border-[rgb(var(--border))] rounded-lg overflow-hidden"
+                  >
+                    {/* Header de la consulta */}
+                    <div 
+                      className="flex items-center justify-between p-4 bg-[rgb(var(--background))] cursor-pointer hover:bg-[rgb(var(--gray-very-light))] transition-colors"
+                      onClick={() => setExpandedConsultation(expandedConsultation === consultation._id ? null : consultation._id)}
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgb(var(--primary))] text-white font-bold text-sm">
+                          {consultations.length - index}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-[rgb(var(--foreground))]">
+                            {consultation.reason.substring(0, 60)}{consultation.reason.length > 60 ? '...' : ''}
+                          </p>
+                          <p className="text-xs text-[rgb(var(--gray-medium))] flex items-center gap-2 mt-1">
+                            <FaClock className="text-[10px]" />
+                            {new Date(consultation.consultationDate).toLocaleDateString('es-ES', {
+                              day: '2-digit',
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/patients/${patient._id}/consultations/${consultation._id}/edit`}
+                          className="p-2 text-[rgb(var(--primary))] hover:bg-[rgb(var(--primary)/0.1)] rounded-lg transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                          title="Editar consulta"
+                        >
+                          <FaEdit />
+                        </Link>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteConsultation(consultation._id);
+                          }}
+                          className="p-2 text-[rgb(var(--error))] hover:bg-[rgb(var(--error)/0.1)] rounded-lg transition-colors"
+                          title="Eliminar consulta"
+                        >
+                          <FaTrash />
+                        </button>
+                        {expandedConsultation === consultation._id ? <FaChevronUp /> : <FaChevronDown />}
+                      </div>
+                    </div>
+
+                    {/* Contenido expandido */}
+                    {expandedConsultation === consultation._id && (
+                      <div className="p-4 space-y-4 border-t border-[rgb(var(--border))]">
+                        <div>
+                          <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Motivo de Consulta:</h4>
+                          <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg">
+                            {consultation.reason}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Síntomas:</h4>
+                          <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg">
+                            {consultation.symptoms}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Duración:</h4>
+                          <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg">
+                            {consultation.symptomsDuration}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">📋 Notas del Médico:</h4>
+                          <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--warning)/0.1)] p-4 rounded-lg border-2 border-[rgb(var(--warning))]">
+                            {consultation.doctorNotes}
+                          </p>
+                        </div>
+
+                        {consultation.vitalSigns && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Signos Vitales:</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                              {consultation.vitalSigns.bloodPressure && (
+                                <div className="bg-[rgb(var(--background))] p-3 rounded-lg">
+                                  <p className="text-xs text-[rgb(var(--gray-medium))]">Presión Arterial</p>
+                                  <p className="font-semibold text-[rgb(var(--foreground))]">{consultation.vitalSigns.bloodPressure}</p>
+                                </div>
+                              )}
+                              {consultation.vitalSigns.temperature && (
+                                <div className="bg-[rgb(var(--background))] p-3 rounded-lg">
+                                  <p className="text-xs text-[rgb(var(--gray-medium))]">Temperatura</p>
+                                  <p className="font-semibold text-[rgb(var(--foreground))]">{consultation.vitalSigns.temperature}°C</p>
+                                </div>
+                              )}
+                              {consultation.vitalSigns.heartRate && (
+                                <div className="bg-[rgb(var(--background))] p-3 rounded-lg">
+                                  <p className="text-xs text-[rgb(var(--gray-medium))]">Frecuencia Cardíaca</p>
+                                  <p className="font-semibold text-[rgb(var(--foreground))]">{consultation.vitalSigns.heartRate} bpm</p>
+                                </div>
+                              )}
+                              {consultation.vitalSigns.respiratoryRate && (
+                                <div className="bg-[rgb(var(--background))] p-3 rounded-lg">
+                                  <p className="text-xs text-[rgb(var(--gray-medium))]">Frecuencia Respiratoria</p>
+                                  <p className="font-semibold text-[rgb(var(--foreground))]">{consultation.vitalSigns.respiratoryRate} rpm</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="text-xs text-[rgb(var(--gray-medium))] pt-2 border-t border-[rgb(var(--border))]">
+                          Última actualización: {new Date(consultation.updatedAt).toLocaleString()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Botón "Ver más" */}
+                {consultations.length > visibleCount && (
+                  <button
+                    onClick={() => setVisibleCount(prev => prev + 5)}
+                    className="w-full py-3 bg-[rgb(var(--background))] text-[rgb(var(--primary))] border border-[rgb(var(--border))] rounded-lg hover:bg-[rgb(var(--gray-very-light))] transition-colors font-medium"
+                  >
+                    Ver 5 consultas anteriores ({consultations.length - visibleCount} restantes)
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Información de Consulta ANTIGUA (Deprecated) */}
           {(patient.consultation?.reason || patient.consultation?.symptoms || patient.doctorNotes) && (
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
-              <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
-                <FaStethoscope className="text-[rgb(var(--primary))]" />
-                Información de Consulta
-              </h2>
+              <div className="flex items-center gap-2 mb-4">
+                <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] flex items-center gap-2">
+                  <FaStethoscope className="text-[rgb(var(--primary))]" />
+                  Consulta Inicial (Sistema Antiguo)
+                </h2>
+                <span className="px-2 py-1 bg-[rgb(var(--warning)/0.2)] text-[rgb(var(--warning))] text-xs rounded">
+                  Deprecado
+                </span>
+              </div>
               
               <div className="space-y-4">
                 {patient.consultation?.reason && (

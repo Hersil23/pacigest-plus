@@ -197,3 +197,96 @@ export const authApi = {
     return response.json();
   }
 };
+
+// ============================================
+// CONSULTAS (HISTORIAL DE CONSULTAS)
+// ============================================
+
+export const consultationsApi = {
+  // Obtener todas las consultas de un paciente
+  getAll: async (patientId: string, limit: number | 'all' = 10) => {
+    const response = await fetch(
+      `${API_URL}/patients/${patientId}/consultations?limit=${limit}`,
+      {
+        headers: getHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Error al obtener consultas');
+    }
+
+    return response.json();
+  },
+
+  // Obtener una consulta específica
+  getById: async (patientId: string, consultationId: string) => {
+    const response = await fetch(
+      `${API_URL}/patients/${patientId}/consultations/${consultationId}`,
+      {
+        headers: getHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Error al obtener consulta');
+    }
+
+    return response.json();
+  },
+
+  // Crear nueva consulta
+  create: async (patientId: string, data: any) => {
+    const response = await fetch(
+      `${API_URL}/patients/${patientId}/consultations`,
+      {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error al crear consulta');
+    }
+
+    return response.json();
+  },
+
+  // Actualizar consulta
+  update: async (patientId: string, consultationId: string, data: any) => {
+    const response = await fetch(
+      `${API_URL}/patients/${patientId}/consultations/${consultationId}`,
+      {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error al actualizar consulta');
+    }
+
+    return response.json();
+  },
+
+  // Eliminar consulta
+  delete: async (patientId: string, consultationId: string) => {
+    const response = await fetch(
+      `${API_URL}/patients/${patientId}/consultations/${consultationId}`,
+      {
+        method: 'DELETE',
+        headers: getHeaders()
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Error al eliminar consulta');
+    }
+
+    return response.json();
+  }
+};
