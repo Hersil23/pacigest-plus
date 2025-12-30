@@ -55,7 +55,9 @@
     "patients": "Pacientes",
     "appointments": "Citas",
     "medicalRecords": "Historias Clínicas",
+    "emitMedicalReport": "Emitir Informe Médico",
     "prescriptions": "Recetas",
+    "emitRecipe": "Emitir Recipe",
     "statistics": "Estadísticas",
     "settings": "Configuración"
   },

@@ -48,15 +48,15 @@ export default function Sidebar() {
       },
       {
         icon: '📋',
-        label: 'Historias',
-        labelKey: 'navigation.medicalRecords',
+        label: 'Emitir Informe Médico',
+        labelKey: 'navigation.emitMedicalReport',
         href: '/medical-records'
       },
       {
         icon: '💊',
-        label: 'Recetas',
-        labelKey: 'navigation.prescriptions',
-        href: '/prescriptions',
+        label: 'Emitir Recipe',
+        labelKey: 'navigation.emitRecipe',
+        href: '/recipe',
         badge: 23,
         badgeColor: 'success'
       },

@@ -55,7 +55,9 @@
     "patients": "Patients",
     "appointments": "Appointments",
     "medicalRecords": "Medical Records",
+    "emitMedicalReport": "Issue Medical Report",
     "prescriptions": "Prescriptions",
+    "emitRecipe": "Issue Recipe",
     "statistics": "Statistics",
     "settings": "Settings"
   },
