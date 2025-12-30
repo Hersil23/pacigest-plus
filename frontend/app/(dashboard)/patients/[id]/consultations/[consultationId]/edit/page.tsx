@@ -2,70 +2,103 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { patientsApi, consultationsApi } from '@/lib/api';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { consultationsApi, patientsApi } from '@/lib/api';
+import { FaArrowLeft, FaSave, FaStethoscope, FaHeartbeat, FaNotesMedical } from 'react-icons/fa';
 import Link from 'next/link';
-import { FaArrowLeft, FaSave, FaStethoscope } from 'react-icons/fa';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 interface ConsultationFormData {
   consultationDate: string;
   reason: string;
-  doctorNotes: string;
   vitalSigns: {
     bloodPressure: string;
-    temperature: string;
-    heartRate: string;
-    respiratoryRate: string;
+    temperature: number;
+    heartRate: number;
+    respiratoryRate: number;
   };
+  doctorNotes: string;
 }
 
-export default function NewConsultationPage() {
+export default function EditConsultationPage() {
+  const { t } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [patientName, setPatientName] = useState('');
+  
   const [formData, setFormData] = useState<ConsultationFormData>({
-    consultationDate: new Date().toISOString().split('T')[0],
+    consultationDate: '',
     reason: '',
-    doctorNotes: '',
     vitalSigns: {
       bloodPressure: '',
-      temperature: '',
-      heartRate: '',
-      respiratoryRate: ''
-    }
+      temperature: 0,
+      heartRate: 0,
+      respiratoryRate: 0
+    },
+    doctorNotes: ''
   });
 
   useEffect(() => {
-    loadPatientInfo();
-  }, [params.id]);
+    loadData();
+  }, [params.id, params.consultationId]);
 
-  const loadPatientInfo = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const response = await patientsApi.getById(params.id as string);
-      setPatientName(`${response.data.firstName} ${response.data.lastName}`);
+      
+      // Cargar datos del paciente
+      const patientResponse = await patientsApi.getById(params.id as string);
+      setPatientName(`${patientResponse.data.firstName} ${patientResponse.data.lastName}`);
+
+      // Cargar consulta existente
+      const consultationResponse = await consultationsApi.getById(
+        params.id as string,
+        params.consultationId as string
+      );
+      
+      const consultation = consultationResponse.data;
+      
+      setFormData({
+        consultationDate: consultation.consultationDate?.split('T')[0] || '',
+        reason: consultation.reason || '',
+        vitalSigns: {
+          bloodPressure: consultation.vitalSigns?.bloodPressure || '',
+          temperature: consultation.vitalSigns?.temperature || 0,
+          heartRate: consultation.vitalSigns?.heartRate || 0,
+          respiratoryRate: consultation.vitalSigns?.respiratoryRate || 0
+        },
+        doctorNotes: consultation.doctorNotes || ''
+      });
+      
     } catch (err: any) {
-      setError(err.message || 'Error al cargar información del paciente');
+      setError(err.message || 'Error al cargar la consulta');
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     
-    if (name.includes('vitalSigns.')) {
-      const field = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        vitalSigns: {
-          ...prev.vitalSigns,
-          [field]: value
+    if (name.includes('.')) {
+      const keys = name.split('.');
+      setFormData(prev => {
+        let newData = { ...prev };
+        let current: any = newData;
+        
+        for (let i = 0; i < keys.length - 1; i++) {
+          current[keys[i]] = { ...current[keys[i]] };
+          current = current[keys[i]];
         }
-      }));
+        
+        const finalValue = type === 'number' ? parseFloat(value) || 0 : value;
+        current[keys[keys.length - 1]] = finalValue;
+        
+        return newData;
+      });
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -73,44 +106,21 @@ export default function NewConsultationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     setError(null);
-
-    // Validaciones
-    if (formData.reason.length < 50) {
-      setError('El motivo de consulta debe tener al menos 50 caracteres');
-      return;
-    }
-
-    if (formData.doctorNotes.length < 50) {
-      setError('Las notas del médico deben tener al menos 50 caracteres');
-      return;
-    }
-
     setSaving(true);
 
     try {
-      // Preparar datos - solo incluir signos vitales si tienen valor
-      const dataToSend: any = {
-        consultationDate: formData.consultationDate,
-        reason: formData.reason,
-        doctorNotes: formData.doctorNotes
-      };
-
-      // Solo agregar vitalSigns si al menos uno tiene valor
-      const hasVitalSigns = Object.values(formData.vitalSigns).some(v => v !== '');
-      if (hasVitalSigns) {
-        dataToSend.vitalSigns = {
-          bloodPressure: formData.vitalSigns.bloodPressure || undefined,
-          temperature: formData.vitalSigns.temperature ? parseFloat(formData.vitalSigns.temperature) : undefined,
-          heartRate: formData.vitalSigns.heartRate ? parseInt(formData.vitalSigns.heartRate) : undefined,
-          respiratoryRate: formData.vitalSigns.respiratoryRate ? parseInt(formData.vitalSigns.respiratoryRate) : undefined
-        };
-      }
-
-      await consultationsApi.create(params.id as string, dataToSend);
+      await consultationsApi.update(
+        params.id as string,
+        params.consultationId as string,
+        formData
+      );
+      
       router.push(`/patients/${params.id}`);
+      
     } catch (err: any) {
-      setError(err.message || 'Error al crear consulta');
+      setError(err.response?.data?.message || 'Error al actualizar consulta');
       window.scrollTo(0, 0);
     } finally {
       setSaving(false);
@@ -123,7 +133,7 @@ export default function NewConsultationPage() {
         <div className="min-h-screen flex items-center justify-center bg-[rgb(var(--background))]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[rgb(var(--primary))] mx-auto mb-4"></div>
-            <p className="text-[rgb(var(--gray-medium))]">Cargando...</p>
+            <p className="text-[rgb(var(--gray-medium))]">Cargando consulta...</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -142,15 +152,14 @@ export default function NewConsultationPage() {
               className="inline-flex items-center gap-2 text-[rgb(var(--primary))] hover:text-[rgb(var(--primary-hover))] mb-4"
             >
               <FaArrowLeft />
-              <span>Volver al paciente</span>
+              <span>Volver al detalle del paciente</span>
             </Link>
             
-            <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] flex items-center gap-2">
-              <FaStethoscope className="text-[rgb(var(--primary))]" />
-              Nueva Consulta
+            <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">
+              ✏️ Editar Consulta
             </h1>
             <p className="text-[rgb(var(--gray-medium))] mt-1">
-              Paciente: <span className="font-semibold">{patientName}</span>
+              Paciente: {patientName}
             </p>
           </div>
 
@@ -164,40 +173,36 @@ export default function NewConsultationPage() {
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-6">
             
-            {/* Fecha de Consulta */}
+            {/* FECHA DE CONSULTA (Solo lectura) */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                Fecha de la Consulta
+                📅 Fecha de la Consulta
               </h2>
               
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  Fecha <span className="text-[rgb(var(--error))]">*</span>
-                </label>
-                <input
-                  type="date"
-                  name="consultationDate"
-                  value={formData.consultationDate}
-                  onChange={handleChange}
-                  max={new Date().toISOString().split('T')[0]}
-                  required
-                  className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                />
+              <div className="bg-[rgb(var(--background))] p-4 rounded-lg border border-[rgb(var(--border))]">
+                <p className="text-[rgb(var(--foreground))] font-medium">
+                  {new Date(formData.consultationDate).toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </p>
                 <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
-                  Por defecto es la fecha de hoy
+                  La fecha de la consulta no puede modificarse
                 </p>
               </div>
             </div>
 
-            {/* Información de Consulta */}
+            {/* MOTIVO DE CONSULTA */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
-              <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                Información de la Consulta
+              <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                <FaStethoscope className="text-[rgb(var(--primary))]" />
+                Motivo de Consulta
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  Motivo de la consulta - Describa los síntomas que presenta y desde cuándo <span className="text-[rgb(var(--error))]">*</span>
+                  ¿Cuál es el motivo de su consulta hoy? Describa los síntomas que presenta y desde cuándo <span className="text-[rgb(var(--error))]">*</span>
                 </label>
                 <textarea
                   name="reason"
@@ -205,106 +210,108 @@ export default function NewConsultationPage() {
                   onChange={handleChange}
                   required
                   rows={6}
-                  placeholder="Ejemplo: Paciente presenta dolor abdominal intenso en cuadrante inferior derecho desde hace 2 días, acompañado de náuseas y fiebre de 38.5°C..."
+                  minLength={50}
+                  placeholder="Ejemplo: Dolor abdominal intenso desde hace 2 días, acompañado de náuseas y fiebre..."
                   className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))] resize-none"
                 />
                 <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
-                  {formData.reason.length}/50 caracteres mínimo
+                  Mínimo 50 caracteres - Incluya motivo, síntomas y duración
                 </p>
               </div>
             </div>
 
-            {/* Signos Vitales (Opcional) */}
+            {/* SIGNOS VITALES */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
-              <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-2">
+              <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                <FaHeartbeat className="text-[rgb(var(--error))]" />
                 Signos Vitales
               </h2>
-              <p className="text-sm text-[rgb(var(--gray-medium))] mb-4">
-                Opcional - Complete solo los signos vitales que tomó
-              </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Presión Arterial
+                    Presión Arterial <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
                     name="vitalSigns.bloodPressure"
                     value={formData.vitalSigns.bloodPressure}
                     onChange={handleChange}
-                    placeholder="Ej: 120/80"
+                    required
+                    placeholder="120/80"
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Temperatura (°C)
+                    Temperatura (°C) <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
                     step="0.1"
                     name="vitalSigns.temperature"
-                    value={formData.vitalSigns.temperature}
+                    value={formData.vitalSigns.temperature || ''}
                     onChange={handleChange}
-                    placeholder="Ej: 36.5"
+                    required
+                    placeholder="36.5"
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Frecuencia Cardíaca (bpm)
+                    Frecuencia Cardíaca (lpm) <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
                     name="vitalSigns.heartRate"
-                    value={formData.vitalSigns.heartRate}
+                    value={formData.vitalSigns.heartRate || ''}
                     onChange={handleChange}
-                    placeholder="Ej: 72"
+                    required
+                    placeholder="70"
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Frecuencia Respiratoria (rpm)
+                    Frecuencia Respiratoria (rpm) <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
                     name="vitalSigns.respiratoryRate"
-                    value={formData.vitalSigns.respiratoryRate}
+                    value={formData.vitalSigns.respiratoryRate || ''}
                     onChange={handleChange}
-                    placeholder="Ej: 16"
+                    required
+                    placeholder="16"
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Notas del Médico */}
+            {/* NOTAS DEL MÉDICO */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
-              <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                Notas del Médico
+              <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                <FaNotesMedical className="text-[rgb(var(--success))]" />
+                Diagnóstico y Plan del Médico
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  Diagnóstico y Plan de Tratamiento <span className="text-[rgb(var(--error))]">*</span>
+                  Impresiones, diagnóstico, plan de tratamiento <span className="text-[rgb(var(--error))]">*</span>
                 </label>
                 <textarea
                   name="doctorNotes"
                   value={formData.doctorNotes}
                   onChange={handleChange}
                   required
-                  rows={6}
-                  placeholder="Escriba su diagnóstico, plan de tratamiento, recetas, indicaciones, etc. (mínimo 50 caracteres)"
-                  className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))] resize-none"
+                  rows={8}
+                  minLength={50}
+                  className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                  placeholder="Escriba aquí sus observaciones médicas, diagnóstico y plan..."
                 />
-                <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
-                  {formData.doctorNotes.length}/50 caracteres mínimo
-                </p>
               </div>
             </div>
 
@@ -323,7 +330,7 @@ export default function NewConsultationPage() {
                 ) : (
                   <>
                     <FaSave />
-                    <span>💾 Guardar Consulta</span>
+                    <span>💾 Guardar Cambios</span>
                   </>
                 )}
               </button>

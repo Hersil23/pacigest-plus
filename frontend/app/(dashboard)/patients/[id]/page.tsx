@@ -447,12 +447,20 @@ export default function PatientDetailPage() {
                 >
                   <FaEdit /> Editar
                 </Link>
-                <button className="px-3 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors flex items-center justify-center gap-1 text-xs shadow-md">
+                <Link
+                  href={`/patients/${patient._id}/print`}
+                  target="_blank"
+                  className="px-3 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors flex items-center justify-center gap-1 text-xs shadow-md"
+                >
                   <FaPrint /> Imprimir
-                </button>
-                <button className="px-3 py-2 bg-[#ef4444] text-white rounded-lg hover:bg-[#dc2626] transition-colors flex items-center justify-center gap-1 text-xs shadow-md">
+                </Link>
+                <Link
+                  href={`/patients/${patient._id}/print`}
+                  target="_blank"
+                  className="px-3 py-2 bg-[#ef4444] text-white rounded-lg hover:bg-[#dc2626] transition-colors flex items-center justify-center gap-1 text-xs shadow-md"
+                >
                   <FaFilePdf /> PDF
-                </button>
+                </Link>
               </div>
             </div>
 
@@ -531,12 +539,20 @@ export default function PatientDetailPage() {
                 >
                   <FaEdit /> Editar
                 </Link>
-                <button className="px-4 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg">
+                <Link
+                  href={`/patients/${patient._id}/print`}
+                  target="_blank"
+                  className="px-4 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
+                >
                   <FaPrint /> Imprimir
-                </button>
-                <button className="px-4 py-2 bg-[#ef4444] text-white rounded-lg hover:bg-[#dc2626] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg">
+                </Link>
+                <Link
+                  href={`/patients/${patient._id}/print`}
+                  target="_blank"
+                  className="px-4 py-2 bg-[#ef4444] text-white rounded-lg hover:bg-[#dc2626] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
+                >
                   <FaFilePdf /> PDF
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -671,7 +687,7 @@ export default function PatientDetailPage() {
                         </div>
                       </div>
                       
-                     <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <Link
                           href={`/patients/${patient._id}/consultations/${consultation._id}/print`}
                           target="_blank"
@@ -710,20 +726,6 @@ export default function PatientDetailPage() {
                           <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Motivo de Consulta:</h4>
                           <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg">
                             {consultation.reason}
-                          </p>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Síntomas:</h4>
-                          <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg">
-                            {consultation.symptoms}
-                          </p>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Duración:</h4>
-                          <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg">
-                            {consultation.symptomsDuration}
                           </p>
                         </div>
 
@@ -971,7 +973,7 @@ export default function PatientDetailPage() {
             )}
           </div>
 
-         {/* Firma Digital */}
+          {/* Firma Digital */}
           {patient.signature && (
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
               <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">

@@ -173,16 +173,14 @@ const patientSchema = new mongoose.Schema({
       minlength: [20, 'El motivo debe tener al menos 20 caracteres']
     },
     symptoms: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: [30, 'Los síntomas deben tener al menos 30 caracteres']
-    },
-    symptomsDuration: {
-      type: String,
-      required: true,
-      trim: true
-    },
+  type: String,
+  required: false,
+  minlength: 30
+},
+symptomsDuration: {
+  type: String,
+  required: false
+},
     previousTreatment: {
       type: Boolean,
       default: false

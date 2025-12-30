@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { patientsApi } from '@/lib/api';
 import { PatientFormData, ClinicalPhoto } from '@/types/patient';
-import { FaArrowLeft, FaSave, FaUser, FaHeartbeat, FaStethoscope, FaFileMedical, FaNotesMedical, FaCamera, FaSignature, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaUser, FaHeartbeat, FaStethoscope, FaFileMedical, FaNotesMedical, FaCamera, FaTrash, FaPlus } from 'react-icons/fa';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Odontogram from '@/components/Odontogram';
@@ -23,8 +23,6 @@ export default function NewPatientPage() {
   const [error, setError] = useState<string | null>(null);
   
   // Refs
-  const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
   const patientPhotoInputRef = useRef<HTMLInputElement>(null);
   const clinicalPhotoInputRef = useRef<HTMLInputElement>(null);
 
@@ -295,164 +293,75 @@ export default function NewPatientPage() {
     }));
   };
 
-  // Canvas firma - iniciar dibujo
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = signatureCanvasRef.current;
-    if (!canvas) return;
+  // Enviar formulario
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    setIsDrawing(true);
-  };
+    setError(null);
+    setLoading(true);
 
-  // Canvas firma - dibujar
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
-    
-    const canvas = signatureCanvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  };
-
-  // Canvas firma - terminar dibujo
-  const stopDrawing = () => {
-    if (isDrawing) {
-      const canvas = signatureCanvasRef.current;
-      if (canvas) {
-        const signatureData = canvas.toDataURL();
-        setFormData(prev => ({
-          ...prev,
-          consent: {
-            ...prev.consent,
-            signature: signatureData,
-            signedAt: new Date().toISOString()
-          }
-        }));
-      }
-      setIsDrawing(false);
-    }
-  };
-
-  // Limpiar firma
-  const clearSignature = () => {
-    const canvas = signatureCanvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        setFormData(prev => ({
-          ...prev,
-          consent: {
-            ...prev.consent,
-            signature: '',
-            signedAt: ''
-          }
-        }));
-      }
-    }
-  };
-
- // Enviar formulario
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  if (!formData.consent.signature) {
-    alert('La firma digital es obligatoria');
-    window.scrollTo(0, document.body.scrollHeight);
-    return;
-  }
-  
-  setError(null);
-  setLoading(true);
-
-  try {
-    const token = localStorage.getItem('token');
-    
-    // 1. CREAR EL PACIENTE PRIMERO (sin fotos)
-    const payload = {
-      ...formData,
-      weight: formData.vitalSigns.weight,
-      height: formData.vitalSigns.height,
-      vitalSigns: undefined,
-      files: undefined // Eliminar files del payload inicial
-    };
-
-    const response = await patientsApi.create(payload);
-    const patientId = response.data._id;
-
-    // 2. SUBIR FOTO DEL PACIENTE (si existe)
-    if (formData.files.patientPhoto && formData.files.patientPhoto !== DEFAULT_AVATAR) {
-      try {
-        await fetch(`http://localhost:5000/api/photos/patients/${patientId}/photo`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ photoData: formData.files.patientPhoto })
-        });
-      } catch (err) {
-        console.error('Error subiendo foto del paciente:', err);
-      }
-    }
-
-    // 3. SUBIR FOTOS CLÍNICAS (si existen)
-    if (formData.files.clinicalPhotos.length > 0) {
-      try {
-        const photos = formData.files.clinicalPhotos.map(photo => ({
-          photoData: photo.url,
-          description: photo.description
-        }));
-        
-        await fetch(`http://localhost:5000/api/photos/patients/${patientId}/clinical-photos`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ photos })
-        });
-      } catch (err) {
-        console.error('Error subiendo fotos clínicas:', err);
-      }
-    }
-
-    // 4. SUBIR FIRMA DIGITAL
     try {
-      await fetch(`http://localhost:5000/api/photos/patients/${patientId}/signature`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ signatureData: formData.consent.signature })
-      });
-    } catch (err) {
-      console.error('Error subiendo firma:', err);
-    }
+      const token = localStorage.getItem('token');
+      
+      // 1. CREAR EL PACIENTE PRIMERO (sin fotos)
+      const payload = {
+        ...formData,
+        weight: formData.vitalSigns.weight,
+        height: formData.vitalSigns.height,
+        vitalSigns: undefined,
+        files: undefined
+      };
 
-    // 5. REDIRIGIR AL LISTADO
-    router.push('/patients');
-    
-  } catch (err: any) {
-    setError(err.response?.data?.message || 'Error al crear historia clínica');
-    window.scrollTo(0, 0);
-  } finally {
-    setLoading(false);
-  }
-};
+      const response = await patientsApi.create(payload);
+      const patientId = response.data._id;
+
+      // 2. SUBIR FOTO DEL PACIENTE (si existe)
+      if (formData.files.patientPhoto && formData.files.patientPhoto !== DEFAULT_AVATAR) {
+        try {
+          await fetch(`http://localhost:5000/api/photos/patients/${patientId}/photo`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ photoData: formData.files.patientPhoto })
+          });
+        } catch (err) {
+          console.error('Error subiendo foto del paciente:', err);
+        }
+      }
+
+      // 3. SUBIR FOTOS CLÍNICAS (si existen)
+      if (formData.files.clinicalPhotos.length > 0) {
+        try {
+          const photos = formData.files.clinicalPhotos.map(photo => ({
+            photoData: photo.url,
+            description: photo.description
+          }));
+          
+          await fetch(`http://localhost:5000/api/photos/patients/${patientId}/clinical-photos`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ photos })
+          });
+        } catch (err) {
+          console.error('Error subiendo fotos clínicas:', err);
+        }
+      }
+
+      // 4. REDIRIGIR AL LISTADO
+      router.push('/patients');
+      
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error al crear historia clínica');
+      window.scrollTo(0, 0);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ProtectedRoute>
@@ -552,7 +461,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                       };
                       input.click();
                     }}
-                    className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[rgb(var(--success))/0.8] flex items-center gap-2"
+                    className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[#16a34a] flex items-center gap-2"
                   >
                     <FaCamera /> Tomar Foto
                   </button>
@@ -931,7 +840,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Alergias a Medicamentos <span className="text-[rgb(var(--error))]">*</span>
+                    Alergias <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -939,37 +848,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.allergies.medications}
                     onChange={handleChange}
                     required
-                    placeholder='Si ninguna, escribir "Ninguna"'
-                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Alergias a Alimentos <span className="text-[rgb(var(--error))]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="allergies.food"
-                    value={formData.allergies.food}
-                    onChange={handleChange}
-                    required
-                    placeholder='Si ninguna, escribir "Ninguna"'
-                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Otras Alergias <span className="text-[rgb(var(--error))]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="allergies.others"
-                    value={formData.allergies.others}
-                    onChange={handleChange}
-                    required
-                    placeholder='Polen, latex, etc. Si ninguna: "Ninguna"'
+                    placeholder='Medicamentos, alimentos, polen, etc. Si ninguna: "Ninguna"'
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
@@ -1067,59 +946,30 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
             </div>
 
-            {/* SECCIÓN 3: MOTIVO DE CONSULTA */}
+          {/* SECCIÓN 3: MOTIVO DE CONSULTA */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaStethoscope className="text-[rgb(var(--primary))]" />
                 Motivo de Consulta
               </h2>
               
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    ¿Cuál es el motivo de su consulta hoy? <span className="text-[rgb(var(--error))]">*</span>
-                  </label>
-                  <textarea
-                    name="consultation.reason"
-                    value={formData.consultation.reason}
-                    onChange={handleChange}
-                    required
-                    rows={3}
-                    minLength={20}
-                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Describa los síntomas que presenta <span className="text-[rgb(var(--error))]">*</span>
-                  </label>
-                  <textarea
-                    name="consultation.symptoms"
-                    value={formData.consultation.symptoms}
-                    onChange={handleChange}
-                    required
-                    rows={4}
-                    minLength={30}
-                    placeholder="Dolor, sangrado, fiebre, dificultad para respirar, etc."
-                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    ¿Desde cuándo presenta estos síntomas? <span className="text-[rgb(var(--error))]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="consultation.symptomsDuration"
-                    value={formData.consultation.symptomsDuration}
-                    onChange={handleChange}
-                    required
-                    placeholder='Ejemplo: "Hace 3 días" o "Hace 2 semanas"'
-                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                  ¿Cuál es el motivo de su consulta hoy? Describa los síntomas que presenta y desde cuándo <span className="text-[rgb(var(--error))]">*</span>
+                </label>
+                <textarea
+                  name="consultation.reason"
+                  value={formData.consultation.reason}
+                  onChange={handleChange}
+                  required
+                  rows={6}
+                  minLength={50}
+                  placeholder="Ejemplo: Dolor abdominal intenso desde hace 2 días, acompañado de náuseas y fiebre..."
+                  className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))] resize-none"
+                />
+                <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
+                  Mínimo 50 caracteres - Incluya motivo, síntomas y duración
+                </p>
               </div>
             </div>
 
@@ -1267,7 +1117,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                       input.click();
                     }}
                     disabled={clinicalPhotos.length >= 20}
-                    className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[rgb(var(--success))/0.8] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[#16a34a] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
                     <FaCamera /> Tomar
                   </button>
@@ -1337,83 +1187,11 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
             </div>
 
-            {/* CONSENTIMIENTO Y FIRMA */}
-            <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
-              <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
-                <FaSignature className="text-[rgb(var(--accent))]" />
-                Consentimiento Informado
-              </h2>
-              
-              <div className="space-y-4">
-                <div className="bg-[rgb(var(--background))] rounded-lg p-4">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="consent.accepted"
-                      checked={formData.consent.accepted}
-                      onChange={handleChange}
-                      required
-                      className="w-5 h-5 mt-1"
-                    />
-                    <span className="text-sm text-[rgb(var(--foreground))]">
-                      Acepto que la información proporcionada es verídica y autorizo el uso de mis datos 
-                      para fines médicos conforme a las leyes de protección de datos vigentes.
-                      <span className="text-[rgb(var(--error))]"> *</span>
-                    </span>
-                  </label>
-                </div>
-
-                {formData.consent.accepted && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                        Nombre completo (quien firma) <span className="text-[rgb(var(--error))]">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="consent.signedBy"
-                        value={formData.consent.signedBy}
-                        onChange={handleChange}
-                        required
-                        placeholder="Nombre del paciente o representante"
-                        className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                        Firma Digital <span className="text-[rgb(var(--error))]">*</span>
-                      </label>
-                      <div className="border-2 border-dashed border-[rgb(var(--border))] rounded-lg p-2">
-                        <canvas
-                          ref={signatureCanvasRef}
-                          width={600}
-                          height={200}
-                          onMouseDown={startDrawing}
-                          onMouseMove={draw}
-                          onMouseUp={stopDrawing}
-                          onMouseLeave={stopDrawing}
-                          className="w-full border border-[rgb(var(--border))] rounded cursor-crosshair bg-white"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={clearSignature}
-                        className="mt-2 text-sm text-[rgb(var(--error))] hover:underline"
-                      >
-                        Limpiar firma
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
             {/* Botones */}
             <div className="flex flex-col sm:flex-row gap-4 sticky bottom-0 bg-[rgb(var(--background))] p-4 border-t border-[rgb(var(--border))]">
               <button
                 type="submit"
-                disabled={loading || !formData.consent.accepted}
+                disabled={loading}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] transition-colors font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (

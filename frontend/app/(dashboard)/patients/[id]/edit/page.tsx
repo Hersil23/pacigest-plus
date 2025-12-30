@@ -5,7 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { patientsApi } from '@/lib/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Link from 'next/link';
-import { FaArrowLeft, FaSave } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaTooth } from 'react-icons/fa';
+import Odontogram from '@/components/Odontogram';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PatientFormData {
   firstName: string;
@@ -36,11 +38,21 @@ interface PatientFormData {
   };
   weight: number;
   height: number;
+  odontogram?: {
+    teeth: {
+      number: number;
+      status: string;
+      notes?: string;
+    }[];
+    lastUpdate: Date;
+  };
 }
 
 export default function EditPatientPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
+  const isOdontologist = (user?.specialty || '').toLowerCase().includes('odont');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +84,11 @@ export default function EditPatientPage() {
       others: ''
     },
     weight: 0,
-    height: 0
+    height: 0,
+    odontogram: {
+      teeth: [],
+      lastUpdate: new Date()
+    }
   });
 
   useEffect(() => {
@@ -113,7 +129,11 @@ export default function EditPatientPage() {
           others: patient.allergies?.others || ''
         },
         weight: patient.weight || 0,
-        height: patient.height || 0
+        height: patient.height || 0,
+        odontogram: patient.odontogram || {
+          teeth: [],
+          lastUpdate: new Date()
+        }
       });
     } catch (err: any) {
       setError(err.message || 'Error al cargar paciente');
@@ -487,50 +507,42 @@ export default function EditPatientPage() {
                 Alergias
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Medicamentos
-                  </label>
-                  <input
-                    type="text"
-                    name="allergies.medications"
-                    value={formData.allergies.medications}
-                    onChange={handleChange}
-                    placeholder='Si ninguna: "Ninguna"'
-                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Alimentos
-                  </label>
-                  <input
-                    type="text"
-                    name="allergies.food"
-                    value={formData.allergies.food}
-                    onChange={handleChange}
-                    placeholder='Si ninguna: "Ninguna"'
-                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Otras
-                  </label>
-                  <input
-                    type="text"
-                    name="allergies.others"
-                    value={formData.allergies.others}
-                    onChange={handleChange}
-                    placeholder='Si ninguna: "Ninguna"'
-                    className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
+                  Alergias <span className="text-[rgb(var(--error))]">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="allergies.medications"
+                  value={formData.allergies.medications}
+                  onChange={handleChange}
+                  required
+                  placeholder='Medicamentos, alimentos, polen, etc. Si ninguna: "Ninguna"'
+                  className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
+                />
               </div>
             </div>
+
+            {/* ODONTOGRAMA (SOLO ODONTÓLOGOS) */}
+            {isOdontologist && (
+              <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
+                <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
+                  <FaTooth className="text-[rgb(var(--primary))]" />
+                  Odontograma Digital
+                </h2>
+                
+                <Odontogram
+                  teeth={formData.odontogram?.teeth || []}
+                  onChange={(teeth) => setFormData(prev => ({
+                    ...prev,
+                    odontogram: {
+                      teeth,
+                      lastUpdate: new Date()
+                    }
+                  }))}
+                />
+              </div>
+            )}
 
             {/* Botones */}
             <div className="flex flex-col sm:flex-row gap-4 sticky bottom-0 bg-[rgb(var(--background))] p-4 border-t border-[rgb(var(--border))]">

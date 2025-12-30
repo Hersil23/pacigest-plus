@@ -107,7 +107,7 @@ export default function PrintConsultationPage() {
       // Cargar doctor actual
       const doctorData = await authApi.getCurrentUser();
       setDoctor(doctorData);
-      setIsOdontologist(doctorData.specialty === 'Odontología' || doctorData.specialty === 'Odontologia');
+      setIsOdontologist(doctorData.specialty?.toLowerCase().includes('odont'));
 
       // Cargar paciente
       const patientResponse = await patientsApi.getById(params.id as string);
@@ -476,53 +476,7 @@ export default function PrintConsultationPage() {
             </div>
           </div>
         )}
-
-        {/* Odontograma (solo para odontólogos) */}
-        {isOdontologist && patient.odontogram && patient.odontogram.teeth && patient.odontogram.teeth.length > 0 && (
-          <div className="section">
-            <div className="section-title">Odontograma</div>
-            <div className="odontogram-grid">
-              <p style={{ textAlign: 'center', fontSize: '12px', fontWeight: '600', marginBottom: '10px' }}>
-                MAXILAR SUPERIOR
-              </p>
-              <div className="teeth-row">
-                {[18, 17, 16, 15, 14, 13, 12, 11].map(renderTooth)}
-              </div>
-              <div className="teeth-row">
-                {[21, 22, 23, 24, 25, 26, 27, 28].map(renderTooth)}
-              </div>
-
-              <div style={{ borderTop: '2px dashed #d1d5db', margin: '15px 0' }}></div>
-
-              <div className="teeth-row">
-                {[48, 47, 46, 45, 44, 43, 42, 41].map(renderTooth)}
-              </div>
-              <div className="teeth-row">
-                {[31, 32, 33, 34, 35, 36, 37, 38].map(renderTooth)}
-              </div>
-              <p style={{ textAlign: 'center', fontSize: '12px', fontWeight: '600', marginTop: '10px' }}>
-                MAXILAR INFERIOR
-              </p>
-
-              {/* Leyenda */}
-              <div className="legend">
-                {Object.entries(TOOTH_LABELS).map(([key, label]) => (
-                  <div key={key} className="legend-item">
-                    <div 
-                      className="legend-color"
-                      style={{ 
-                        backgroundColor: TOOTH_COLORS[key],
-                        borderColor: key === 'sano' ? '#d1d5db' : TOOTH_COLORS[key]
-                      }}
-                    />
-                    <span>{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
+    
         {/* Notas del Médico */}
         <div className="section">
           <div className="section-title">Diagnóstico y Plan de Tratamiento</div>
