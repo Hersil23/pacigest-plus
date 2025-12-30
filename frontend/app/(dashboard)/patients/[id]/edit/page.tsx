@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { patientsApi } from '@/lib/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Link from 'next/link';
@@ -49,6 +50,7 @@ interface PatientFormData {
 }
 
 export default function EditPatientPage() {
+  const { t } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
@@ -186,7 +188,7 @@ export default function EditPatientPage() {
         <div className="min-h-screen flex items-center justify-center bg-[rgb(var(--background))]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[rgb(var(--primary))] mx-auto mb-4"></div>
-            <p className="text-[rgb(var(--gray-medium))]">Cargando datos del paciente...</p>
+            <p className="text-[rgb(var(--gray-medium))]">{t('patientDetail.loading')}</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -205,14 +207,14 @@ export default function EditPatientPage() {
               className="inline-flex items-center gap-2 text-[rgb(var(--primary))] hover:text-[rgb(var(--primary-hover))] mb-4"
             >
               <FaArrowLeft />
-              <span>Volver al detalle</span>
+              <span>{t('patientForm.backToDetail')}</span>
             </Link>
             
             <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">
-              ✏️ Editar Paciente
+              ✏️ {t('patientForm.editTitle')}
             </h1>
             <p className="text-[rgb(var(--gray-medium))] mt-1">
-              Modifica la información del paciente
+              {t('patientForm.subtitle')}
             </p>
           </div>
 
@@ -229,13 +231,13 @@ export default function EditPatientPage() {
             {/* Datos Personales */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                Datos Personales
+                {t('patientForm.personalData')}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Primer Nombre <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.firstName')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -249,7 +251,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Segundo Nombre
+                    {t('patientForm.secondName')}
                   </label>
                   <input
                     type="text"
@@ -262,7 +264,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Primer Apellido <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.lastName')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -276,7 +278,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Segundo Apellido
+                    {t('patientForm.secondLastName')}
                   </label>
                   <input
                     type="text"
@@ -289,7 +291,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Fecha de Nacimiento <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.dateOfBirth')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="date"
@@ -303,7 +305,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Género <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.gender')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <select
                     name="gender"
@@ -312,14 +314,14 @@ export default function EditPatientPage() {
                     required
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   >
-                    <option value="M">Masculino</option>
-                    <option value="F">Femenino</option>
+                    <option value="M">{t('patientForm.male')}</option>
+                    <option value="F">{t('patientForm.female')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Email <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.email')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="email"
@@ -333,7 +335,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Teléfono <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.phone')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="tel"
@@ -347,7 +349,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Tipo de Sangre <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.bloodType')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <select
                     name="bloodType"
@@ -369,7 +371,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Peso (kg) <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.weight')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
@@ -384,7 +386,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Altura (cm) <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.height')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
@@ -402,13 +404,13 @@ export default function EditPatientPage() {
             {/* Dirección */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                Dirección
+                {t('patientForm.address')}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Calle/Avenida <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.street')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -422,7 +424,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Ciudad <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.city')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -436,7 +438,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Estado <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.state')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -453,13 +455,13 @@ export default function EditPatientPage() {
             {/* Contacto de Emergencia */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                Contacto de Emergencia
+                {t('patientForm.emergencyContact')}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Nombre <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.contactName')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -473,7 +475,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Relación <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.relationship')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -487,7 +489,7 @@ export default function EditPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Teléfono <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.contactPhone')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="tel"
@@ -504,12 +506,12 @@ export default function EditPatientPage() {
             {/* Alergias */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                Alergias
+                {t('patientForm.allergies')}
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  Alergias <span className="text-[rgb(var(--error))]">*</span>
+                  {t('patientForm.allergies')} <span className="text-[rgb(var(--error))]">*</span>
                 </label>
                 <input
                   type="text"
@@ -517,7 +519,7 @@ export default function EditPatientPage() {
                   value={formData.allergies.medications}
                   onChange={handleChange}
                   required
-                  placeholder='Medicamentos, alimentos, polen, etc. Si ninguna: "Ninguna"'
+                  placeholder={t('patientForm.allergiesPlaceholder')}
                   className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                 />
               </div>
@@ -528,7 +530,7 @@ export default function EditPatientPage() {
               <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
                 <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                   <FaTooth className="text-[rgb(var(--primary))]" />
-                  Odontograma Digital
+                  {t('patientForm.odontogram')}
                 </h2>
                 
                 <Odontogram
@@ -554,12 +556,12 @@ export default function EditPatientPage() {
                 {saving ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Guardando...</span>
+                    <span>{t('patientForm.saving')}</span>
                   </>
                 ) : (
                   <>
                     <FaSave />
-                    <span>💾 Guardar Cambios</span>
+                    <span>💾 {t('patientForm.saveChanges')}</span>
                   </>
                 )}
               </button>
@@ -568,7 +570,7 @@ export default function EditPatientPage() {
                 href={`/patients/${params.id}`}
                 className="px-6 py-3 bg-[rgb(var(--background))] text-[rgb(var(--foreground))] border border-[rgb(var(--border))] rounded-lg hover:bg-[rgb(var(--gray-very-light))] transition-colors font-medium text-center"
               >
-                ❌ Cancelar
+                ❌ {t('common.cancel')}
               </Link>
             </div>
           </form>

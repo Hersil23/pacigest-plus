@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { patientsApi } from '@/lib/api';
 import { PatientFormData, ClinicalPhoto } from '@/types/patient';
-import { FaArrowLeft, FaSave, FaUser, FaHeartbeat, FaStethoscope, FaFileMedical, FaNotesMedical, FaCamera, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaUser, FaHeartbeat, FaStethoscope, FaFileMedical, FaNotesMedical, FaCamera, FaTrash, FaPlus, FaTooth } from 'react-icons/fa';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Odontogram from '@/components/Odontogram';
@@ -223,7 +223,7 @@ export default function NewPatientPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('La foto no debe superar 5MB');
+        alert(t('patientForm.photoTooLarge'));
         return;
       }
       
@@ -248,12 +248,12 @@ export default function NewPatientPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (clinicalPhotos.length >= 20) {
-        alert('Máximo 20 fotos clínicas permitidas');
+        alert(t('patientForm.maxPhotosReached'));
         return;
       }
       
       if (file.size > 5 * 1024 * 1024) {
-        alert('La foto no debe superar 5MB');
+        alert(t('patientForm.photoTooLarge'));
         return;
       }
       
@@ -375,14 +375,14 @@ export default function NewPatientPage() {
               className="inline-flex items-center gap-2 text-[rgb(var(--primary))] hover:text-[rgb(var(--primary-hover))] mb-4"
             >
               <FaArrowLeft />
-              <span>Volver a pacientes</span>
+              <span>{t('patientForm.backToList')}</span>
             </Link>
             
             <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">
-              📋 Nueva Historia Clínica Completa
+              📋 {t('patientForm.title')}
             </h1>
             <p className="text-[rgb(var(--gray-medium))] mt-1">
-              Complete toda la información del paciente
+              {t('patientForm.subtitle')}
             </p>
           </div>
 
@@ -400,7 +400,7 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaCamera className="text-[rgb(var(--primary))]" />
-                Foto del Paciente (Opcional)
+                {t('patientForm.patientPhoto')} ({t('common.optional')})
               </h2>
               
               <div className="flex flex-col items-center gap-4">
@@ -444,7 +444,7 @@ export default function NewPatientPage() {
                         const file = (e.target as HTMLInputElement).files?.[0];
                         if (file) {
                           if (file.size > 5 * 1024 * 1024) {
-                            alert('La foto no debe superar 5MB');
+                            alert(t('patientForm.photoTooLarge'));
                             return;
                           }
                           const reader = new FileReader();
@@ -463,7 +463,7 @@ export default function NewPatientPage() {
                     }}
                     className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[#16a34a] flex items-center gap-2"
                   >
-                    <FaCamera /> Tomar Foto
+                    <FaCamera /> {t('patientForm.takePhoto')}
                   </button>
                   
                   <button
@@ -471,10 +471,10 @@ export default function NewPatientPage() {
                     onClick={() => patientPhotoInputRef.current?.click()}
                     className="px-4 py-2 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] flex items-center gap-2"
                   >
-                    <FaCamera /> Subir Foto
+                    <FaCamera /> {t('patientForm.uploadPhoto')}
                   </button>
                 </div>
-                <p className="text-xs text-[rgb(var(--gray-medium))]">Máximo 5MB - JPG, PNG</p>
+                <p className="text-xs text-[rgb(var(--gray-medium))]">{t('patientForm.maxPhotos')}</p>
               </div>
             </div>
 
@@ -482,19 +482,19 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaUser className="text-[rgb(var(--primary))]" />
-                Información Básica del Paciente
+                {t('patientForm.personalData')}
               </h2>
               
               {/* Datos de consulta */}
               <div className="bg-[rgb(var(--background))] rounded-lg p-4 mb-4">
-                <p className="text-sm text-[rgb(var(--gray-medium))] mb-2">Datos de la Consulta:</p>
+                <p className="text-sm text-[rgb(var(--gray-medium))] mb-2">{t('consultation.consultationDate')}:</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm">📅 Fecha: </span>
+                    <span className="text-sm">📅 {t('common.date')}: </span>
                     <span className="font-medium">{formData.consultationDate}</span>
                   </div>
                   <div>
-                    <span className="text-sm">🕐 Hora: </span>
+                    <span className="text-sm">🕐 {t('common.time')}: </span>
                     <span className="font-medium">{formData.consultationTime}</span>
                   </div>
                 </div>
@@ -536,7 +536,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    País de Emisión <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.country')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -550,11 +550,11 @@ export default function NewPatientPage() {
               </div>
 
               {/* Datos Personales */}
-              <h3 className="font-semibold text-[rgb(var(--foreground))] mb-3 mt-6">Datos Personales</h3>
+              <h3 className="font-semibold text-[rgb(var(--foreground))] mb-3 mt-6">{t('patientForm.personalData')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Primer Nombre <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.firstName')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -568,7 +568,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Segundo Nombre
+                    {t('patientForm.secondName')}
                   </label>
                   <input
                     type="text"
@@ -581,7 +581,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Primer Apellido <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.lastName')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -595,7 +595,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Segundo Apellido
+                    {t('patientForm.secondLastName')}
                   </label>
                   <input
                     type="text"
@@ -608,7 +608,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Fecha de Nacimiento <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.dateOfBirth')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="date"
@@ -620,14 +620,14 @@ export default function NewPatientPage() {
                   />
                   {calculatedAge > 0 && (
                     <p className="text-sm text-[rgb(var(--primary))] mt-1">
-                      Edad: {calculatedAge} años
+                      {t('patientDetail.age')}: {calculatedAge} {t('patientDetail.years')}
                     </p>
                   )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Género <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.gender')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <select
                     name="gender"
@@ -636,15 +636,15 @@ export default function NewPatientPage() {
                     required
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   >
-                    <option value="M">Masculino</option>
-                    <option value="F">Femenino</option>
+                    <option value="M">{t('patientForm.male')}</option>
+                    <option value="F">{t('patientForm.female')}</option>
                     <option value="Otro">Otro</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Email <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.email')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="email"
@@ -658,7 +658,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Teléfono Principal <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.phone')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="tel"
@@ -672,11 +672,11 @@ export default function NewPatientPage() {
               </div>
 
               {/* Dirección */}
-              <h3 className="font-semibold text-[rgb(var(--foreground))] mb-3 mt-6">Dirección</h3>
+              <h3 className="font-semibold text-[rgb(var(--foreground))] mb-3 mt-6">{t('patientForm.address')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Calle/Avenida <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.street')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -690,7 +690,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Ciudad <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.city')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -704,7 +704,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Estado/Provincia <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.state')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -767,11 +767,11 @@ export default function NewPatientPage() {
               </div>
 
               {/* Contacto de Emergencia */}
-              <h3 className="font-semibold text-[rgb(var(--foreground))] mb-3 mt-6">Contacto de Emergencia</h3>
+              <h3 className="font-semibold text-[rgb(var(--foreground))] mb-3 mt-6">{t('patientForm.emergencyContact')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Nombre Completo <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.contactName')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -785,7 +785,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Relación <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.relationship')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -800,7 +800,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Teléfono <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.contactPhone')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="tel"
@@ -818,7 +818,7 @@ export default function NewPatientPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Tipo de Sangre <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.bloodType')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <select
                     name="bloodType"
@@ -840,7 +840,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Alergias <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.allergies')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -848,7 +848,7 @@ export default function NewPatientPage() {
                     value={formData.allergies.medications}
                     onChange={handleChange}
                     required
-                    placeholder='Medicamentos, alimentos, polen, etc. Si ninguna: "Ninguna"'
+                    placeholder={t('patientForm.allergiesPlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
@@ -859,13 +859,13 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaHeartbeat className="text-[rgb(var(--error))]" />
-                Signos Vitales (Consulta Actual)
+                {t('patientForm.vitalSigns')}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Presión Arterial <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.bloodPressure')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -873,14 +873,14 @@ export default function NewPatientPage() {
                     value={formData.vitalSigns.bloodPressure}
                     onChange={handleChange}
                     required
-                    placeholder="120/80"
+                    placeholder={t('patientForm.bloodPressurePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Temperatura (°C) <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.temperature')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
@@ -889,14 +889,14 @@ export default function NewPatientPage() {
                     value={formData.vitalSigns.temperature || ''}
                     onChange={handleChange}
                     required
-                    placeholder="36.5"
+                    placeholder={t('patientForm.temperaturePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Frecuencia Cardíaca (lpm) <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.heartRate')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
@@ -904,14 +904,14 @@ export default function NewPatientPage() {
                     value={formData.vitalSigns.heartRate || ''}
                     onChange={handleChange}
                     required
-                    placeholder="70"
+                    placeholder={t('patientForm.heartRatePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Peso (kg) <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.weight')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
@@ -926,7 +926,7 @@ export default function NewPatientPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Altura (cm) <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.height')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
@@ -939,7 +939,7 @@ export default function NewPatientPage() {
                   />
                   {calculatedBMI !== '0' && (
                     <p className="text-sm text-[rgb(var(--primary))] mt-1">
-                      IMC: {calculatedBMI}
+                      {t('patientDetail.bmi')}: {calculatedBMI}
                     </p>
                   )}
                 </div>
@@ -950,12 +950,12 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaStethoscope className="text-[rgb(var(--primary))]" />
-                Motivo de Consulta
+                {t('patientForm.initialConsultation')}
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  ¿Cuál es el motivo de su consulta hoy? Describa los síntomas que presenta y desde cuándo <span className="text-[rgb(var(--error))]">*</span>
+                  {t('patientForm.consultationReason')} <span className="text-[rgb(var(--error))]">*</span>
                 </label>
                 <textarea
                   name="consultation.reason"
@@ -964,11 +964,11 @@ export default function NewPatientPage() {
                   required
                   rows={6}
                   minLength={50}
-                  placeholder="Ejemplo: Dolor abdominal intenso desde hace 2 días, acompañado de náuseas y fiebre..."
+                  placeholder={t('patientForm.consultationPlaceholder')}
                   className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))] resize-none"
                 />
                 <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
-                  Mínimo 50 caracteres - Incluya motivo, síntomas y duración
+                  {t('patientForm.consultationMin')}
                 </p>
               </div>
             </div>
@@ -1032,7 +1032,8 @@ export default function NewPatientPage() {
             {isOdontologist && (
               <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
                 <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
-                  🦷 Odontograma Digital
+                  <FaTooth className="text-[rgb(var(--primary))]" />
+                  {t('patientForm.odontogram')}
                 </h2>
                 
                 <Odontogram
@@ -1052,20 +1053,20 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaCamera className="text-[rgb(var(--info))]" />
-                Evidencia Clínica - Fotos (Opcional - Máx. 20)
+                {t('patientForm.clinicalPhotosOptional')}
               </h2>
               
               <div className="space-y-4">
                 <div className="flex gap-4 items-end">
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                      Descripción de la foto
+                      {t('patientForm.photoDescription')}
                     </label>
                     <input
                       type="text"
                       value={currentPhotoDescription}
                       onChange={(e) => setCurrentPhotoDescription(e.target.value)}
-                      placeholder="Ej: Lesión en brazo derecho"
+                      placeholder={t('patientForm.photoDescriptionPlaceholder')}
                       className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                     />
                   </div>
@@ -1089,11 +1090,11 @@ export default function NewPatientPage() {
                         const file = (e.target as HTMLInputElement).files?.[0];
                         if (file) {
                           if (clinicalPhotos.length >= 20) {
-                            alert('Máximo 20 fotos clínicas permitidas');
+                            alert(t('patientForm.maxPhotosReached'));
                             return;
                           }
                           if (file.size > 5 * 1024 * 1024) {
-                            alert('La foto no debe superar 5MB');
+                            alert(t('patientForm.photoTooLarge'));
                             return;
                           }
                           const reader = new FileReader();
@@ -1119,7 +1120,7 @@ export default function NewPatientPage() {
                     disabled={clinicalPhotos.length >= 20}
                     className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[#16a34a] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
-                    <FaCamera /> Tomar
+                    <FaCamera /> {t('patientForm.takePhoto')}
                   </button>
                   
                   <button
@@ -1128,12 +1129,12 @@ export default function NewPatientPage() {
                     disabled={clinicalPhotos.length >= 20}
                     className="px-4 py-2 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
-                    <FaPlus /> Subir
+                    <FaPlus /> {t('patientForm.uploadPhoto')}
                   </button>
                 </div>
 
                 <p className="text-xs text-[rgb(var(--gray-medium))]">
-                  {clinicalPhotos.length}/20 fotos • Máximo 5MB por foto
+                  {clinicalPhotos.length}/20 {t('patientForm.photosCount')} • {t('patientForm.maxPhotos')}
                 </p>
 
                 {/* Grid de fotos */}
@@ -1167,12 +1168,12 @@ export default function NewPatientPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaNotesMedical className="text-[rgb(var(--success))]" />
-                Diagnóstico y Plan del Médico
+                {t('patientForm.doctorDiagnosis')}
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  Impresiones, diagnóstico, plan de tratamiento <span className="text-[rgb(var(--error))]">*</span>
+                  {t('patientForm.doctorNotes')} <span className="text-[rgb(var(--error))]">*</span>
                 </label>
                 <textarea
                   name="doctorNotes"
@@ -1182,7 +1183,7 @@ export default function NewPatientPage() {
                   rows={8}
                   minLength={50}
                   className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  placeholder="Escriba aquí sus observaciones médicas, diagnóstico y plan..."
+                  placeholder={t('patientForm.doctorNotesPlaceholder')}
                 />
               </div>
             </div>
@@ -1197,12 +1198,12 @@ export default function NewPatientPage() {
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Guardando Historia Clínica...</span>
+                    <span>{t('patientForm.saving')}</span>
                   </>
                 ) : (
                   <>
                     <FaSave />
-                    <span>💾 Guardar Historia Clínica Completa</span>
+                    <span>💾 {t('patientForm.saveComplete')}</span>
                   </>
                 )}
               </button>
@@ -1211,7 +1212,7 @@ export default function NewPatientPage() {
                 href="/patients"
                 className="px-6 py-3 bg-[rgb(var(--background))] text-[rgb(var(--foreground))] border border-[rgb(var(--border))] rounded-lg hover:bg-[rgb(var(--gray-very-light))] transition-colors font-medium text-center"
               >
-                ❌ Cancelar
+                ❌ {t('common.cancel')}
               </Link>
             </div>
           </form>

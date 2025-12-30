@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { patientsApi, authApi } from '@/lib/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { FaTooth } from 'react-icons/fa';
@@ -62,19 +63,8 @@ const TOOTH_COLORS: Record<string, string> = {
   porExtraer: '#f97316'
 };
 
-const TOOTH_LABELS: Record<string, string> = {
-  sano: 'Sano',
-  caries: 'Caries',
-  obturacion: 'Obturación',
-  ausente: 'Ausente',
-  fractura: 'Fractura',
-  corona: 'Corona',
-  implante: 'Implante',
-  endodoncia: 'Endodoncia',
-  porExtraer: 'Por Extraer'
-};
-
 export default function PrintPatientPage() {
+  const { t } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -82,6 +72,18 @@ export default function PrintPatientPage() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [isOdontologist, setIsOdontologist] = useState(false);
+
+  const TOOTH_LABELS: Record<string, string> = {
+    sano: t('print.toothStatus.sano'),
+    caries: t('print.toothStatus.caries'),
+    obturacion: t('print.toothStatus.obturacion'),
+    ausente: t('print.toothStatus.ausente'),
+    fractura: t('print.toothStatus.fractura'),
+    corona: t('print.toothStatus.corona'),
+    implante: t('print.toothStatus.implante'),
+    endodoncia: t('print.toothStatus.endodoncia'),
+    porExtraer: t('print.toothStatus.porExtraer')
+  };
 
   useEffect(() => {
     loadData();
@@ -146,7 +148,7 @@ export default function PrintPatientPage() {
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p>Preparando historia clínica...</p>
+            <p>{t('print.preparing')}</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -158,12 +160,12 @@ export default function PrintPatientPage() {
       <ProtectedRoute>
         <div className="min-h-screen flex items-center justify-center p-6">
           <div className="text-center">
-            <p className="text-red-600 text-lg mb-4">❌ {error || 'No se pudo cargar la información'}</p>
+            <p className="text-red-600 text-lg mb-4">❌ {error || t('print.errorLoading')}</p>
             <button
               onClick={() => window.close()}
               className="text-blue-600 hover:underline"
             >
-              ← Cerrar
+              ← {t('common.close')}
             </button>
           </div>
         </div>
@@ -384,7 +386,7 @@ export default function PrintPatientPage() {
           onClick={() => window.close()}
           className="no-print no-print-button"
         >
-          ← Volver
+          ← {t('print.back')}
         </button>
 
         {/* Header / Membrete */}
@@ -403,43 +405,43 @@ export default function PrintPatientPage() {
 
         {/* Información del Paciente */}
         <div className="section">
-          <div className="section-title">Información Personal</div>
+          <div className="section-title">{t('patientDetail.personalInfo')}</div>
           <div className="info-grid">
             <div className="info-item">
-              <div className="info-label">Nombre Completo</div>
+              <div className="info-label">{t('print.fullName')}</div>
               <div className="info-value">
                 {patient.firstName} {patient.secondName} {patient.lastName} {patient.secondLastName}
               </div>
             </div>
             <div className="info-item">
-              <div className="info-label">Expediente</div>
+              <div className="info-label">{t('print.record')}</div>
               <div className="info-value">{patient.medicalRecordNumber}</div>
             </div>
             <div className="info-item">
-              <div className="info-label">Edad / Género</div>
+              <div className="info-label">{t('print.ageGender')}</div>
               <div className="info-value">
-                {patient.age} años • {patient.gender === 'M' ? 'Masculino' : 'Femenino'}
+                {patient.age} {t('patientDetail.years')} • {patient.gender === 'M' ? t('patientDetail.male') : t('patientDetail.female')}
               </div>
             </div>
             <div className="info-item">
-              <div className="info-label">Fecha de Nacimiento</div>
+              <div className="info-label">{t('patientForm.dateOfBirth')}</div>
               <div className="info-value">
                 {new Date(patient.dateOfBirth).toLocaleDateString('es-ES')}
               </div>
             </div>
             <div className="info-item">
-              <div className="info-label">Teléfono</div>
+              <div className="info-label">{t('print.phone')}</div>
               <div className="info-value">{patient.phone}</div>
             </div>
             <div className="info-item">
-              <div className="info-label">Email</div>
+              <div className="info-label">{t('common.email')}</div>
               <div className="info-value">{patient.email}</div>
             </div>
           </div>
 
           {patient.address && (
             <>
-              <div className="info-label" style={{ marginTop: '15px', marginBottom: '5px' }}>Dirección</div>
+              <div className="info-label" style={{ marginTop: '15px', marginBottom: '5px' }}>{t('common.address')}</div>
               <div className="info-value">
                 {patient.address.street}, {patient.address.city}, {patient.address.state}, {patient.address.country}
               </div>
@@ -449,27 +451,27 @@ export default function PrintPatientPage() {
 
         {/* Información Médica */}
         <div className="section">
-          <div className="section-title">Información Médica</div>
+          <div className="section-title">{t('patientDetail.medicalInfo')}</div>
           <div className="info-grid">
             <div className="info-item">
-              <div className="info-label">Tipo de Sangre</div>
+              <div className="info-label">{t('print.bloodType')}</div>
               <div className="info-value">{patient.bloodType}</div>
             </div>
             {patient.weight && (
               <div className="info-item">
-                <div className="info-label">Peso</div>
+                <div className="info-label">{t('patientDetail.weight')}</div>
                 <div className="info-value">{patient.weight} kg</div>
               </div>
             )}
             {patient.height && (
               <div className="info-item">
-                <div className="info-label">Altura</div>
+                <div className="info-label">{t('patientDetail.height')}</div>
                 <div className="info-value">{patient.height} cm</div>
               </div>
             )}
             {patient.bmi && (
               <div className="info-item">
-                <div className="info-label">IMC</div>
+                <div className="info-label">{t('patientDetail.bmi')}</div>
                 <div className="info-value">{patient.bmi}</div>
               </div>
             )}
@@ -478,7 +480,7 @@ export default function PrintPatientPage() {
 
        {/* Alergias */}
         <div className="section">
-          <div className="section-title">Alergias</div>
+          <div className="section-title">{t('patientDetail.allergies')}</div>
           
           {patient.allergies && patient.allergies.list && patient.allergies.list.length > 0 ? (
             <>
@@ -523,10 +525,10 @@ export default function PrintPatientPage() {
         {/* Odontograma (solo para odontólogos) */}
         {isOdontologist && patient.odontogram && patient.odontogram.teeth && patient.odontogram.teeth.length > 0 && (
           <div className="section page-break">
-            <div className="section-title">Odontograma</div>
+            <div className="section-title">{t('print.odontogram')}</div>
             <div className="odontogram-grid">
               <p style={{ textAlign: 'center', fontSize: '12px', fontWeight: '600', marginBottom: '10px' }}>
-                MAXILAR SUPERIOR
+                {t('print.upperJaw')}
               </p>
               <div className="teeth-row">
                 {[18, 17, 16, 15, 14, 13, 12, 11].map(renderTooth)}
@@ -544,7 +546,7 @@ export default function PrintPatientPage() {
                 {[31, 32, 33, 34, 35, 36, 37, 38].map(renderTooth)}
               </div>
               <p style={{ textAlign: 'center', fontSize: '12px', fontWeight: '600', marginTop: '10px' }}>
-                MAXILAR INFERIOR
+                {t('print.lowerJaw')}
               </p>
 
               {/* Leyenda */}
@@ -577,7 +579,7 @@ export default function PrintPatientPage() {
           <div>{doctor.specialty}</div>
           {doctor.licenseNumber && <div>Lic. {doctor.licenseNumber}</div>}
           <div style={{ marginTop: '20px', fontSize: '10px' }}>
-            Fecha de impresión: {new Date().toLocaleDateString('es-ES')} {new Date().toLocaleTimeString('es-ES')}
+            {t('print.printDate')}: {new Date().toLocaleDateString('es-ES')} {new Date().toLocaleTimeString('es-ES')}
           </div>
         </div>
       </div>

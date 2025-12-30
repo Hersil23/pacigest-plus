@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { FaTooth, FaTimes } from 'react-icons/fa';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Tooth {
   number: number;
@@ -27,21 +28,23 @@ const TOOTH_COLORS = {
   porExtraer: '#f97316'
 };
 
-const TOOTH_LABELS = {
-  sano: 'Sano',
-  caries: 'Caries',
-  obturacion: 'Obturación',
-  ausente: 'Ausente',
-  fractura: 'Fractura',
-  corona: 'Corona',
-  implante: 'Implante',
-  endodoncia: 'Endodoncia',
-  porExtraer: 'Por Extraer'
-};
-
 export default function Odontogram({ teeth, onChange }: OdontogramProps) {
+  const { t } = useLanguage();
   const [selectedTooth, setSelectedTooth] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
+
+  // Labels traducidos
+  const TOOTH_LABELS = {
+    sano: t('print.toothStatus.sano'),
+    caries: t('print.toothStatus.caries'),
+    obturacion: t('print.toothStatus.obturacion'),
+    ausente: t('print.toothStatus.ausente'),
+    fractura: t('print.toothStatus.fractura'),
+    corona: t('print.toothStatus.corona'),
+    implante: t('print.toothStatus.implante'),
+    endodoncia: t('print.toothStatus.endodoncia'),
+    porExtraer: t('print.toothStatus.porExtraer')
+  };
 
   // Inicializar dientes vacíos en useEffect para evitar actualización durante render
   useEffect(() => {
@@ -129,7 +132,7 @@ export default function Odontogram({ teeth, onChange }: OdontogramProps) {
         {/* Superior */}
         <div className="mb-8">
           <p className="text-center text-sm font-semibold text-[rgb(var(--gray-medium))] mb-3">
-            MAXILAR SUPERIOR
+            {t('print.upperJaw')}
           </p>
           <div className="grid grid-cols-8 gap-2 mb-2">
             {[18, 17, 16, 15, 14, 13, 12, 11].map(renderTooth)}
@@ -151,7 +154,7 @@ export default function Odontogram({ teeth, onChange }: OdontogramProps) {
             {[31, 32, 33, 34, 35, 36, 37, 38].map(renderTooth)}
           </div>
           <p className="text-center text-sm font-semibold text-[rgb(var(--gray-medium))]">
-            MAXILAR INFERIOR
+            {t('print.lowerJaw')}
           </p>
         </div>
       </div>
@@ -212,7 +215,7 @@ export default function Odontogram({ teeth, onChange }: OdontogramProps) {
                 onClick={closeModal}
                 className="w-full px-4 py-2 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] transition-colors font-medium"
               >
-                ✅ Guardar y Cerrar
+                ✅ {t('common.save')} y {t('common.close')}
               </button>
             </div>
           </div>

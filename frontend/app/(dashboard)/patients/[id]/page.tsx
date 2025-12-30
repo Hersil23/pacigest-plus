@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { patientsApi, consultationsApi } from '@/lib/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Link from 'next/link';
@@ -98,19 +99,8 @@ const TOOTH_COLORS: Record<string, string> = {
   porExtraer: '#f97316'
 };
 
-const TOOTH_LABELS: Record<string, string> = {
-  sano: 'Sano',
-  caries: 'Caries',
-  obturacion: 'Obturación',
-  ausente: 'Ausente',
-  fractura: 'Fractura',
-  corona: 'Corona',
-  implante: 'Implante',
-  endodoncia: 'Endodoncia',
-  porExtraer: 'Por Extraer'
-};
-
 export default function PatientDetailPage() {
+  const { t } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -120,6 +110,18 @@ export default function PatientDetailPage() {
   const [loadingConsultations, setLoadingConsultations] = useState(false);
   const [expandedConsultation, setExpandedConsultation] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(5);
+
+  const TOOTH_LABELS: Record<string, string> = {
+    sano: t('print.toothStatus.sano'),
+    caries: t('print.toothStatus.caries'),
+    obturacion: t('print.toothStatus.obturacion'),
+    ausente: t('print.toothStatus.ausente'),
+    fractura: t('print.toothStatus.fractura'),
+    corona: t('print.toothStatus.corona'),
+    implante: t('print.toothStatus.implante'),
+    endodoncia: t('print.toothStatus.endodoncia'),
+    porExtraer: t('print.toothStatus.porExtraer')
+  };
 
   useEffect(() => {
     loadPatient();
@@ -151,15 +153,15 @@ export default function PatientDetailPage() {
   };
 
   const handleDeleteConsultation = async (consultationId: string) => {
-    if (!confirm('¿Estás seguro de eliminar esta consulta? Esta acción no se puede deshacer.')) return;
+    if (!confirm(t('patientDetail.confirmDelete'))) return;
 
     try {
       await consultationsApi.delete(params.id as string, consultationId);
-      alert('Consulta eliminada exitosamente');
+      alert(t('patientDetail.deleteSuccess'));
       loadConsultations();
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al eliminar la consulta');
+      alert(t('patientDetail.deleteError'));
     }
   };
 
@@ -193,7 +195,7 @@ export default function PatientDetailPage() {
 
   const handleUploadPatientPhoto = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
-      alert('La foto no debe superar 5MB');
+      alert(t('patientForm.photoTooLarge'));
       return;
     }
 
@@ -327,7 +329,7 @@ export default function PatientDetailPage() {
         <div className="min-h-screen flex items-center justify-center bg-[rgb(var(--background))]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[rgb(var(--primary))] mx-auto mb-4"></div>
-            <p className="text-[rgb(var(--gray-medium))]">Cargando paciente...</p>
+            <p className="text-[rgb(var(--gray-medium))]">{t('patientDetail.loading')}</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -339,12 +341,12 @@ export default function PatientDetailPage() {
       <ProtectedRoute>
         <div className="min-h-screen flex items-center justify-center bg-[rgb(var(--background))] p-6">
           <div className="text-center">
-            <p className="text-[rgb(var(--error))] text-lg mb-4">❌ {error || 'Paciente no encontrado'}</p>
+            <p className="text-[rgb(var(--error))] text-lg mb-4">❌ {error || t('patientDetail.error')}</p>
             <Link
               href="/patients"
               className="text-[rgb(var(--primary))] hover:text-[rgb(var(--primary-hover))]"
             >
-              ← Volver a la lista
+              ← {t('patientForm.backToList')}
             </Link>
           </div>
         </div>
@@ -364,7 +366,7 @@ export default function PatientDetailPage() {
               className="inline-flex items-center gap-2 text-[rgb(var(--primary))] hover:text-[rgb(var(--primary-hover))] mb-4"
             >
               <FaArrowLeft />
-              <span>Volver a pacientes</span>
+              <span>{t('patientForm.backToList')}</span>
             </Link>
             
             {/* MÓVIL: Layout vertical */}
@@ -390,14 +392,14 @@ export default function PatientDetailPage() {
                         <label
                           htmlFor="change-patient-photo-mobile"
                           className="p-1.5 bg-[rgb(var(--primary))] text-white rounded-full cursor-pointer hover:bg-[rgb(var(--primary-hover))] transition-colors"
-                          title="Cambiar foto"
+                          title={t('patientForm.changePhoto')}
                         >
                           <FaCamera className="text-xs" />
                         </label>
                         <button
                           onClick={handleDeletePatientPhoto}
                           className="p-1.5 bg-[rgb(var(--error))] text-white rounded-full hover:bg-[#dc2626] transition-colors"
-                          title="Eliminar foto"
+                          title={t('patientForm.removePhoto')}
                         >
                           <FaTrash className="text-xs" />
                         </button>
@@ -418,7 +420,7 @@ export default function PatientDetailPage() {
                       <label
                         htmlFor="add-patient-photo-mobile"
                         className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                        title="Agregar foto"
+                        title={t('patientForm.uploadPhoto')}
                       >
                         <FaCamera className="text-xl text-white" />
                       </label>
@@ -434,7 +436,7 @@ export default function PatientDetailPage() {
                     {patient.medicalRecordNumber}
                   </p>
                   <p className="text-xs text-[rgb(var(--gray-medium))]">
-                    {patient.age} años
+                    {patient.age} {t('patientDetail.years')}
                   </p>
                 </div>
               </div>
@@ -445,21 +447,21 @@ export default function PatientDetailPage() {
                   href={`/patients/${patient._id}/edit`}
                   className="px-3 py-2 bg-[#f59e0b] text-white rounded-lg hover:bg-[#d97706] transition-colors flex items-center justify-center gap-1 text-xs shadow-md"
                 >
-                  <FaEdit /> Editar
+                  <FaEdit /> {t('patientDetail.editPatient')}
                 </Link>
                 <Link
                   href={`/patients/${patient._id}/print`}
                   target="_blank"
                   className="px-3 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors flex items-center justify-center gap-1 text-xs shadow-md"
                 >
-                  <FaPrint /> Imprimir
+                  <FaPrint /> {t('patientDetail.printHistory')}
                 </Link>
                 <Link
                   href={`/patients/${patient._id}/print`}
                   target="_blank"
                   className="px-3 py-2 bg-[#ef4444] text-white rounded-lg hover:bg-[#dc2626] transition-colors flex items-center justify-center gap-1 text-xs shadow-md"
                 >
-                  <FaFilePdf /> PDF
+                  <FaFilePdf /> {t('patientDetail.exportPDF')}
                 </Link>
               </div>
             </div>
@@ -486,14 +488,14 @@ export default function PatientDetailPage() {
                         <label
                           htmlFor="change-patient-photo"
                           className="p-2 bg-[rgb(var(--primary))] text-white rounded-full cursor-pointer hover:bg-[rgb(var(--primary-hover))] transition-colors"
-                          title="Cambiar foto"
+                          title={t('patientForm.changePhoto')}
                         >
                           <FaCamera className="text-sm" />
                         </label>
                         <button
                           onClick={handleDeletePatientPhoto}
                           className="p-2 bg-[rgb(var(--error))] text-white rounded-full hover:bg-[#dc2626] transition-colors"
-                          title="Eliminar foto"
+                          title={t('patientForm.removePhoto')}
                         >
                           <FaTrash className="text-sm" />
                         </button>
@@ -514,7 +516,7 @@ export default function PatientDetailPage() {
                       <label
                         htmlFor="add-patient-photo"
                         className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                        title="Agregar foto"
+                        title={t('patientForm.uploadPhoto')}
                       >
                         <FaCamera className="text-2xl text-white" />
                       </label>
@@ -527,7 +529,7 @@ export default function PatientDetailPage() {
                     {patient.firstName} {patient.secondName} {patient.lastName} {patient.secondLastName}
                   </h1>
                   <p className="text-[rgb(var(--gray-medium))] mt-1">
-                    Expediente: {patient.medicalRecordNumber} • {patient.age} años
+                    {t('patientDetail.medicalRecord')}: {patient.medicalRecordNumber} • {patient.age} {t('patientDetail.years')}
                   </p>
                 </div>
               </div>
@@ -537,21 +539,21 @@ export default function PatientDetailPage() {
                   href={`/patients/${patient._id}/edit`}
                   className="px-4 py-2 bg-[#f59e0b] text-white rounded-lg hover:bg-[#d97706] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
                 >
-                  <FaEdit /> Editar
+                  <FaEdit /> {t('patientDetail.editPatient')}
                 </Link>
                 <Link
                   href={`/patients/${patient._id}/print`}
                   target="_blank"
                   className="px-4 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
                 >
-                  <FaPrint /> Imprimir
+                  <FaPrint /> {t('patientDetail.printHistory')}
                 </Link>
                 <Link
                   href={`/patients/${patient._id}/print`}
                   target="_blank"
                   className="px-4 py-2 bg-[#ef4444] text-white rounded-lg hover:bg-[#dc2626] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
                 >
-                  <FaFilePdf /> PDF
+                  <FaFilePdf /> {t('patientDetail.exportPDF')}
                 </Link>
               </div>
             </div>
@@ -562,27 +564,27 @@ export default function PatientDetailPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaUser className="text-[rgb(var(--primary))]" />
-                Información Personal
+                {t('patientDetail.personalInfo')}
               </h2>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-[rgb(var(--gray-medium))]">Email</p>
+                  <p className="text-sm text-[rgb(var(--gray-medium))]">{t('patientDetail.email')}</p>
                   <p className="text-[rgb(var(--foreground))] flex items-center gap-2">
                     <FaEnvelope className="text-[rgb(var(--primary))]" /> {patient.email}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-[rgb(var(--gray-medium))]">Teléfono</p>
+                  <p className="text-sm text-[rgb(var(--gray-medium))]">{t('patientDetail.phone')}</p>
                   <p className="text-[rgb(var(--foreground))] flex items-center gap-2">
                     <FaPhone className="text-[rgb(var(--primary))]" /> {patient.phone}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-[rgb(var(--gray-medium))]">Género</p>
-                  <p className="text-[rgb(var(--foreground))]">{patient.gender === 'M' ? 'Masculino' : 'Femenino'}</p>
+                  <p className="text-sm text-[rgb(var(--gray-medium))]">{t('patientDetail.gender')}</p>
+                  <p className="text-[rgb(var(--foreground))]">{patient.gender === 'M' ? t('patientDetail.male') : t('patientDetail.female')}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-[rgb(var(--gray-medium))]">Fecha de Nacimiento</p>
+                  <p className="text-sm text-[rgb(var(--gray-medium))]">{t('patientForm.dateOfBirth')}</p>
                   <p className="text-[rgb(var(--foreground))]">{new Date(patient.dateOfBirth).toLocaleDateString()}</p>
                 </div>
               </div>
@@ -591,7 +593,7 @@ export default function PatientDetailPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaMapMarkerAlt className="text-[rgb(var(--primary))]" />
-                Dirección
+                {t('patientDetail.address')}
               </h2>
               {patient.address && (
                 <p className="text-[rgb(var(--foreground))]">
@@ -607,23 +609,23 @@ export default function PatientDetailPage() {
           <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
             <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
               <FaHeartbeat className="text-[rgb(var(--error))]" />
-              Información Médica
+              {t('patientDetail.medicalInfo')}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <p className="text-sm text-[rgb(var(--gray-medium))]">Tipo de Sangre</p>
+                <p className="text-sm text-[rgb(var(--gray-medium))]">{t('patientDetail.bloodType')}</p>
                 <p className="text-lg font-semibold text-[rgb(var(--foreground))]">{patient.bloodType}</p>
               </div>
               <div>
-                <p className="text-sm text-[rgb(var(--gray-medium))]">Peso</p>
+                <p className="text-sm text-[rgb(var(--gray-medium))]">{t('patientDetail.weight')}</p>
                 <p className="text-lg font-semibold text-[rgb(var(--foreground))]">{patient.weight} kg</p>
               </div>
               <div>
-                <p className="text-sm text-[rgb(var(--gray-medium))]">Altura</p>
+                <p className="text-sm text-[rgb(var(--gray-medium))]">{t('patientDetail.height')}</p>
                 <p className="text-lg font-semibold text-[rgb(var(--foreground))]">{patient.height} cm</p>
               </div>
               <div>
-                <p className="text-sm text-[rgb(var(--gray-medium))]">IMC</p>
+                <p className="text-sm text-[rgb(var(--gray-medium))]">{t('patientDetail.bmi')}</p>
                 <p className="text-lg font-semibold text-[rgb(var(--foreground))]">{patient.bmi}</p>
               </div>
             </div>
@@ -634,27 +636,26 @@ export default function PatientDetailPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] flex items-center gap-2">
                 <FaStethoscope className="text-[rgb(var(--primary))]" />
-                Historial de Consultas ({consultations.length})
+                {t('patientDetail.consultationHistory')} ({consultations.length})
               </h2>
               
               <Link
                 href={`/patients/${patient._id}/consultations/new`}
                 className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[#16a34a] transition-colors flex items-center gap-2 shadow-md hover:shadow-lg"
               >
-                <FaPlus /> Nueva Consulta
+                <FaPlus /> {t('patientDetail.newConsultation')}
               </Link>
             </div>
 
             {loadingConsultations ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[rgb(var(--primary))] mx-auto mb-2"></div>
-                <p className="text-[rgb(var(--gray-medium))]">Cargando consultas...</p>
+                <p className="text-[rgb(var(--gray-medium))]">{t('common.loading')}</p>
               </div>
             ) : consultations.length === 0 ? (
               <div className="text-center py-8 text-[rgb(var(--gray-medium))]">
                 <FaStethoscope className="text-4xl mx-auto mb-2 opacity-30" />
-                <p>No hay consultas registradas.</p>
-                <p className="text-sm mt-2">Haz clic en "Nueva Consulta" para agregar la primera.</p>
+                <p>{t('patientDetail.noConsultations')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -693,7 +694,7 @@ export default function PatientDetailPage() {
                           target="_blank"
                           className="p-2 text-[rgb(var(--info))] hover:bg-[rgb(var(--info)/0.1)] rounded-lg transition-colors"
                           onClick={(e) => e.stopPropagation()}
-                          title="Imprimir consulta"
+                          title={t('patientDetail.print')}
                         >
                           <FaPrint />
                         </Link>
@@ -701,7 +702,7 @@ export default function PatientDetailPage() {
                           href={`/patients/${patient._id}/consultations/${consultation._id}/edit`}
                           className="p-2 text-[rgb(var(--primary))] hover:bg-[rgb(var(--primary)/0.1)] rounded-lg transition-colors"
                           onClick={(e) => e.stopPropagation()}
-                          title="Editar consulta"
+                          title={t('patientDetail.edit')}
                         >
                           <FaEdit />
                         </Link>
@@ -711,7 +712,7 @@ export default function PatientDetailPage() {
                             handleDeleteConsultation(consultation._id);
                           }}
                           className="p-2 text-[rgb(var(--error))] hover:bg-[rgb(var(--error)/0.1)] rounded-lg transition-colors"
-                          title="Eliminar consulta"
+                          title={t('patientDetail.deleteConsultation')}
                         >
                           <FaTrash />
                         </button>
@@ -723,14 +724,14 @@ export default function PatientDetailPage() {
                     {expandedConsultation === consultation._id && (
                       <div className="p-4 space-y-4 border-t border-[rgb(var(--border))]">
                         <div>
-                          <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Motivo de Consulta:</h4>
+                          <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">{t('patientDetail.reason')}:</h4>
                           <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg">
                             {consultation.reason}
                           </p>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">📋 Notas del Médico:</h4>
+                          <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">📋 {t('consultation.doctorNotes')}:</h4>
                           <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--warning)/0.1)] p-4 rounded-lg border-2 border-[rgb(var(--warning))]">
                             {consultation.doctorNotes}
                           </p>
@@ -738,30 +739,30 @@ export default function PatientDetailPage() {
 
                         {consultation.vitalSigns && (
                           <div>
-                            <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Signos Vitales:</h4>
+                            <h4 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">{t('consultation.vitalSigns')}:</h4>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                               {consultation.vitalSigns.bloodPressure && (
                                 <div className="bg-[rgb(var(--background))] p-3 rounded-lg">
-                                  <p className="text-xs text-[rgb(var(--gray-medium))]">Presión Arterial</p>
+                                  <p className="text-xs text-[rgb(var(--gray-medium))]">{t('patientForm.bloodPressure')}</p>
                                   <p className="font-semibold text-[rgb(var(--foreground))]">{consultation.vitalSigns.bloodPressure}</p>
                                 </div>
                               )}
                               {consultation.vitalSigns.temperature && (
                                 <div className="bg-[rgb(var(--background))] p-3 rounded-lg">
-                                  <p className="text-xs text-[rgb(var(--gray-medium))]">Temperatura</p>
+                                  <p className="text-xs text-[rgb(var(--gray-medium))]">{t('patientForm.temperature')}</p>
                                   <p className="font-semibold text-[rgb(var(--foreground))]">{consultation.vitalSigns.temperature}°C</p>
                                 </div>
                               )}
                               {consultation.vitalSigns.heartRate && (
                                 <div className="bg-[rgb(var(--background))] p-3 rounded-lg">
-                                  <p className="text-xs text-[rgb(var(--gray-medium))]">Frecuencia Cardíaca</p>
-                                  <p className="font-semibold text-[rgb(var(--foreground))]">{consultation.vitalSigns.heartRate} bpm</p>
+                                  <p className="text-xs text-[rgb(var(--gray-medium))]">{t('patientForm.heartRate')}</p>
+                                  <p className="font-semibold text-[rgb(var(--foreground))]">{consultation.vitalSigns.heartRate} {t('print.bpm')}</p>
                                 </div>
                               )}
                               {consultation.vitalSigns.respiratoryRate && (
                                 <div className="bg-[rgb(var(--background))] p-3 rounded-lg">
-                                  <p className="text-xs text-[rgb(var(--gray-medium))]">Frecuencia Respiratoria</p>
-                                  <p className="font-semibold text-[rgb(var(--foreground))]">{consultation.vitalSigns.respiratoryRate} rpm</p>
+                                  <p className="text-xs text-[rgb(var(--gray-medium))]">{t('patientForm.respiratoryRate')}</p>
+                                  <p className="font-semibold text-[rgb(var(--foreground))]">{consultation.vitalSigns.respiratoryRate} {t('print.rpm')}</p>
                                 </div>
                               )}
                             </div>
@@ -805,7 +806,7 @@ export default function PatientDetailPage() {
               <div className="space-y-4">
                 {patient.consultation?.reason && (
                   <div>
-                    <h3 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">Motivo de Consulta:</h3>
+                    <h3 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">{t('patientDetail.reason')}:</h3>
                     <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-3 rounded-lg border border-[rgb(var(--border))]">
                       {patient.consultation.reason}
                     </p>
@@ -832,7 +833,7 @@ export default function PatientDetailPage() {
 
                 {patient.doctorNotes && (
                   <div>
-                    <h3 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">📋 Notas del Médico:</h3>
+                    <h3 className="text-sm font-semibold text-[rgb(var(--gray-medium))] mb-2">📋 {t('consultation.doctorNotes')}:</h3>
                     <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--warning)/0.1)] p-4 rounded-lg border-2 border-[rgb(var(--warning))]">
                       {patient.doctorNotes}
                     </p>
@@ -847,7 +848,7 @@ export default function PatientDetailPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6 mb-6">
               <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaTooth className="text-[rgb(var(--primary))]" />
-                Odontograma
+                {t('patientDetail.odontogram')}
               </h2>
 
               <div className="bg-[rgb(var(--background))] rounded-lg p-4 border border-[rgb(var(--border))] mb-6">
@@ -870,7 +871,7 @@ export default function PatientDetailPage() {
 
               <div className="space-y-8">
                 <div>
-                  <p className="text-center text-sm font-semibold text-[rgb(var(--gray-medium))] mb-3">MAXILAR SUPERIOR</p>
+                  <p className="text-center text-sm font-semibold text-[rgb(var(--gray-medium))] mb-3">{t('print.upperJaw')}</p>
                   <div className="grid grid-cols-8 gap-2 mb-2">
                     {[18, 17, 16, 15, 14, 13, 12, 11].map(renderTooth)}
                   </div>
@@ -888,7 +889,7 @@ export default function PatientDetailPage() {
                   <div className="grid grid-cols-8 gap-2 mb-3">
                     {[31, 32, 33, 34, 35, 36, 37, 38].map(renderTooth)}
                   </div>
-                  <p className="text-center text-sm font-semibold text-[rgb(var(--gray-medium))]">MAXILAR INFERIOR</p>
+                  <p className="text-center text-sm font-semibold text-[rgb(var(--gray-medium))]">{t('print.lowerJaw')}</p>
                 </div>
               </div>
 
@@ -920,7 +921,7 @@ export default function PatientDetailPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-[rgb(var(--foreground))] flex items-center gap-2">
                 <FaCamera className="text-[rgb(var(--info))]" />
-                Evidencia Clínica ({patient.clinicalPhotos?.length || 0} fotos)
+                {t('patientDetail.clinicalPhotos')} ({patient.clinicalPhotos?.length || 0} {t('patientForm.photosCount')})
               </h2>
               
               <div>
@@ -936,7 +937,7 @@ export default function PatientDetailPage() {
                   htmlFor="upload-clinical-photos"
                   className="px-4 py-2 bg-[rgb(var(--success))] text-white rounded-lg hover:bg-[#16a34a] transition-colors flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg"
                 >
-                  <FaPlus /> Agregar Fotos
+                  <FaPlus /> {t('patientForm.addPhoto')}
                 </label>
               </div>
             </div>
@@ -954,13 +955,13 @@ export default function PatientDetailPage() {
                     <button
                       onClick={() => handleDeleteClinicalPhoto(photo._id)}
                       className="absolute -top-2 -right-2 p-2 bg-[rgb(var(--error))] text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-[#dc2626]"
-                      title="Eliminar foto"
+                      title={t('patientForm.removePhoto')}
                     >
                       <FaTrash className="text-xs" />
                     </button>
                     <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
                       <p className="text-xs truncate">{photo.description}</p>
-                      <p className="text-[10px] text-gray-300">{new Date(photo.uploadedAt).toLocaleDateString()}</p>
+                      <p className="text-[10px] text-gray-300">{t('patientDetail.uploadedAt')} {new Date(photo.uploadedAt).toLocaleDateString()}</p>
                     </div>
                   </div>
                 ))}
@@ -968,7 +969,7 @@ export default function PatientDetailPage() {
             ) : (
               <div className="text-center py-8 text-[rgb(var(--gray-medium))]">
                 <FaCamera className="text-4xl mx-auto mb-2 opacity-30" />
-                <p>No hay fotos clínicas. Haz click en "Agregar Fotos" para subir.</p>
+                <p>{t('patientDetail.noPhotos')}</p>
               </div>
             )}
           </div>

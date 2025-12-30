@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { patientsApi, consultationsApi } from '@/lib/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Link from 'next/link';
@@ -20,6 +21,7 @@ interface ConsultationFormData {
 }
 
 export default function NewConsultationPage() {
+  const { t } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -123,7 +125,7 @@ export default function NewConsultationPage() {
         <div className="min-h-screen flex items-center justify-center bg-[rgb(var(--background))]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[rgb(var(--primary))] mx-auto mb-4"></div>
-            <p className="text-[rgb(var(--gray-medium))]">Cargando...</p>
+            <p className="text-[rgb(var(--gray-medium))]">{t('common.loading')}</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -142,15 +144,15 @@ export default function NewConsultationPage() {
               className="inline-flex items-center gap-2 text-[rgb(var(--primary))] hover:text-[rgb(var(--primary-hover))] mb-4"
             >
               <FaArrowLeft />
-              <span>Volver al paciente</span>
+              <span>{t('consultation.backToPatient')}</span>
             </Link>
             
             <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] flex items-center gap-2">
               <FaStethoscope className="text-[rgb(var(--primary))]" />
-              Nueva Consulta
+              {t('consultation.new')}
             </h1>
             <p className="text-[rgb(var(--gray-medium))] mt-1">
-              Paciente: <span className="font-semibold">{patientName}</span>
+              {t('patientDetail.personalInfo')}: <span className="font-semibold">{patientName}</span>
             </p>
           </div>
 
@@ -167,12 +169,12 @@ export default function NewConsultationPage() {
             {/* Fecha de Consulta */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                Fecha de la Consulta
+                {t('consultation.consultationDate')}
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  Fecha <span className="text-[rgb(var(--error))]">*</span>
+                  {t('common.date')} <span className="text-[rgb(var(--error))]">*</span>
                 </label>
                 <input
                   type="date"
@@ -192,12 +194,12 @@ export default function NewConsultationPage() {
             {/* Información de Consulta */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                Información de la Consulta
+                {t('consultation.detail')}
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  Motivo de la consulta - Describa los síntomas que presenta y desde cuándo <span className="text-[rgb(var(--error))]">*</span>
+                  {t('patientForm.consultationReason')} <span className="text-[rgb(var(--error))]">*</span>
                 </label>
                 <textarea
                   name="reason"
@@ -205,11 +207,11 @@ export default function NewConsultationPage() {
                   onChange={handleChange}
                   required
                   rows={6}
-                  placeholder="Ejemplo: Paciente presenta dolor abdominal intenso en cuadrante inferior derecho desde hace 2 días, acompañado de náuseas y fiebre de 38.5°C..."
+                  placeholder={t('patientForm.consultationPlaceholder')}
                   className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))] resize-none"
                 />
                 <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
-                  {formData.reason.length}/50 caracteres mínimo
+                  {formData.reason.length}/50 {t('patientForm.consultationMin').split(' ')[0]}
                 </p>
               </div>
             </div>
@@ -217,7 +219,7 @@ export default function NewConsultationPage() {
             {/* Signos Vitales (Opcional) */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-2">
-                Signos Vitales
+                {t('consultation.vitalSigns')}
               </h2>
               <p className="text-sm text-[rgb(var(--gray-medium))] mb-4">
                 Opcional - Complete solo los signos vitales que tomó
@@ -226,21 +228,21 @@ export default function NewConsultationPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Presión Arterial
+                    {t('patientForm.bloodPressure')}
                   </label>
                   <input
                     type="text"
                     name="vitalSigns.bloodPressure"
                     value={formData.vitalSigns.bloodPressure}
                     onChange={handleChange}
-                    placeholder="Ej: 120/80"
+                    placeholder={t('patientForm.bloodPressurePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Temperatura (°C)
+                    {t('patientForm.temperature')}
                   </label>
                   <input
                     type="number"
@@ -248,35 +250,35 @@ export default function NewConsultationPage() {
                     name="vitalSigns.temperature"
                     value={formData.vitalSigns.temperature}
                     onChange={handleChange}
-                    placeholder="Ej: 36.5"
+                    placeholder={t('patientForm.temperaturePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Frecuencia Cardíaca (bpm)
+                    {t('patientForm.heartRate')}
                   </label>
                   <input
                     type="number"
                     name="vitalSigns.heartRate"
                     value={formData.vitalSigns.heartRate}
                     onChange={handleChange}
-                    placeholder="Ej: 72"
+                    placeholder={t('patientForm.heartRatePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Frecuencia Respiratoria (rpm)
+                    {t('patientForm.respiratoryRate')}
                   </label>
                   <input
                     type="number"
                     name="vitalSigns.respiratoryRate"
                     value={formData.vitalSigns.respiratoryRate}
                     onChange={handleChange}
-                    placeholder="Ej: 16"
+                    placeholder={t('patientForm.respiratoryRatePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
@@ -286,12 +288,12 @@ export default function NewConsultationPage() {
             {/* Notas del Médico */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                Notas del Médico
+                {t('patientForm.doctorDiagnosis')}
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  Diagnóstico y Plan de Tratamiento <span className="text-[rgb(var(--error))]">*</span>
+                  {t('consultation.doctorNotes')} <span className="text-[rgb(var(--error))]">*</span>
                 </label>
                 <textarea
                   name="doctorNotes"
@@ -299,11 +301,11 @@ export default function NewConsultationPage() {
                   onChange={handleChange}
                   required
                   rows={6}
-                  placeholder="Escriba su diagnóstico, plan de tratamiento, recetas, indicaciones, etc. (mínimo 50 caracteres)"
+                  placeholder={t('patientForm.doctorNotesPlaceholder')}
                   className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))] resize-none"
                 />
                 <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
-                  {formData.doctorNotes.length}/50 caracteres mínimo
+                  {formData.doctorNotes.length}/50 {t('patientForm.consultationMin').split(' ')[0]}
                 </p>
               </div>
             </div>
@@ -318,12 +320,12 @@ export default function NewConsultationPage() {
                 {saving ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Guardando...</span>
+                    <span>{t('consultation.saving')}</span>
                   </>
                 ) : (
                   <>
                     <FaSave />
-                    <span>💾 Guardar Consulta</span>
+                    <span>💾 {t('consultation.saveConsultation')}</span>
                   </>
                 )}
               </button>
@@ -332,7 +334,7 @@ export default function NewConsultationPage() {
                 href={`/patients/${params.id}`}
                 className="px-6 py-3 bg-[rgb(var(--background))] text-[rgb(var(--foreground))] border border-[rgb(var(--border))] rounded-lg hover:bg-[rgb(var(--gray-very-light))] transition-colors font-medium text-center"
               >
-                ❌ Cancelar
+                ❌ {t('common.cancel')}
               </Link>
             </div>
           </form>

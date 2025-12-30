@@ -133,7 +133,7 @@ export default function EditConsultationPage() {
         <div className="min-h-screen flex items-center justify-center bg-[rgb(var(--background))]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[rgb(var(--primary))] mx-auto mb-4"></div>
-            <p className="text-[rgb(var(--gray-medium))]">Cargando consulta...</p>
+            <p className="text-[rgb(var(--gray-medium))]">{t('common.loading')}</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -152,14 +152,14 @@ export default function EditConsultationPage() {
               className="inline-flex items-center gap-2 text-[rgb(var(--primary))] hover:text-[rgb(var(--primary-hover))] mb-4"
             >
               <FaArrowLeft />
-              <span>Volver al detalle del paciente</span>
+              <span>{t('consultation.backToPatient')}</span>
             </Link>
             
             <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">
-              ✏️ Editar Consulta
+              ✏️ {t('consultation.edit')}
             </h1>
             <p className="text-[rgb(var(--gray-medium))] mt-1">
-              Paciente: {patientName}
+              {t('patientDetail.personalInfo')}: {patientName}
             </p>
           </div>
 
@@ -176,7 +176,7 @@ export default function EditConsultationPage() {
             {/* FECHA DE CONSULTA (Solo lectura) */}
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4">
-                📅 Fecha de la Consulta
+                📅 {t('consultation.consultationDate')}
               </h2>
               
               <div className="bg-[rgb(var(--background))] p-4 rounded-lg border border-[rgb(var(--border))]">
@@ -188,7 +188,7 @@ export default function EditConsultationPage() {
                   })}
                 </p>
                 <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
-                  La fecha de la consulta no puede modificarse
+                  {t('consultation.dateReadonly')}
                 </p>
               </div>
             </div>
@@ -197,12 +197,12 @@ export default function EditConsultationPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaStethoscope className="text-[rgb(var(--primary))]" />
-                Motivo de Consulta
+                {t('consultation.reason')}
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  ¿Cuál es el motivo de su consulta hoy? Describa los síntomas que presenta y desde cuándo <span className="text-[rgb(var(--error))]">*</span>
+                  {t('patientForm.consultationReason')} <span className="text-[rgb(var(--error))]">*</span>
                 </label>
                 <textarea
                   name="reason"
@@ -211,11 +211,11 @@ export default function EditConsultationPage() {
                   required
                   rows={6}
                   minLength={50}
-                  placeholder="Ejemplo: Dolor abdominal intenso desde hace 2 días, acompañado de náuseas y fiebre..."
+                  placeholder={t('patientForm.consultationPlaceholder')}
                   className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))] resize-none"
                 />
                 <p className="text-xs text-[rgb(var(--gray-medium))] mt-1">
-                  Mínimo 50 caracteres - Incluya motivo, síntomas y duración
+                  {t('patientForm.consultationMin')}
                 </p>
               </div>
             </div>
@@ -224,13 +224,13 @@ export default function EditConsultationPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaHeartbeat className="text-[rgb(var(--error))]" />
-                Signos Vitales
+                {t('consultation.vitalSigns')}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Presión Arterial <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.bloodPressure')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="text"
@@ -238,14 +238,14 @@ export default function EditConsultationPage() {
                     value={formData.vitalSigns.bloodPressure}
                     onChange={handleChange}
                     required
-                    placeholder="120/80"
+                    placeholder={t('patientForm.bloodPressurePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Temperatura (°C) <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.temperature')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
@@ -254,14 +254,14 @@ export default function EditConsultationPage() {
                     value={formData.vitalSigns.temperature || ''}
                     onChange={handleChange}
                     required
-                    placeholder="36.5"
+                    placeholder={t('patientForm.temperaturePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Frecuencia Cardíaca (lpm) <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.heartRate')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
@@ -269,14 +269,14 @@ export default function EditConsultationPage() {
                     value={formData.vitalSigns.heartRate || ''}
                     onChange={handleChange}
                     required
-                    placeholder="70"
+                    placeholder={t('patientForm.heartRatePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                    Frecuencia Respiratoria (rpm) <span className="text-[rgb(var(--error))]">*</span>
+                    {t('patientForm.respiratoryRate')} <span className="text-[rgb(var(--error))]">*</span>
                   </label>
                   <input
                     type="number"
@@ -284,7 +284,7 @@ export default function EditConsultationPage() {
                     value={formData.vitalSigns.respiratoryRate || ''}
                     onChange={handleChange}
                     required
-                    placeholder="16"
+                    placeholder={t('patientForm.respiratoryRatePlaceholder')}
                     className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
                   />
                 </div>
@@ -295,12 +295,12 @@ export default function EditConsultationPage() {
             <div className="bg-[rgb(var(--card))] rounded-lg border border-[rgb(var(--border))] p-6">
               <h2 className="text-xl font-semibold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
                 <FaNotesMedical className="text-[rgb(var(--success))]" />
-                Diagnóstico y Plan del Médico
+                {t('patientForm.doctorDiagnosis')}
               </h2>
               
               <div>
                 <label className="block text-sm font-medium text-[rgb(var(--foreground))] mb-2">
-                  Impresiones, diagnóstico, plan de tratamiento <span className="text-[rgb(var(--error))]">*</span>
+                  {t('patientForm.doctorNotes')} <span className="text-[rgb(var(--error))]">*</span>
                 </label>
                 <textarea
                   name="doctorNotes"
@@ -310,7 +310,7 @@ export default function EditConsultationPage() {
                   rows={8}
                   minLength={50}
                   className="w-full px-4 py-2 bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] text-[rgb(var(--foreground))]"
-                  placeholder="Escriba aquí sus observaciones médicas, diagnóstico y plan..."
+                  placeholder={t('patientForm.doctorNotesPlaceholder')}
                 />
               </div>
             </div>
@@ -325,12 +325,12 @@ export default function EditConsultationPage() {
                 {saving ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Guardando...</span>
+                    <span>{t('patientForm.saving')}</span>
                   </>
                 ) : (
                   <>
                     <FaSave />
-                    <span>💾 Guardar Cambios</span>
+                    <span>💾 {t('patientForm.saveChanges')}</span>
                   </>
                 )}
               </button>
@@ -339,7 +339,7 @@ export default function EditConsultationPage() {
                 href={`/patients/${params.id}`}
                 className="px-6 py-3 bg-[rgb(var(--background))] text-[rgb(var(--foreground))] border border-[rgb(var(--border))] rounded-lg hover:bg-[rgb(var(--gray-very-light))] transition-colors font-medium text-center"
               >
-                ❌ Cancelar
+                ❌ {t('common.cancel')}
               </Link>
             </div>
           </form>
