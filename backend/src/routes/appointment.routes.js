@@ -1,24 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const appointmentController = require('../controllers/appointmentController');
-const { protect, checkPermission } = require('../middlewares/auth');
+const { protect } = require('../middlewares/auth');
 const { checkSubscription } = require('../middlewares/subscription');
 
 // Todas las rutas protegidas (autenticación + suscripción)
 router.use(protect);
 router.use(checkSubscription);
 
-// Rutas de citas (requieren permiso)
-router.post('/', checkPermission('canScheduleAppointments'), appointmentController.createAppointment);
-router.get('/', checkPermission('canScheduleAppointments'), appointmentController.getAllAppointments);
-router.get('/doctor/:doctorId', checkPermission('canScheduleAppointments'), appointmentController.getAppointmentsByDoctor);
-router.get('/patient/:patientId', checkPermission('canScheduleAppointments'), appointmentController.getAppointmentsByPatient);
-router.get('/today/:doctorId', checkPermission('canScheduleAppointments'), appointmentController.getTodaySchedule);
-router.get('/:id', checkPermission('canScheduleAppointments'), appointmentController.getAppointmentById);
-router.put('/:id', checkPermission('canScheduleAppointments'), appointmentController.updateAppointment);
-router.patch('/:id/confirm', checkPermission('canScheduleAppointments'), appointmentController.confirmAppointment);
-router.patch('/:id/cancel', checkPermission('canScheduleAppointments'), appointmentController.cancelAppointment);
-router.patch('/:id/complete', checkPermission('canScheduleAppointments'), appointmentController.completeAppointment);
-router.delete('/:id', checkPermission('canScheduleAppointments'), appointmentController.deleteAppointment);
+// Rutas de citas (SIN checkPermission temporal)
+router.post('/', appointmentController.createAppointment);
+router.get('/', appointmentController.getAllAppointments);
+router.get('/doctor/:doctorId', appointmentController.getAppointmentsByDoctor);
+router.get('/patient/:patientId', appointmentController.getAppointmentsByPatient);
+router.get('/today/:doctorId', appointmentController.getTodaySchedule);
+router.get('/:id', appointmentController.getAppointmentById);
+router.put('/:id', appointmentController.updateAppointment);
+router.patch('/:id/confirm', appointmentController.confirmAppointment);
+router.patch('/:id/cancel', appointmentController.cancelAppointment);
+router.patch('/:id/complete', appointmentController.completeAppointment);
+router.delete('/:id', appointmentController.deleteAppointment);
 
 module.exports = router;

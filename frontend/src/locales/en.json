@@ -26,7 +26,14 @@
     "previous": "Previous",
     "next": "Next",
     "page": "Page",
-    "of": "of"
+    "of": "of",
+    "back": "Back",
+    "today": "Today",
+    "clear": "Clear",
+    "retry": "Retry",
+    "tomorrow": "Tomorrow",
+    "quickFilters": "Quick Filters",
+    "noResults": "No results"
   },
   "theme": {
     "soft": "Soft",
@@ -60,6 +67,9 @@
     "emitRecipe": "Issue Recipe",
     "statistics": "Statistics",
     "settings": "Settings"
+  },
+  "sidebar": {
+    "help": "Help"
   },
   "panel": {
     "welcome": "Welcome",
@@ -141,15 +151,30 @@
   },
   "appointments": {
     "title": "Appointments",
-    "subtitle": "Manage medical appointments",
+    "subtitle": "Manage your medical appointments",
+    "new": {
+      "title": "New Appointment"
+    },
+    "form": {
+      "patient": "Patient",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration (minutes)",
+      "type": "Appointment Type",
+      "reason": "Reason for Visit",
+      "notes": "Additional Notes"
+    },
+    "create": {
+      "button": "Create Appointment",
+      "success": "Appointment created successfully"
+    },
     "today": "Today's Appointments",
     "upcoming": "Upcoming",
-    "new": "New Appointment",
     "edit": "Edit Appointment",
     "details": "Appointment Details",
     "list": "Appointments List",
     "calendar": "Calendar",
-    "schedule": "Day Schedule",
+    "schedule": "Daily Schedule",
     "noAppointments": "No appointments scheduled",
     "noAppointmentsToday": "No appointments for today",
     "confirmAppointment": "Confirm Appointment",

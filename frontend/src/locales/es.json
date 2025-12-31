@@ -1,14 +1,21 @@
 {
   "common": {
-    "appName": "PaciGest Plus",
-    "loading": "Cargando...",
-    "save": "Guardar",
+    "back": "Volver",
     "cancel": "Cancelar",
-    "delete": "Eliminar",
+    "save": "Guardar",
     "edit": "Editar",
-    "view": "Ver",
+    "delete": "Eliminar",
     "search": "Buscar",
     "filter": "Filtrar",
+    "today": "Hoy",
+    "clear": "Limpiar",
+    "retry": "Reintentar",
+    "tomorrow": "Mañana",
+    "quickFilters": "Filtros Rápidos",
+    "loading": "Cargando...",
+    "noResults": "Sin resultados",
+    "appName": "PaciGest Plus",
+    "view": "Ver",
     "export": "Exportar",
     "import": "Importar",
     "close": "Cerrar",
@@ -184,14 +191,32 @@
       "cancelled": "Cancelada",
       "noShow": "No Asistió"
     },
-    "types": {
-      "first": "Primera Vez",
-      "followup": "Seguimiento",
-      "emergency": "Urgencia",
-      "control": "Control",
-      "surgery": "Cirugía",
-      "other": "Otro"
+    "form": {
+      "patient": "Paciente",
+      "date": "Fecha",
+      "time": "Hora",
+      "duration": "Duración (minutos)",
+      "type": "Tipo de Cita",
+      "reason": "Motivo de Consulta",
+      "notes": "Notas Adicionales"
     },
+    "new_alt": {
+      "title": "Nueva Cita"
+    },
+    "create": {
+      "button": "Crear Cita",
+      "success": "Cita creada exitosamente"
+    }
+  },
+  "types": {
+    "first": "Primera Vez",
+    "followup": "Seguimiento",
+    "emergency": "Urgencia",
+    "control": "Control",
+    "surgery": "Cirugía",
+    "other": "Otro"
+  },
+  "appointmentActions": {
     "actions": "Acciones",
     "patient": "Paciente",
     "doctor": "Médico",

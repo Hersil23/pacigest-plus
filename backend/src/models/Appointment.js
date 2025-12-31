@@ -182,11 +182,10 @@ appointmentSchema.pre('save', async function(next) {
 // MIDDLEWARE PARA SOFT DELETE
 // ============================================
 // Excluir registros eliminados en queries automáticamente
-appointmentSchema.pre(/^find/, function(next) {
+appointmentSchema.pre(/^find/, function() {
   if (!this.getOptions().includeDeleted) {
     this.where({ deletedAt: null });
   }
-  next();
 });
 
 // ============================================

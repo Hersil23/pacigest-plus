@@ -1,8 +1,11 @@
 const Appointment = require('../models/Appointment');
 const Patient = require('../models/Patient');
 const User = require('../models/User');
-const { sendAppointmentConfirmation, sendNewAppointmentNotification, sendAppointmentCancelled } = require('../utils/emailService');
-const logger = require('../utils/logger');
+const { 
+  sendAppointmentConfirmation, 
+  sendAppointmentCancellation, 
+  sendAppointmentRescheduled 
+} = require('../services/emailService');
 
 // ============================================
 // CREAR NUEVA CITA
@@ -17,42 +20,13 @@ exports.createAppointment = async (req, res) => {
 
     // Enviar email de confirmación al paciente (si tiene email)
     if (patient && patient.email) {
-      const appointmentData = {
-        patientEmail: patient.email,
-        patientName: `${patient.firstName} ${patient.lastName}`,
-        doctorName: `${doctor.firstName} ${doctor.lastName}`,
-        appointmentDate: appointment.appointmentDate,
-        appointmentTime: appointment.appointmentTime,
-        clinicName: doctor.clinic?.name,
-        clinicAddress: doctor.clinic?.address ? 
-          `${doctor.clinic.address.street}, ${doctor.clinic.address.city}, ${doctor.clinic.address.state}` : null,
-        clinicPhone: doctor.clinic?.phone,
-        language: patient.language || 'es'
-      };
-
-      await sendAppointmentConfirmation(appointmentData);
-      logger.logEmail(patient.email, 'Confirmación de cita', true);
-    }
-
-    // Enviar email de notificación al médico
-    if (doctor && doctor.email) {
-      const doctorNotification = {
-        doctorEmail: doctor.email,
-        doctorName: `${doctor.firstName} ${doctor.lastName}`,
-        patientName: `${patient.firstName} ${patient.lastName}`,
-        appointmentDate: appointment.appointmentDate,
-        appointmentTime: appointment.appointmentTime,
-        reasonForVisit: appointment.reasonForVisit,
-        language: doctor.preferences?.language || 'es'
-      };
-
-      await sendNewAppointmentNotification(doctorNotification);
-      logger.logEmail(doctor.email, 'Nueva cita agendada', true);
-      logger.logAudit('APPOINTMENT_CREATED', doctor._id, { 
-        appointmentId: appointment._id, 
-        patientId: patient._id, 
-        date: appointment.appointmentDate 
-      });
+      try {
+        await sendAppointmentConfirmation(appointment, patient, doctor);
+        console.log('✅ Email de confirmación enviado a:', patient.email);
+      } catch (emailError) {
+        console.error('❌ Error enviando email de confirmación:', emailError);
+        // No bloqueamos la respuesta si falla el email
+      }
     }
 
     res.status(201).json({
@@ -252,6 +226,21 @@ exports.getAppointmentById = async (req, res) => {
 // ============================================
 exports.updateAppointment = async (req, res) => {
   try {
+    // Obtener cita anterior para comparar fecha/hora
+    const oldAppointment = await Appointment.findById(req.params.id);
+    
+    if (!oldAppointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Cita no encontrada'
+      });
+    }
+
+    // Guardar fecha/hora anterior
+    const oldDate = oldAppointment.appointmentDate;
+    const oldTime = oldAppointment.appointmentTime;
+
+    // Actualizar cita
     const appointment = await Appointment.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -261,11 +250,25 @@ exports.updateAppointment = async (req, res) => {
       }
     );
 
-    if (!appointment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Cita no encontrada'
-      });
+    // Verificar si cambió la fecha o la hora
+    const dateChanged = req.body.appointmentDate && 
+      new Date(req.body.appointmentDate).getTime() !== new Date(oldDate).getTime();
+    const timeChanged = req.body.appointmentTime && 
+      req.body.appointmentTime !== oldTime;
+
+    // Si cambió fecha u hora, enviar email de reagendado
+    if (dateChanged || timeChanged) {
+      const patient = await Patient.findById(appointment.patientId);
+      const doctor = await User.findById(appointment.doctorId);
+
+      if (patient && patient.email) {
+        try {
+          await sendAppointmentRescheduled(appointment, patient, doctor, oldDate, oldTime);
+          console.log('✅ Email de reagendado enviado a:', patient.email);
+        } catch (emailError) {
+          console.error('❌ Error enviando email de reagendado:', emailError);
+        }
+      }
     }
 
     res.status(200).json({
@@ -352,23 +355,12 @@ exports.cancelAppointment = async (req, res) => {
     const doctor = await User.findById(appointment.doctorId);
 
     if (patient && patient.email) {
-      const cancellationData = {
-        patientEmail: patient.email,
-        patientName: `${patient.firstName} ${patient.lastName}`,
-        doctorName: `${doctor.firstName} ${doctor.lastName}`,
-        appointmentDate: appointment.appointmentDate,
-        appointmentTime: appointment.appointmentTime,
-        cancellationReason: appointment.cancellationReason,
-        language: patient.language || 'es'
-      };
-
-      await sendAppointmentCancelled(cancellationData);
-      logger.logEmail(patient.email, 'Cita cancelada', true);
-      logger.logAudit('APPOINTMENT_CANCELLED', doctor._id, { 
-        appointmentId: appointment._id, 
-        patientId: patient._id, 
-        reason: cancellationReason 
-      });
+      try {
+        await sendAppointmentCancellation(appointment, patient, doctor, cancellationReason);
+        console.log('✅ Email de cancelación enviado a:', patient.email);
+      } catch (emailError) {
+        console.error('❌ Error enviando email de cancelación:', emailError);
+      }
     }
 
     res.status(200).json({
