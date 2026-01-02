@@ -3,260 +3,283 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { create } from '@/services/appointmentsService';
-import { getAll as getAllPatients } from '@/services/patientsService';
+
+interface Patient {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  identificationType: string;
+  identificationNumber: string;
+}
 
 export default function NewAppointmentPage() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
-  const [patients, setPatients] = useState<any[]>([]);
   const [loadingPatients, setLoadingPatients] = useState(true);
+  const [error, setError] = useState('');
 
-  // Obtener doctorId del usuario logueado
-  const [doctorId, setDoctorId] = useState('');
+  const [formData, setFormData] = useState({
+    patient: '',
+    date: '',
+    time: '',
+    reason: '',
+    notes: ''
+  });
 
   useEffect(() => {
-  // Cargar doctorId del localStorage
-  const user = localStorage.getItem('user');
-  if (user) {
-    try {
-      const userData = JSON.parse(user);
-      console.log('👤 Usuario desde localStorage:', userData);
-      console.log('🆔 Doctor ID:', userData._id);
-      setDoctorId(userData._id);
-    } catch (error) {
-      console.error('Error parsing user:', error);
-    }
-  } else {
-    console.error('❌ No hay usuario en localStorage');
-  }
+    fetchPatients();
+  }, []);
 
-  // Cargar pacientes
-  loadPatients();
-}, []);
-
-  const loadPatients = async () => {
+  const fetchPatients = async () => {
     try {
-      const response = await getAllPatients();
-      setPatients(response.data || []);
-    } catch (error) {
-      console.error('Error loading patients:', error);
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/patients', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Error fetching patients');
+      
+      const data = await response.json();
+      setPatients(data.data || []);
+    } catch (err) {
+      console.error('Error loading patients:', err);
+      setError(t('errorLoadingPatients') || 'Error loading patients');
     } finally {
       setLoadingPatients(false);
     }
   };
 
-  const [formData, setFormData] = useState({
-    patientId: '',
-    appointmentDate: '',
-    appointmentTime: '',
-    duration: 30,
-    appointmentType: 'seguimiento',
-    reasonForVisit: '',
-    notes: '',
-  });
-
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-
-  console.log('🔵 1. DoctorId al enviar:', doctorId);
-  console.log('🔵 2. FormData completo:', formData);
-  console.log('🔵 3. Datos a enviar:', {
-    ...formData,
-    doctorId,
-    createdBy: doctorId,
-  });
-
-  try {
-    await create({
-      ...formData,
-      doctorId,
-      createdBy: doctorId,
-    });
-
-    alert(t('appointments.create.success') || 'Cita creada exitosamente');
-    router.push('/appointments');
-  } catch (error: any) {
-    console.error('❌ Error creating appointment:', error);
-    console.error('❌ Error response:', error.response?.data);
-    alert(error.response?.data?.message || 'Error al crear la cita');
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     });
   };
 
-  return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <button
-          onClick={() => router.back()}
-          className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
-        >
-          ← {t('common.back')}
-        </button>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {t('appointments.new.title') || 'Nueva Cita'}
-        </h1>
-      </div>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-      {/* Formulario */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Paciente */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('appointments.form.patient') || 'Paciente'} *
-            </label>
-            {loadingPatients ? (
-              <p className="text-sm text-gray-500">Cargando pacientes...</p>
-            ) : (
+    if (!formData.patient || !formData.date || !formData.time || !formData.reason) {
+      setError(t('fillRequiredFields') || 'Please fill all required fields');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const appointmentDateTime = new Date(`${formData.date}T${formData.time}`);
+
+      const appointmentData = {
+        patient: formData.patient,
+        dateTime: appointmentDateTime.toISOString(),
+        reason: formData.reason,
+        notes: formData.notes || undefined
+      };
+
+      const response = await fetch('http://localhost:5000/api/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(appointmentData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error creating appointment');
+      }
+
+      router.push(`/${language}/panel/appointments`);
+    } catch (err: any) {
+      console.error('Error creating appointment:', err);
+      setError(err.message || t('errorCreatingAppointment') || 'Error creating appointment');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen p-6" style={{ backgroundColor: 'rgb(var(--background))' }}>
+      <div className="max-w-2xl mx-auto">
+        <div className="rounded-lg shadow-md p-6" style={{ backgroundColor: 'rgb(var(--card))' }}>
+          <h1 className="text-2xl font-bold mb-6" style={{ color: 'rgb(var(--foreground))' }}>
+            {t('createAppointment') || 'Create Appointment'}
+          </h1>
+
+          {error && (
+            <div className="mb-4 p-4 rounded-lg" style={{ 
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              borderWidth: '1px',
+              borderColor: 'rgb(var(--error))'
+            }}>
+              <p style={{ color: 'rgb(var(--error))' }}>{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Patient Select */}
+            <div>
+              <label htmlFor="patient" className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
+                {t('patient') || 'Patient'} <span style={{ color: 'rgb(var(--error))' }}>*</span>
+              </label>
               <select
-                name="patientId"
-                value={formData.patientId}
-                onChange={handleChange}
+                id="patient"
+                name="patient"
+                value={formData.patient}
+                onChange={handleInputChange}
+                disabled={loadingPatients}
                 required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                style={{
+                  backgroundColor: 'rgb(var(--card))',
+                  color: 'rgb(var(--foreground))',
+                  borderWidth: '1px',
+                  borderColor: 'rgb(var(--border))',
+                  '--tw-ring-color': 'rgb(var(--primary))'
+                } as React.CSSProperties}
               >
-                <option value="">Seleccionar paciente</option>
+                <option value="">
+                  {loadingPatients ? t('loading') || 'Loading...' : t('selectPatient') || 'Select a patient'}
+                </option>
                 {patients.map((patient) => (
                   <option key={patient._id} value={patient._id}>
-                    {patient.firstName} {patient.lastName}
+                    {patient.firstName} {patient.lastName} - {patient.identificationType} {patient.identificationNumber}
                   </option>
                 ))}
               </select>
-            )}
-          </div>
+            </div>
 
-          {/* Fecha y Hora */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('appointments.form.date') || 'Fecha'} *
+              <label htmlFor="date" className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
+                {t('date') || 'Date'} <span style={{ color: 'rgb(var(--error))' }}>*</span>
               </label>
               <input
                 type="date"
-                name="appointmentDate"
-                value={formData.appointmentDate}
-                onChange={handleChange}
+                id="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
                 required
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none transition-all"
+                style={{
+                  backgroundColor: 'rgb(var(--card))',
+                  color: 'rgb(var(--foreground))',
+                  borderWidth: '1px',
+                  borderColor: 'rgb(var(--border))',
+                  '--tw-ring-color': 'rgb(var(--primary))'
+                } as React.CSSProperties}
               />
             </div>
 
+            {/* Time */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('appointments.form.time') || 'Hora'} *
+              <label htmlFor="time" className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
+                {t('time') || 'Time'} <span style={{ color: 'rgb(var(--error))' }}>*</span>
               </label>
               <input
                 type="time"
-                name="appointmentTime"
-                value={formData.appointmentTime}
-                onChange={handleChange}
+                id="time"
+                name="time"
+                value={formData.time}
+                onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none transition-all"
+                style={{
+                  backgroundColor: 'rgb(var(--card))',
+                  color: 'rgb(var(--foreground))',
+                  borderWidth: '1px',
+                  borderColor: 'rgb(var(--border))',
+                  '--tw-ring-color': 'rgb(var(--primary))'
+                } as React.CSSProperties}
               />
             </div>
-          </div>
 
-          {/* Duración y Tipo */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Reason */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('appointments.form.duration') || 'Duración (min)'}
+              <label htmlFor="reason" className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
+                {t('reason') || 'Reason'} <span style={{ color: 'rgb(var(--error))' }}>*</span>
               </label>
-              <select
-                name="duration"
-                value={formData.duration}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                <option value={15}>15 minutos</option>
-                <option value={30}>30 minutos</option>
-                <option value={45}>45 minutos</option>
-                <option value={60}>60 minutos</option>
-              </select>
+              <input
+                type="text"
+                id="reason"
+                name="reason"
+                value={formData.reason}
+                onChange={handleInputChange}
+                required
+                placeholder={t('appointmentReason') || 'e.g., General checkup, Follow-up visit'}
+                className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none transition-all placeholder:opacity-50"
+                style={{
+                  backgroundColor: 'rgb(var(--card))',
+                  color: 'rgb(var(--foreground))',
+                  borderWidth: '1px',
+                  borderColor: 'rgb(var(--border))',
+                  '--tw-ring-color': 'rgb(var(--primary))'
+                } as React.CSSProperties}
+              />
             </div>
 
+            {/* Notes (Optional) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('appointments.form.type') || 'Tipo de Cita'}
+              <label htmlFor="notes" className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
+                {t('notes') || 'Additional Notes'} <span className="text-xs opacity-60">({t('optional') || 'optional'})</span>
               </label>
-              <select
-                name="appointmentType"
-                value={formData.appointmentType}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="primera-vez">Primera Vez</option>
-                <option value="seguimiento">Seguimiento</option>
-                <option value="urgencia">Urgencia</option>
-                <option value="control">Control</option>
-                <option value="cirugia">Cirugía</option>
-                <option value="otro">Otro</option>
-              </select>
+              <textarea
+                id="notes"
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows={4}
+                placeholder={t('additionalNotes') || 'Any additional information...'}
+                className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none resize-none transition-all placeholder:opacity-50"
+                style={{
+                  backgroundColor: 'rgb(var(--card))',
+                  color: 'rgb(var(--foreground))',
+                  borderWidth: '1px',
+                  borderColor: 'rgb(var(--border))',
+                  '--tw-ring-color': 'rgb(var(--primary))'
+                } as React.CSSProperties}
+              />
             </div>
-          </div>
 
-          {/* Motivo */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('appointments.form.reason') || 'Motivo de Consulta'} *
-            </label>
-            <textarea
-              name="reasonForVisit"
-              value={formData.reasonForVisit}
-              onChange={handleChange}
-              required
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              placeholder="Describe el motivo de la consulta..."
-            />
-          </div>
-
-          {/* Notas */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('appointments.form.notes') || 'Notas Adicionales'}
-            </label>
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              rows={2}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              placeholder="Notas opcionales..."
-            />
-          </div>
-
-          {/* Botones */}
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-            >
-              {t('common.cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? 'Creando...' : (t('appointments.create.button') || 'Crear Cita')}
-            </button>
-          </div>
-        </form>
+            {/* Buttons */}
+            <div className="flex gap-4 pt-4">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                disabled={loading}
+                className="flex-1 px-6 py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:opacity-80"
+                style={{
+                  backgroundColor: 'rgb(var(--gray-very-light))',
+                  color: 'rgb(var(--foreground))',
+                  borderWidth: '1px',
+                  borderColor: 'rgb(var(--border))'
+                }}
+              >
+                {t('cancel') || 'Cancel'}
+              </button>
+              <button
+                type="submit"
+                disabled={loading || loadingPatients}
+                className="flex-1 px-6 py-3 rounded-lg font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:opacity-90"
+                style={{
+                  backgroundColor: 'rgb(var(--primary))'
+                }}
+              >
+                {loading ? t('creating') || 'Creating...' : t('createAppointment') || 'Create Appointment'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
