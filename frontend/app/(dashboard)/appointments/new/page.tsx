@@ -74,14 +74,17 @@ export default function NewAppointmentPage() {
 
     try {
       const token = localStorage.getItem('token');
-      const appointmentDateTime = new Date(`${formData.date}T${formData.time}`);
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
 
       const appointmentData = {
-        patient: formData.patient,
-        appointmentDate: appointmentDateTime.toISOString(),
-        reasonForVisit: formData.reason, 
+        patientId: formData.patient,
+        doctorId: user._id || user.id,
+        appointmentDate: formData.date,
+        appointmentTime: formData.time,
+        reasonForVisit: formData.reason,
         notes: formData.notes || undefined
       };
+
       const response = await fetch('http://localhost:5000/api/appointments', {
         method: 'POST',
         headers: {
@@ -96,7 +99,7 @@ export default function NewAppointmentPage() {
         throw new Error(errorData.message || 'Error creating appointment');
       }
 
-      router.push(`/${language}/panel/appointments`);
+      router.push('/appointments');
     } catch (err: any) {
       console.error('Error creating appointment:', err);
       setError(err.message || t('appointments.errorCreatingAppointment'));
@@ -109,9 +112,29 @@ export default function NewAppointmentPage() {
     <div className="min-h-screen p-6" style={{ backgroundColor: 'rgb(var(--background))' }}>
       <div className="max-w-2xl mx-auto">
         <div className="rounded-lg shadow-md p-6" style={{ backgroundColor: 'rgb(var(--card))' }}>
-          <h1 className="text-2xl font-bold mb-6" style={{ color: 'rgb(var(--foreground))' }}>
-            {t('appointments.createAppointment')}
-          </h1>
+          {/* Header con botón Back */}
+          <div className="mb-6">
+            <button
+              onClick={() => router.back()}
+              disabled={loading}
+              className="flex items-center gap-2 mb-4 px-4 py-2 rounded-lg transition-all hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: 'rgb(var(--card))',
+                color: 'rgb(var(--foreground))',
+                borderWidth: '1px',
+                borderColor: 'rgb(var(--border))'
+              }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              {t('common.back')}
+            </button>
+
+            <h1 className="text-2xl font-bold" style={{ color: 'rgb(var(--foreground))' }}>
+              {t('appointments.createAppointment')}
+            </h1>
+          </div>
 
           {error && (
             <div className="mb-4 p-4 rounded-lg" style={{ 

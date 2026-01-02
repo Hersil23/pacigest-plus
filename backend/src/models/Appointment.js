@@ -175,7 +175,6 @@ appointmentSchema.pre('save', async function(next) {
     const count = await mongoose.model('Appointment').countDocuments();
     this.appointmentNumber = `APT-${date}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
 });
 
 // ============================================

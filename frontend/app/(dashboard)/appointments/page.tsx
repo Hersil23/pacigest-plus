@@ -1,280 +1,264 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import AppointmentCard from '@/components/appointments/AppointmentCard';
-import AppointmentFilters from '@/components/appointments/AppointmentFilters';
-import { getByDoctor, confirm, cancel, deleteAppointment } from '@/services/appointmentsService';
-import Link from 'next/link';
-import { FaPlus, FaCalendar } from 'react-icons/fa';
+
+interface Appointment {
+  _id: string;
+  appointmentNumber: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  reasonForVisit: string;
+  status: string;
+  patientId: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+  };
+  notes?: string;
+}
 
 export default function AppointmentsPage() {
-  const { t } = useLanguage();
-  const { user } = useAuth();
+  const router = useRouter();
+  const { t, language } = useLanguage();
   
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<any>({});
-  const [stats, setStats] = useState({
-    total: 0,
-    today: 0,
-    pending: 0,
-    confirmed: 0
-  });
+  const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Cargar citas
   useEffect(() => {
-    loadAppointments();
-  }, [filters, user]);
+    fetchAppointments();
+  }, []);
 
-  const loadAppointments = async () => {
-    if (!user) return;
-
+  const fetchAppointments = async () => {
     try {
-      setLoading(true);
-      setError(null);
-
-      const response = await getByDoctor(user._id, {
-        status: filters.status || undefined,
-        date: filters.date || undefined,
-        limit: 20
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/appointments', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
-      let appointmentsData = response.data || [];
-
-      // Filtro de búsqueda en frontend
-      if (filters.search && filters.search.trim() !== '') {
-        const searchLower = filters.search.toLowerCase();
-        appointmentsData = appointmentsData.filter((apt: any) => {
-          const patientName = `${apt.patientId.firstName} ${apt.patientId.lastName}`.toLowerCase();
-          const reason = apt.reasonForVisit.toLowerCase();
-          return patientName.includes(searchLower) || reason.includes(searchLower);
-        });
-      }
-
-      setAppointments(appointmentsData);
-      calculateStats(appointmentsData);
-
-    } catch (err: any) {
+      if (!response.ok) throw new Error('Error fetching appointments');
+      
+      const data = await response.json();
+      setAppointments(data.data || []);
+    } catch (err) {
       console.error('Error loading appointments:', err);
-      setError(err.message || 'Error al cargar citas');
+      setError(t('appointments.error'));
     } finally {
       setLoading(false);
     }
   };
 
-  // Calcular estadísticas
-  const calculateStats = (data: any[]) => {
-    const today = new Date().toISOString().split('T')[0];
-    
-    setStats({
-      total: data.length,
-      today: data.filter((apt: any) => 
-        apt.appointmentDate.split('T')[0] === today
-      ).length,
-      pending: data.filter((apt: any) => apt.status === 'pending').length,
-      confirmed: data.filter((apt: any) => apt.status === 'confirmed').length
+  const getStatusColor = (status: string) => {
+    const colors = {
+      'pending': 'rgb(234, 179, 8)',      // Amarillo
+      'confirmed': 'rgb(34, 197, 94)',    // Verde
+      'in-progress': 'rgb(59, 130, 246)', // Azul
+      'completed': 'rgb(156, 163, 175)',  // Gris
+      'cancelled': 'rgb(239, 68, 68)',    // Rojo
+      'no-show': 'rgb(249, 115, 22)'      // Naranja
+    };
+    return colors[status as keyof typeof colors] || 'rgb(156, 163, 175)';
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
-  // Confirmar cita
-  const handleConfirm = async (id: string) => {
-    try {
-      await confirm(id);
-      loadAppointments();
-      alert(t('appointments.confirmed'));
-    } catch (err: any) {
-      console.error('Error confirming appointment:', err);
-      alert(t('appointments.error'));
-    }
-  };
+  const filteredAppointments = appointments.filter(apt => {
+    const matchesStatus = statusFilter === 'all' || apt.status === statusFilter;
+    const matchesSearch = searchQuery === '' || 
+      `${apt.patientId.firstName} ${apt.patientId.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      apt.reasonForVisit.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesStatus && matchesSearch;
+  });
 
-  // Cancelar cita
-  const handleCancel = async (id: string) => {
-    const reason = prompt(t('appointments.cancellationReason'));
-    if (!reason) return;
-
-    const confirmed = window.confirm(t('appointments.confirmCancel'));
-    if (!confirmed) return;
-
-    try {
-      await cancel(id, reason);
-      loadAppointments();
-      alert(t('appointments.cancelled'));
-    } catch (err: any) {
-      console.error('Error cancelling appointment:', err);
-      alert(t('appointments.error'));
-    }
-  };
-
-  // Eliminar cita
-  const handleDelete = async (id: string) => {
-    const confirmed = window.confirm(t('appointments.confirmDelete'));
-    if (!confirmed) return;
-
-    try {
-      await deleteAppointment(id);
-      loadAppointments();
-      alert(t('appointments.deleted'));
-    } catch (err: any) {
-      console.error('Error deleting appointment:', err);
-      alert(t('appointments.error'));
-    }
-  };
-
-  // Manejar cambio de filtros
-  const handleFilterChange = (newFilters: any) => {
-    setFilters(newFilters);
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: 'rgb(var(--background))' }}>
+        <p style={{ color: 'rgb(var(--foreground))' }}>{t('common.loading')}</p>
+      </div>
+    );
+  }
 
   return (
-    <ProtectedRoute>
-      <div className="max-w-7xl mx-auto space-y-6 p-6">
-        
+    <div className="min-h-screen p-6" style={{ backgroundColor: 'rgb(var(--background))' }}>
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            {/* BOTÓN VOLVER */}
-            <Link
-              href="/panel"
-              className="inline-flex items-center gap-2 text-[rgb(var(--primary))] hover:text-[rgb(var(--primary-hover))] mb-3"
+        <div className="mb-6">
+          {/* Back Button */}
+          <button
+            onClick={() => router.push('/panel')}
+            className="flex items-center gap-2 mb-4 px-4 py-2 rounded-lg transition-all hover:opacity-80"
+            style={{
+              backgroundColor: 'rgb(var(--card))',
+              color: 'rgb(var(--foreground))',
+              borderWidth: '1px',
+              borderColor: 'rgb(var(--border))'
+            }}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            {t('common.back')}
+          </button>
+
+          {/* Title and New Button */}
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold" style={{ color: 'rgb(var(--foreground))' }}>
+                {t('appointments.title')}
+              </h1>
+              <p className="mt-1" style={{ color: 'rgb(var(--foreground))', opacity: 0.7 }}>
+                {t('appointments.subtitle')}
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/appointments/new')}
+              className="px-6 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90 flex items-center gap-2"
+              style={{ backgroundColor: 'rgb(var(--primary))' }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span>{t('print.back')}</span>
-            </Link>
-            
-            <h1 className="text-3xl font-bold text-[rgb(var(--foreground))]">
-              📅 {t('appointments.title')}
-            </h1>
-            <p className="text-[rgb(var(--gray-medium))] mt-1">
-              {t('appointments.subtitle')}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/appointments/today"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[rgb(var(--info)/0.1)] text-[rgb(var(--info))] hover:bg-[rgb(var(--info)/0.2)] transition-colors font-medium"
-            >
-              <FaCalendar />
-              <span>{t('appointments.schedule')}</span>
-            </Link>
-            <Link
-              href="/appointments/new"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[rgb(var(--primary))] text-white hover:bg-[rgb(var(--primary-hover))] transition-colors font-medium shadow-md"
-            >
-              <FaPlus />
-              <span>{t('appointments.new')}</span>
-            </Link>
+              {t('appointments.new')}
+            </button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[rgb(var(--card))] rounded-lg p-4 border border-[rgb(var(--border))]">
-            <p className="text-sm text-[rgb(var(--gray-medium))] mb-1">
-              {t('appointments.stats.total')}
-            </p>
-            <p className="text-2xl font-bold text-[rgb(var(--foreground))]">
-              {stats.total}
-            </p>
-          </div>
-          <div className="bg-[rgb(var(--card))] rounded-lg p-4 border border-[rgb(var(--border))]">
-            <p className="text-sm text-[rgb(var(--gray-medium))] mb-1">
-              {t('appointments.stats.today')}
-            </p>
-            <p className="text-2xl font-bold text-[rgb(var(--info))]">
-              {stats.today}
-            </p>
-          </div>
-          <div className="bg-[rgb(var(--card))] rounded-lg p-4 border border-[rgb(var(--border))]">
-            <p className="text-sm text-[rgb(var(--gray-medium))] mb-1">
-              {t('appointments.stats.pending')}
-            </p>
-            <p className="text-2xl font-bold text-[rgb(var(--warning))]">
-              {stats.pending}
-            </p>
-          </div>
-          <div className="bg-[rgb(var(--card))] rounded-lg p-4 border border-[rgb(var(--border))]">
-            <p className="text-sm text-[rgb(var(--gray-medium))] mb-1">
-              {t('appointments.stats.confirmed')}
-            </p>
-            <p className="text-2xl font-bold text-[rgb(var(--success))]">
-              {stats.confirmed}
-            </p>
+        {/* Filters */}
+        <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'rgb(var(--card))' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Search */}
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
+                {t('common.search')}
+              </label>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('appointments.searchPlaceholder')}
+                className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none transition-all"
+                style={{
+                  backgroundColor: 'rgb(var(--background))',
+                  color: 'rgb(var(--foreground))',
+                  borderWidth: '1px',
+                  borderColor: 'rgb(var(--border))',
+                  '--tw-ring-color': 'rgb(var(--primary))'
+                } as React.CSSProperties}
+              />
+            </div>
+
+            {/* Status Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
+                {t('common.status')}
+              </label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none transition-all"
+                style={{
+                  backgroundColor: 'rgb(var(--background))',
+                  color: 'rgb(var(--foreground))',
+                  borderWidth: '1px',
+                  borderColor: 'rgb(var(--border))',
+                  '--tw-ring-color': 'rgb(var(--primary))'
+                } as React.CSSProperties}
+              >
+                <option value="all">{t('appointments.status.all')}</option>
+                <option value="pending">{t('appointments.status.pending')}</option>
+                <option value="confirmed">{t('appointments.status.confirmed')}</option>
+                <option value="in-progress">{t('appointments.status.inProgress')}</option>
+                <option value="completed">{t('appointments.status.completed')}</option>
+                <option value="cancelled">{t('appointments.status.cancelled')}</option>
+                <option value="no-show">{t('appointments.status.noShow')}</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Content: Filtros + Lista */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          
-          {/* Filtros (Sidebar) */}
-          <div className="lg:col-span-1">
-            <AppointmentFilters onFilterChange={handleFilterChange} />
+        {/* Error */}
+        {error && (
+          <div className="mb-6 p-4 rounded-lg" style={{ 
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            borderWidth: '1px',
+            borderColor: 'rgb(var(--error))'
+          }}>
+            <p style={{ color: 'rgb(var(--error))' }}>{error}</p>
           </div>
+        )}
 
-          {/* Lista de Citas */}
-          <div className="lg:col-span-3">
-            
-            {/* Loading */}
-            {loading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[rgb(var(--primary))]"></div>
-              </div>
-            )}
+        {/* Appointments List */}
+        {filteredAppointments.length === 0 ? (
+          <div className="rounded-lg shadow-md p-12 text-center" style={{ backgroundColor: 'rgb(var(--card))' }}>
+            <p className="text-lg" style={{ color: 'rgb(var(--foreground))', opacity: 0.7 }}>
+              {t('appointments.noAppointments')}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAppointments.map((appointment) => (
+              <div
+                key={appointment._id}
+                className="rounded-lg shadow-md p-6 transition-all hover:shadow-lg cursor-pointer"
+                style={{ backgroundColor: 'rgb(var(--card))' }}
+                onClick={() => router.push(`/appointments/${appointment._id}`)}
+              >
+                {/* Status Badge */}
+                <div className="flex justify-between items-start mb-4">
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-medium text-white"
+                    style={{ backgroundColor: getStatusColor(appointment.status) }}
+                  >
+                    {t(`appointments.status.${appointment.status}`)}
+                  </span>
+                  <span className="text-sm" style={{ color: 'rgb(var(--foreground))', opacity: 0.6 }}>
+                    #{appointment.appointmentNumber}
+                  </span>
+                </div>
 
-            {/* Error */}
-            {error && !loading && (
-              <div className="bg-[rgb(var(--error)/0.1)] border border-[rgb(var(--error)/0.3)] rounded-lg p-4 text-center">
-                <p className="text-[rgb(var(--error))]">❌ {error}</p>
-                <button
-                  onClick={loadAppointments}
-                  className="mt-3 px-4 py-2 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))]"
-                >
-                  {t('common.retry') || 'Reintentar'}
-                </button>
-              </div>
-            )}
+                {/* Patient */}
+                <h3 className="text-lg font-semibold mb-2" style={{ color: 'rgb(var(--foreground))' }}>
+                  {appointment.patientId.firstName} {appointment.patientId.lastName}
+                </h3>
 
-            {/* Sin resultados */}
-            {!loading && !error && appointments.length === 0 && (
-              <div className="bg-[rgb(var(--card))] rounded-lg p-12 border border-[rgb(var(--border))] text-center">
-                <p className="text-[rgb(var(--gray-medium))] text-lg mb-4">
-                  📅 {t('appointments.noAppointments')}
+                {/* Date & Time */}
+                <div className="flex items-center gap-2 mb-3" style={{ color: 'rgb(var(--foreground))', opacity: 0.8 }}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-sm">{formatDate(appointment.appointmentDate)}</span>
+                </div>
+
+                <div className="flex items-center gap-2 mb-4" style={{ color: 'rgb(var(--foreground))', opacity: 0.8 }}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm">{appointment.appointmentTime}</span>
+                </div>
+
+                {/* Reason */}
+                <p className="text-sm line-clamp-2" style={{ color: 'rgb(var(--foreground))', opacity: 0.7 }}>
+                  {appointment.reasonForVisit}
                 </p>
-                <Link
-                  href="/appointments/new"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[rgb(var(--primary))] text-white rounded-lg hover:bg-[rgb(var(--primary-hover))] transition-colors"
-                >
-                  <FaPlus />
-                  <span>{t('appointments.new')}</span>
-                </Link>
               </div>
-            )}
-
-            {/* Lista de Cards */}
-            {!loading && !error && appointments.length > 0 && (
-              <div className="space-y-4">
-                {appointments.map((appointment) => (
-                  <AppointmentCard
-                    key={appointment._id}
-                    appointment={appointment}
-                    onConfirm={handleConfirm}
-                    onCancel={handleCancel}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            )}
+            ))}
           </div>
-        </div>
-
+        )}
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }
