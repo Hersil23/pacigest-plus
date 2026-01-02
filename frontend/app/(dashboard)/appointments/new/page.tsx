@@ -57,26 +57,35 @@ export default function NewAppointmentPage() {
     notes: '',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      await create({
-        ...formData,
-        doctorId,
-        createdBy: doctorId,
-      });
+  console.log('🔵 1. DoctorId al enviar:', doctorId);
+  console.log('🔵 2. FormData completo:', formData);
+  console.log('🔵 3. Datos a enviar:', {
+    ...formData,
+    doctorId,
+    createdBy: doctorId,
+  });
 
-      alert(t('appointments.create.success') || 'Cita creada exitosamente');
-      router.push('/appointments');
-    } catch (error: any) {
-      console.error('Error creating appointment:', error);
-      alert(error.response?.data?.message || 'Error al crear la cita');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    await create({
+      ...formData,
+      doctorId,
+      createdBy: doctorId,
+    });
+
+    alert(t('appointments.create.success') || 'Cita creada exitosamente');
+    router.push('/appointments');
+  } catch (error: any) {
+    console.error('❌ Error creating appointment:', error);
+    console.error('❌ Error response:', error.response?.data);
+    alert(error.response?.data?.message || 'Error al crear la cita');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({

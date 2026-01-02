@@ -45,29 +45,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (token) {
         const currentUser = await authApi.getCurrentUser();
         setUser(currentUser);
+        localStorage.setItem('user', JSON.stringify(currentUser)); // ✅ AGREGADO
       }
     } catch (error) {
       console.error('Auth check failed:', error);
       localStorage.removeItem('token');
+      localStorage.removeItem('user'); // ✅ AGREGADO
     } finally {
       setLoading(false);
     }
   };
 
   const login = async (email: string, password: string) => {
-    try {
-      const response = await authApi.login(email, password);
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-        const currentUser = await authApi.getCurrentUser();
-        setUser(currentUser);
-        router.push('/panel');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+  console.log('🔵 1. Login iniciado con:', email);
+  try {
+    console.log('🔵 2. Llamando authApi.login...');
+    const response = await authApi.login(email, password);
+    console.log('🔵 3. Respuesta de login:', response);
+    
+    if (response.token) {
+      console.log('🔵 4. Token recibido:', response.token);
+      localStorage.setItem('token', response.token);
+      console.log('🔵 5. Token guardado en localStorage');
+      
+      console.log('🔵 6. Llamando authApi.getCurrentUser...');
+      const currentUser = await authApi.getCurrentUser();
+      console.log('🔵 7. Usuario recibido:', currentUser);
+      
+      setUser(currentUser);
+      console.log('🔵 8. Usuario guardado en state');
+      
+      localStorage.setItem('user', JSON.stringify(currentUser));
+      console.log('🔵 9. Usuario guardado en localStorage');
+      console.log('🔵 10. Verificando localStorage:', localStorage.getItem('user'));
+      
+      console.log('🔵 11. Redirigiendo a /panel...');
+      router.push('/panel');
+    } else {
+      console.error('❌ NO HAY TOKEN en la respuesta:', response);
     }
-  };
+  } catch (error) {
+    console.error('❌ ERROR en login:', error);
+    throw error;
+  }
+};
 
   const register = async (userData: any) => {
     try {
@@ -115,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Cargar usuario actual
       const currentUser = await authApi.getCurrentUser();
       setUser(currentUser);
+      localStorage.setItem('user', JSON.stringify(currentUser)); // ✅ AGREGADO
 
       // Redirigir al panel
       router.push('/panel');
@@ -126,6 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user'); // ✅ AGREGADO
     setUser(null);
     router.push('/');
   };
