@@ -48,7 +48,7 @@ export default function NewAppointmentPage() {
       setPatients(data.data || []);
     } catch (err) {
       console.error('Error loading patients:', err);
-      setError(t('errorLoadingPatients') || 'Error loading patients');
+      setError(t('appointments.errorLoadingPatients'));
     } finally {
       setLoadingPatients(false);
     }
@@ -67,7 +67,7 @@ export default function NewAppointmentPage() {
     setLoading(true);
 
     if (!formData.patient || !formData.date || !formData.time || !formData.reason) {
-      setError(t('fillRequiredFields') || 'Please fill all required fields');
+      setError(t('appointments.fillRequiredFields'));
       setLoading(false);
       return;
     }
@@ -78,11 +78,10 @@ export default function NewAppointmentPage() {
 
       const appointmentData = {
         patient: formData.patient,
-        dateTime: appointmentDateTime.toISOString(),
-        reason: formData.reason,
+        appointmentDate: appointmentDateTime.toISOString(),
+        reasonForVisit: formData.reason, 
         notes: formData.notes || undefined
       };
-
       const response = await fetch('http://localhost:5000/api/appointments', {
         method: 'POST',
         headers: {
@@ -100,7 +99,7 @@ export default function NewAppointmentPage() {
       router.push(`/${language}/panel/appointments`);
     } catch (err: any) {
       console.error('Error creating appointment:', err);
-      setError(err.message || t('errorCreatingAppointment') || 'Error creating appointment');
+      setError(err.message || t('appointments.errorCreatingAppointment'));
     } finally {
       setLoading(false);
     }
@@ -111,7 +110,7 @@ export default function NewAppointmentPage() {
       <div className="max-w-2xl mx-auto">
         <div className="rounded-lg shadow-md p-6" style={{ backgroundColor: 'rgb(var(--card))' }}>
           <h1 className="text-2xl font-bold mb-6" style={{ color: 'rgb(var(--foreground))' }}>
-            {t('createAppointment') || 'Create Appointment'}
+            {t('appointments.createAppointment')}
           </h1>
 
           {error && (
@@ -128,7 +127,7 @@ export default function NewAppointmentPage() {
             {/* Patient Select */}
             <div>
               <label htmlFor="patient" className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
-                {t('patient') || 'Patient'} <span style={{ color: 'rgb(var(--error))' }}>*</span>
+                {t('appointments.form.patient')} <span style={{ color: 'rgb(var(--error))' }}>*</span>
               </label>
               <select
                 id="patient"
@@ -147,7 +146,7 @@ export default function NewAppointmentPage() {
                 } as React.CSSProperties}
               >
                 <option value="">
-                  {loadingPatients ? t('loading') || 'Loading...' : t('selectPatient') || 'Select a patient'}
+                  {loadingPatients ? t('common.loading') : t('appointments.selectPatient')}
                 </option>
                 {patients.map((patient) => (
                   <option key={patient._id} value={patient._id}>
@@ -160,7 +159,7 @@ export default function NewAppointmentPage() {
             {/* Date */}
             <div>
               <label htmlFor="date" className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
-                {t('date') || 'Date'} <span style={{ color: 'rgb(var(--error))' }}>*</span>
+                {t('common.date')} <span style={{ color: 'rgb(var(--error))' }}>*</span>
               </label>
               <input
                 type="date"
@@ -184,7 +183,7 @@ export default function NewAppointmentPage() {
             {/* Time */}
             <div>
               <label htmlFor="time" className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
-                {t('time') || 'Time'} <span style={{ color: 'rgb(var(--error))' }}>*</span>
+                {t('common.time')} <span style={{ color: 'rgb(var(--error))' }}>*</span>
               </label>
               <input
                 type="time"
@@ -207,7 +206,7 @@ export default function NewAppointmentPage() {
             {/* Reason */}
             <div>
               <label htmlFor="reason" className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
-                {t('reason') || 'Reason'} <span style={{ color: 'rgb(var(--error))' }}>*</span>
+                {t('appointments.form.reason')} <span style={{ color: 'rgb(var(--error))' }}>*</span>
               </label>
               <input
                 type="text"
@@ -216,7 +215,7 @@ export default function NewAppointmentPage() {
                 value={formData.reason}
                 onChange={handleInputChange}
                 required
-                placeholder={t('appointmentReason') || 'e.g., General checkup, Follow-up visit'}
+                placeholder={t('appointments.appointmentReason')}
                 className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none transition-all placeholder:opacity-50"
                 style={{
                   backgroundColor: 'rgb(var(--card))',
@@ -231,7 +230,7 @@ export default function NewAppointmentPage() {
             {/* Notes (Optional) */}
             <div>
               <label htmlFor="notes" className="block text-sm font-medium mb-2" style={{ color: 'rgb(var(--foreground))' }}>
-                {t('notes') || 'Additional Notes'} <span className="text-xs opacity-60">({t('optional') || 'optional'})</span>
+                {t('appointments.form.notes')} <span className="text-xs opacity-60">({t('appointments.optional')})</span>
               </label>
               <textarea
                 id="notes"
@@ -239,7 +238,7 @@ export default function NewAppointmentPage() {
                 value={formData.notes}
                 onChange={handleInputChange}
                 rows={4}
-                placeholder={t('additionalNotes') || 'Any additional information...'}
+                placeholder={t('appointments.additionalNotes')}
                 className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none resize-none transition-all placeholder:opacity-50"
                 style={{
                   backgroundColor: 'rgb(var(--card))',
@@ -265,7 +264,7 @@ export default function NewAppointmentPage() {
                   borderColor: 'rgb(var(--border))'
                 }}
               >
-                {t('cancel') || 'Cancel'}
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
@@ -275,7 +274,7 @@ export default function NewAppointmentPage() {
                   backgroundColor: 'rgb(var(--primary))'
                 }}
               >
-                {loading ? t('creating') || 'Creating...' : t('createAppointment') || 'Create Appointment'}
+                {loading ? t('appointments.creating') : t('appointments.createAppointment')}
               </button>
             </div>
           </form>

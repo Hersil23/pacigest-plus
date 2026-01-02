@@ -147,6 +147,14 @@
     }
   },
   "appointments": {
+    "createAppointment": "Crear Cita",
+    "errorLoadingPatients": "Error al cargar pacientes",
+    "appointmentReason": "Ej: Chequeo general, Visita de seguimiento",
+    "additionalNotes": "Información adicional...",
+    "optional": "opcional",
+    "creating": "Creando...",
+    "fillRequiredFields": "Por favor complete todos los campos requeridos",
+    "errorCreatingAppointment": "Error al crear cita",
     "title": "Citas",
     "subtitle": "Gestiona las citas médicas",
     "today": "Citas de Hoy",

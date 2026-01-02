@@ -149,7 +149,15 @@
       "inactive": "Inactive"
     }
   },
-  "appointments": {
+ "appointments": {
+    "createAppointment": "Create Appointment",
+    "errorLoadingPatients": "Error loading patients",
+    "appointmentReason": "e.g., General checkup, Follow-up visit",
+    "additionalNotes": "Any additional information...",
+    "optional": "optional",
+    "creating": "Creating...",
+    "fillRequiredFields": "Please fill all required fields",
+    "errorCreatingAppointment": "Error creating appointment",
     "title": "Appointments",
     "subtitle": "Manage your medical appointments",
     "new": {
