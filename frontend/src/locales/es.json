@@ -256,6 +256,40 @@
       "today": "Hoy",
       "pending": "Pendientes",
       "confirmed": "Confirmadas"
+    },
+    "calendarView": {
+      "title": "Calendario de Citas",
+      "subtitle": "Vista mensual",
+      "today": "Hoy",
+      "month": "Mes",
+      "week": "Semana",
+      "day": "Día",
+      "noAppointments": "Sin citas",
+      "clickToAdd": "Click para agregar cita",
+      "viewDay": "Ver día completo",
+      "months": {
+        "0": "Enero",
+        "1": "Febrero",
+        "2": "Marzo",
+        "3": "Abril",
+        "4": "Mayo",
+        "5": "Junio",
+        "6": "Julio",
+        "7": "Agosto",
+        "8": "Septiembre",
+        "9": "Octubre",
+        "10": "Noviembre",
+        "11": "Diciembre"
+      },
+      "days": {
+        "0": "Dom",
+        "1": "Lun",
+        "2": "Mar",
+        "3": "Mié",
+        "4": "Jue",
+        "5": "Vie",
+        "6": "Sáb"
+      }
     }
   },
   "types": {

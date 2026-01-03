@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react';
 import SidebarItem from './SidebarItem';
 import { NavSection } from '@/types/navigation';
+import dashboardService, { DashboardStats } from '@/services/dashboardService';
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Cargar estado colapsado de localStorage
   useEffect(() => {
@@ -15,6 +18,22 @@ export default function Sidebar() {
     }
   }, []);
 
+  // Cargar estadísticas
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const data = await dashboardService.getStats();
+      setStats(data);
+    } catch (err) {
+      console.error('Error loading sidebar stats:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Guardar estado en localStorage
   const toggleCollapsed = () => {
     const newState = !collapsed;
@@ -22,7 +41,7 @@ export default function Sidebar() {
     localStorage.setItem('sidebar-collapsed', newState.toString());
   };
 
-  // Navegación principal
+  // Navegación principal con datos dinámicos
   const mainNav: NavSection = {
     items: [
       {
@@ -36,14 +55,14 @@ export default function Sidebar() {
         label: 'Pacientes',
         labelKey: 'navigation.patients',
         href: '/patients',
-        badge: 127
+        badge: loading ? undefined : stats?.stats.totalPatients || 0
       },
       {
         icon: '📅',
         label: 'Citas',
         labelKey: 'navigation.appointments',
         href: '/appointments',
-        badge: 8,
+        badge: loading ? undefined : stats?.stats.appointmentsToday || 0,
         badgeColor: 'info'
       },
       {
@@ -57,7 +76,7 @@ export default function Sidebar() {
         label: 'Emitir Recipe',
         labelKey: 'navigation.emitRecipe',
         href: '/recipe',
-        badge: 23,
+        badge: loading ? undefined : stats?.stats.activePrescriptions || 0,
         badgeColor: 'success'
       },
       {
@@ -81,7 +100,7 @@ export default function Sidebar() {
       {
         icon: '❓',
         label: 'Ayuda',
-        labelKey: 'Ayuda',
+        labelKey: 'sidebar.help',
         href: '/help'
       }
     ]

@@ -66,11 +66,25 @@ export default function NewAppointmentPage() {
     setError('');
     setLoading(true);
 
+    // Validar campos requeridos
     if (!formData.patient || !formData.date || !formData.time || !formData.reason) {
       setError(t('appointments.fillRequiredFields'));
       setLoading(false);
       return;
     }
+
+   // Validar que la fecha no sea en el pasado
+const today = new Date();
+const year = today.getFullYear();
+const month = String(today.getMonth() + 1).padStart(2, '0');
+const day = String(today.getDate()).padStart(2, '0');
+const todayString = `${year}-${month}-${day}`;
+
+if (formData.date < todayString) {
+  setError(language === 'es' ? 'No puedes crear citas en fechas pasadas' : 'You cannot create appointments in past dates');
+  setLoading(false);
+  return;
+}
 
     try {
       const token = localStorage.getItem('token');
@@ -191,7 +205,13 @@ export default function NewAppointmentPage() {
                 value={formData.date}
                 onChange={handleInputChange}
                 required
-                min={new Date().toISOString().split('T')[0]}
+                min={(() => {
+                  const today = new Date();
+                  const year = today.getFullYear();
+                  const month = String(today.getMonth() + 1).padStart(2, '0');
+                  const day = String(today.getDate()).padStart(2, '0');
+                  return `${year}-${month}-${day}`;
+                })()}
                 className="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none transition-all"
                 style={{
                   backgroundColor: 'rgb(var(--card))',
