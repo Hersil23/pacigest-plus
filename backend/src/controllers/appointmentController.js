@@ -53,8 +53,11 @@ exports.getAllAppointments = async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    // Filtros opcionales
-    const filter = { isActive: true };
+    // ✅ FILTRAR POR MÉDICO ACTUAL (del token JWT)
+    const filter = { 
+      isActive: true,
+      doctorId: req.user.id // ✅ Agregado: Filtra por médico logueado
+    };
     
     if (req.query.status) {
       filter.status = req.query.status;
