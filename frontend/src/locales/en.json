@@ -84,7 +84,22 @@
     "email": "Email",
     "active": "Active",
     "trial": "Trial",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "totalPatients": "Patients",
+    "appointmentsToday": "Appointments today",
+    "upcomingAppointments": "Upcoming appointments",
+    "activePrescriptions": "Active prescriptions",
+    "todayAppointments": "Today's Appointments",
+    "noAppointmentsToday": "No appointments scheduled for today",
+    "viewFullSchedule": "View full schedule",
+    "viewDetails": "View details",
+    "issueReport": "Issue Medical Report",
+    "issuePrescription": "Issue Prescription",
+    "manageClinicalHistories": "View medical records",
+    "generatePrescriptions": "Generate prescriptions",
+    "trialEnding": "Your free trial ends in",
+    "day": "day",
+    "days": "days"
   },
   "settings": {
     "title": "Settings",

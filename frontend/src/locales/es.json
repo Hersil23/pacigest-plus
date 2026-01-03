@@ -68,6 +68,9 @@
     "statistics": "Estadísticas",
     "settings": "Configuración"
   },
+  "sidebar": {
+    "help": "Ayuda"
+  },
   "panel": {
     "welcome": "¡Bienvenido",
     "controlPanel": "Panel de control",
@@ -81,7 +84,22 @@
     "email": "Correo",
     "active": "Activo",
     "trial": "Prueba",
-    "inactive": "Inactivo"
+    "inactive": "Inactivo",
+    "totalPatients": "Pacientes",
+    "appointmentsToday": "Citas de hoy",
+    "upcomingAppointments": "Próximas citas",
+    "activePrescriptions": "Recetas activas",
+    "todayAppointments": "Citas de Hoy",
+    "noAppointmentsToday": "No hay citas programadas para hoy",
+    "viewFullSchedule": "Ver agenda completa",
+    "viewDetails": "Ver detalle",
+    "issueReport": "Emitir Informe Médico",
+    "issuePrescription": "Emitir Receta",
+    "manageClinicalHistories": "Ver historias médicas",
+    "generatePrescriptions": "Generar prescripciones",
+    "trialEnding": "Tu prueba gratuita termina en",
+    "day": "día",
+    "days": "días"
   },
   "settings": {
     "title": "Ajustes",

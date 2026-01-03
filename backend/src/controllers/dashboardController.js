@@ -20,8 +20,8 @@ exports.getDashboardStats = async (req, res) => {
       });
     }
 
-    // Contar pacientes del usuario
-    const totalPatients = await Patient.countDocuments({ doctorId: userId });
+    // Contar pacientes del usuario (doctorIds es un array)
+    const totalPatients = await Patient.countDocuments({ doctorIds: userId });
 
     // Contar citas de hoy
     const today = new Date();
@@ -43,7 +43,7 @@ exports.getDashboardStats = async (req, res) => {
       appointmentDate: {
         $gte: tomorrow
       },
-      status: { $in: ['scheduled', 'confirmed'] }
+      status: { $in: ['scheduled', 'confirmed', 'pending'] }
     });
 
     // Contar recetas activas
@@ -61,7 +61,7 @@ exports.getDashboardStats = async (req, res) => {
       }
     })
       .populate('patientId', 'firstName lastName')
-      .sort({ appointmentDate: 1 })
+      .sort({ appointmentTime: 1 })
       .limit(10);
 
     // Calcular días restantes del trial
@@ -100,7 +100,7 @@ exports.getDashboardStats = async (req, res) => {
           id: apt._id,
           time: apt.appointmentDate,
           patient: apt.patientId ? `${apt.patientId.firstName} ${apt.patientId.lastName}` : 'Paciente',
-          reason: apt.reason,
+          reason: apt.reasonForVisit || apt.reason || 'Sin motivo especificado',
           status: apt.status
         }))
       }

@@ -69,6 +69,7 @@ export default function AppointmentsPage() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', {
+      weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -201,63 +202,73 @@ export default function AppointmentsPage() {
           </div>
         )}
 
-        {/* Appointments List */}
-        {filteredAppointments.length === 0 ? (
-          <div className="rounded-lg shadow-md p-12 text-center" style={{ backgroundColor: 'rgb(var(--card))' }}>
-            <p className="text-lg" style={{ color: 'rgb(var(--foreground))', opacity: 0.7 }}>
-              {t('appointments.noAppointments')}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAppointments.map((appointment) => (
-              <div
-                key={appointment._id}
-                className="rounded-lg shadow-md p-6 transition-all hover:shadow-lg cursor-pointer"
-                style={{ backgroundColor: 'rgb(var(--card))' }}
-                onClick={() => router.push(`/appointments/${appointment._id}`)}
-              >
-                {/* Status Badge */}
-                <div className="flex justify-between items-start mb-4">
-                  <span
-                    className="px-3 py-1 rounded-full text-xs font-medium text-white"
-                    style={{ backgroundColor: getStatusColor(appointment.status) }}
-                  >
-                    {t(`appointments.status.${appointment.status}`)}
-                  </span>
-                  <span className="text-sm" style={{ color: 'rgb(var(--foreground))', opacity: 0.6 }}>
-                    #{appointment.appointmentNumber}
-                  </span>
+        {/* Appointments List - ESTILO GOOGLE CALENDAR */}
+        <div className="rounded-lg shadow-md p-6" style={{ backgroundColor: 'rgb(var(--card))', borderWidth: '1px', borderColor: 'rgb(var(--border))' }}>
+          {filteredAppointments.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-lg" style={{ color: 'rgb(var(--gray-medium))' }}>
+                {t('appointments.noAppointments')}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredAppointments.map((appointment) => (
+                <div
+                  key={appointment._id}
+                  className="p-4 rounded-lg transition-all hover:shadow-md cursor-pointer"
+                  style={{ backgroundColor: 'rgb(var(--background))', borderWidth: '1px', borderColor: 'rgb(var(--border))' }}
+                  onClick={() => router.push(`/appointments/${appointment._id}`)}
+                >
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div className="flex-1">
+                      {/* Fecha completa */}
+                      <p className="text-sm mb-1" style={{ color: 'rgb(var(--gray-medium))' }}>
+                        📅 {formatDate(appointment.appointmentDate)}
+                      </p>
+                      
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {/* Hora grande */}
+                        <p className="text-2xl font-bold" style={{ color: 'rgb(var(--primary))' }}>
+                          ⏰ {appointment.appointmentTime}
+                        </p>
+                        
+                        {/* Paciente y motivo */}
+                        <div className="flex-1">
+                          <p className="font-semibold" style={{ color: 'rgb(var(--foreground))' }}>
+                            👤 {appointment.patientId.firstName} {appointment.patientId.lastName}
+                          </p>
+                          <p className="text-sm" style={{ color: 'rgb(var(--gray-medium))' }}>
+                            📋 {appointment.reasonForVisit}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Status badge y número */}
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-xs mb-1" style={{ color: 'rgb(var(--gray-medium))' }}>
+                          #{appointment.appointmentNumber}
+                        </p>
+                        <span
+                          className="inline-block px-3 py-1 rounded-full text-xs font-medium text-white"
+                          style={{ backgroundColor: getStatusColor(appointment.status) }}
+                        >
+                          {t(`appointments.status.${appointment.status}`)}
+                        </span>
+                      </div>
+                      
+                      {/* Arrow icon */}
+                      <svg className="w-5 h-5" style={{ color: 'rgb(var(--gray-medium))' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-
-                {/* Patient */}
-                <h3 className="text-lg font-semibold mb-2" style={{ color: 'rgb(var(--foreground))' }}>
-                  {appointment.patientId.firstName} {appointment.patientId.lastName}
-                </h3>
-
-                {/* Date & Time */}
-                <div className="flex items-center gap-2 mb-3" style={{ color: 'rgb(var(--foreground))', opacity: 0.8 }}>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span className="text-sm">{formatDate(appointment.appointmentDate)}</span>
-                </div>
-
-                <div className="flex items-center gap-2 mb-4" style={{ color: 'rgb(var(--foreground))', opacity: 0.8 }}>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-sm">{appointment.appointmentTime}</span>
-                </div>
-
-                {/* Reason */}
-                <p className="text-sm line-clamp-2" style={{ color: 'rgb(var(--foreground))', opacity: 0.7 }}>
-                  {appointment.reasonForVisit}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
