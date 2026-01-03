@@ -8,7 +8,7 @@ const { checkSubscription } = require('../middlewares/subscription');
 router.use(protect);
 router.use(checkSubscription);
 
-// Rutas de citas (SIN checkPermission temporal)
+// Rutas de citas
 router.post('/', appointmentController.createAppointment);
 router.get('/', appointmentController.getAllAppointments);
 router.get('/doctor/:doctorId', appointmentController.getAppointmentsByDoctor);
@@ -16,6 +16,7 @@ router.get('/patient/:patientId', appointmentController.getAppointmentsByPatient
 router.get('/today/:doctorId', appointmentController.getTodaySchedule);
 router.get('/:id', appointmentController.getAppointmentById);
 router.put('/:id', appointmentController.updateAppointment);
+router.patch('/:id', appointmentController.updateAppointment);
 router.patch('/:id/confirm', appointmentController.confirmAppointment);
 router.patch('/:id/cancel', appointmentController.cancelAppointment);
 router.patch('/:id/complete', appointmentController.completeAppointment);

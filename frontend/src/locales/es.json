@@ -208,6 +208,27 @@
     "privateNotes": "Notas Privadas",
     "privateNotesPlaceholder": "Notas solo para el doctor",
     "fee": "Honorarios",
+    "date": "Fecha",
+    "time": "Hora",
+    "patient": "Paciente",
+    "doctor": "Médico",
+    "error": "Error al cargar citas",
+    "saving": "Guardando...",
+    "saved": "Cita guardada exitosamente",
+    "updated": "Cita actualizada",
+    "deleted": "Cita eliminada exitosamente",
+    "confirmed": "Cita confirmada",
+    "cancelled": "Cita cancelada",
+    "completed": "Cita completada",
+    "confirmDelete": "¿Estás seguro de eliminar esta cita?",
+    "confirmCancel": "¿Estás seguro de cancelar esta cita?",
+    "cancellationReason": "Motivo de cancelación",
+    "required": "Este campo es obligatorio",
+    "invalidDate": "Fecha no válida",
+    "pastDate": "La fecha no puede ser en el pasado",
+    "overlapping": "Esta hora ya está ocupada",
+    "emailSent": "Email de confirmación enviado",
+    "reminderSent": "Recordatorio enviado",
     "status": {
       "all": "Todas",
       "pending": "Pendiente",
@@ -226,12 +247,15 @@
       "reason": "Motivo de Consulta",
       "notes": "Notas Adicionales"
     },
-    "new_alt": {
-      "title": "Nueva Cita"
-    },
     "create": {
       "button": "Crear Cita",
       "success": "Cita creada exitosamente"
+    },
+    "stats": {
+      "total": "Total",
+      "today": "Hoy",
+      "pending": "Pendientes",
+      "confirmed": "Confirmadas"
     }
   },
   "types": {
@@ -244,33 +268,7 @@
   },
   "appointmentActions": {
     "actions": "Acciones",
-    "patient": "Paciente",
-    "doctor": "Médico",
-    "date": "Fecha",
-    "time": "Hora",
-    "saving": "Guardando...",
-    "saved": "Cita guardada exitosamente",
-    "updated": "Cita actualizada",
-    "deleted": "Cita eliminada",
-    "confirmed": "Cita confirmada",
-    "cancelled": "Cita cancelada",
-    "completed": "Cita completada",
-    "error": "Error al procesar la cita",
-    "confirmDelete": "¿Estás seguro de eliminar esta cita?",
-    "confirmCancel": "¿Estás seguro de cancelar esta cita?",
-    "cancellationReason": "Motivo de cancelación",
-    "required": "Este campo es obligatorio",
-    "invalidDate": "Fecha no válida",
-    "pastDate": "La fecha no puede ser en el pasado",
-    "overlapping": "Esta hora ya está ocupada",
-    "emailSent": "Email de confirmación enviado",
-    "reminderSent": "Recordatorio enviado",
-    "stats": {
-      "total": "Total",
-      "today": "Hoy",
-      "pending": "Pendientes",
-      "confirmed": "Confirmadas"
-    }
+    "error": "Error al procesar la cita"
   },
   "footer": {
     "developedBy": "Desarrollado por",
