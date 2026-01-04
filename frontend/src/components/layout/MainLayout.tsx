@@ -34,7 +34,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
           <div className="container mx-auto px-4 py-6">
             {children}
           </div>
-          <Footer />
+          <div className="no-print">
+            <Footer />
+          </div>
         </main>
       </div>
     </div>

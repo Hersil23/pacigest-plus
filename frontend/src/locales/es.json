@@ -653,4 +653,41 @@
     "error": "Error al procesar receta",
     "confirmDelete": "¿Está seguro de eliminar esta receta?"
   }
+,
+"medicalReports": {
+  "title": "Informes Médicos",
+  "subtitle": "Gestiona los informes médicos emitidos",
+  "new": "Nuevo Informe",
+  "edit": "Editar Informe",
+  "view": "Ver Informe",
+  "print": "Imprimir Informe",
+  "noReports": "No hay informes médicos registrados",
+  "reportDate": "Fecha del Informe",
+  "patient": "Paciente",
+  "medicalReport": "Informe Médico",
+  "reportPlaceholder": "Escriba aquí el informe médico completo con toda la información relevante sobre la condición del paciente, diagnóstico, tratamiento recomendado, estudios realizados, y cualquier otra información necesaria para el médico especialista o profesional que revisará este informe...",
+  "creating": "Creando informe...",
+  "created": "Informe médico creado exitosamente",
+  "updated": "Informe médico actualizado exitosamente",
+  "deleted": "Informe médico eliminado exitosamente",
+  "error": "Error al procesar informe médico",
+  "confirmDelete": "¿Está seguro de eliminar este informe médico?"
+}
+,
+"statistics": {
+  "title": "Estadísticas",
+  "subtitle": "Resumen de actividad del consultorio",
+  "totalPatients": "Total Pacientes",
+  "todayAppointments": "Citas Hoy",
+  "pendingAppointments": "Citas Pendientes",
+  "medicalRecordsThisMonth": "Informes Este Mes",
+  "prescriptionsThisMonth": "Recetas Este Mes",
+  "monthlyRevenue": "Ingresos del Mes",
+  "currentMonth": "Mes Actual",
+  "loading": "Cargando estadísticas...",
+  "error": "Error al cargar estadísticas",
+  "noData": "No hay datos disponibles",
+  "overview": "Resumen General",
+  "thisMonth": "Este Mes"
+}
 }

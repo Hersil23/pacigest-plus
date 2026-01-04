@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongooseDelete = require('mongoose-delete');
 
 const medicalRecordSchema = new mongoose.Schema({
   // ============================================
@@ -128,12 +129,12 @@ const medicalRecordSchema = new mongoose.Schema({
 // MIDDLEWARE PARA SOFT DELETE
 // ============================================
 // Excluir registros eliminados en queries automáticamente
-medicalRecordSchema.pre(/^find/, function(next) {
-  if (!this.getOptions().includeDeleted) {
-    this.where({ deletedAt: null });
-  }
-  next();
-});
+//medicalRecordSchema.pre(/^find/, function(next) {
+ // if (!this.getOptions().includeDeleted) {
+ //   this.where({ deletedAt: null });
+ // }
+  //next();
+//});
 
 // ============================================
 // ÍNDICES PARA OPTIMIZACIÓN
@@ -189,6 +190,16 @@ medicalRecordSchema.statics.findWithDeleted = function(filter = {}) {
 
 medicalRecordSchema.set('toJSON', { virtuals: true });
 medicalRecordSchema.set('toObject', { virtuals: true });
+
+// ============================================
+// PLUGIN DE SOFT DELETE
+// ============================================
+medicalRecordSchema.plugin(mongooseDelete, { 
+  deletedAt: true,
+  deletedBy: false,
+  overrideMethods: 'all',
+  indexFields: ['deleted']
+});
 
 const MedicalRecord = mongoose.model('MedicalRecord', medicalRecordSchema);
 
