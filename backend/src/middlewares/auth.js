@@ -72,7 +72,13 @@ exports.authorize = (...roles) => {
 // ============================================
 exports.checkPermission = (permission) => {
   return (req, res, next) => {
-    if (!req.user.permissions[permission]) {
+    // Si el usuario es doctor, permitir acceso automático
+    if (req.user.role === 'doctor') {
+      return next();
+    }
+
+    // Si es assistant, verificar permisos específicos
+    if (!req.user.permissions || !req.user.permissions[permission]) {
       return res.status(403).json({
         success: false,
         message: 'No tienes permiso para realizar esta acción'

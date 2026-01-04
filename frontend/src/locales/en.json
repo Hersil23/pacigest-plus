@@ -628,4 +628,29 @@
       "porExtraer": "To Extract"
     }
   }
+,
+  "prescriptions": {
+    "title": "Medical Prescriptions",
+    "subtitle": "Manage issued prescriptions",
+    "new": "New Prescription",
+    "edit": "Edit Prescription",
+    "view": "View Prescription",
+    "print": "Print Prescription",
+    "noPrescriptions": "No prescriptions registered",
+    "prescriptionNumber": "Prescription Number",
+    "prescriptionDate": "Issue Date",
+    "patient": "Patient",
+    "medications": "Prescribed Medications",
+    "medicationsPlaceholder": "Write here the medications, dosage, frequency and duration...\n\nExample:\n- Amoxicillin 500mg: 1 tablet every 8 hours for 7 days\n- Paracetamol 500mg: 1 tablet every 6 hours if fever",
+    "indications": "General Instructions",
+    "indicationsPlaceholder": "Write here general instructions, recommendations and warnings...",
+    "doctorSignature": "Doctor's Signature",
+    "licenseNumber": "License Number",
+    "creating": "Creating prescription...",
+    "created": "Prescription created successfully",
+    "updated": "Prescription updated successfully",
+    "deleted": "Prescription deleted successfully",
+    "error": "Error processing prescription",
+    "confirmDelete": "Are you sure you want to delete this prescription?"
+  }
 }

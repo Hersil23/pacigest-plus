@@ -5,7 +5,11 @@ const Prescription = require('../models/Prescription');
 // ============================================
 exports.createPrescription = async (req, res) => {
   try {
+    console.log('📝 Intentando crear receta con datos:', req.body); // ← NUEVO
+
     const prescription = await Prescription.create(req.body);
+
+    console.log('✅ Receta creada exitosamente:', prescription.prescriptionNumber); // ← NUEVO
 
     res.status(201).json({
       success: true,
@@ -14,6 +18,7 @@ exports.createPrescription = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('❌ ERROR en createPrescription:', error); // ← NUEVO
     res.status(500).json({
       success: false,
       message: 'Error al crear receta',
@@ -75,6 +80,8 @@ exports.getPrescriptionsByDoctor = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    console.log('📋 Buscando recetas para doctor:', doctorId); // ← NUEVO
+
     const prescriptions = await Prescription.find({ 
       doctorId,
       isActive: true 
@@ -83,6 +90,8 @@ exports.getPrescriptionsByDoctor = async (req, res) => {
       .sort({ prescriptionDate: -1 })
       .limit(limit)
       .skip(skip);
+
+    console.log('✅ Recetas encontradas:', prescriptions.length); // ← NUEVO
 
     const total = await Prescription.countDocuments({ 
       doctorId,
@@ -99,6 +108,7 @@ exports.getPrescriptionsByDoctor = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('❌ ERROR en getPrescriptionsByDoctor:', error); // ← NUEVO
     res.status(500).json({
       success: false,
       message: 'Error al obtener recetas del médico',
@@ -106,7 +116,6 @@ exports.getPrescriptionsByDoctor = async (req, res) => {
     });
   }
 };
-
 // ============================================
 // OBTENER UNA RECETA POR ID
 // ============================================

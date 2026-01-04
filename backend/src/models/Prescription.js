@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongooseDelete = require('mongoose-delete');
 
 const prescriptionSchema = new mongoose.Schema({
   // ============================================
@@ -140,19 +141,27 @@ prescriptionSchema.pre('save', async function(next) {
     const count = await mongoose.model('Prescription').countDocuments();
     this.prescriptionNumber = `RX-${date}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
+
 });
 
 // ============================================
-// MIDDLEWARE PARA SOFT DELETE
+// MIDDLEWARE PARA SOFT DELETE - DESACTIVADO
 // ============================================
-// Excluir registros eliminados en queries automáticamente
+// El middleware causaba error "next is not a function"
+// Ahora usamos mongoose-delete plugin (más abajo)
+/*
 prescriptionSchema.pre(/^find/, function(next) {
-  if (!this.getOptions().includeDeleted) {
-    this.where({ deletedAt: null });
+  try {
+    const options = this.getOptions();
+    if (!options || !options.includeDeleted) {
+      this.where({ deletedAt: null });
+    }
+  } catch (error) {
+    console.warn('Warning: Could not apply soft delete filter');
   }
   next();
 });
+*/
 
 // ============================================
 // ÍNDICES PARA OPTIMIZACIÓN
@@ -199,6 +208,16 @@ prescriptionSchema.statics.findDeleted = function(filter = {}) {
 prescriptionSchema.statics.findWithDeleted = function(filter = {}) {
   return this.find(filter).setOptions({ includeDeleted: true });
 };
+
+// ============================================
+// PLUGIN DE SOFT DELETE (mongoose-delete)
+// ============================================
+prescriptionSchema.plugin(mongooseDelete, { 
+  deletedAt: true,
+  deletedBy: false,
+  overrideMethods: 'all',
+  indexFields: ['deleted']
+});
 
 const Prescription = mongoose.model('Prescription', prescriptionSchema);
 

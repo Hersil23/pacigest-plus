@@ -628,4 +628,29 @@
       "porExtraer": "Por Extraer"
     }
   }
+,
+  "prescriptions": {
+    "title": "Recetas Médicas",
+    "subtitle": "Gestiona las recetas emitidas",
+    "new": "Nueva Receta",
+    "edit": "Editar Receta",
+    "view": "Ver Receta",
+    "print": "Imprimir Receta",
+    "noPrescriptions": "No hay recetas registradas",
+    "prescriptionNumber": "Número de Receta",
+    "prescriptionDate": "Fecha de Emisión",
+    "patient": "Paciente",
+    "medications": "Medicamentos Prescritos",
+    "medicationsPlaceholder": "Escriba aquí los medicamentos, dosis, frecuencia y duración...\n\nEjemplo:\n- Amoxicilina 500mg: 1 tableta cada 8 horas por 7 días\n- Paracetamol 500mg: 1 tableta cada 6 horas si hay fiebre",
+    "indications": "Indicaciones Generales",
+    "indicationsPlaceholder": "Escriba aquí las indicaciones generales, recomendaciones y advertencias...",
+    "doctorSignature": "Firma del Médico",
+    "licenseNumber": "Número de Licencia",
+    "creating": "Creando receta...",
+    "created": "Receta creada exitosamente",
+    "updated": "Receta actualizada exitosamente",
+    "deleted": "Receta eliminada exitosamente",
+    "error": "Error al procesar receta",
+    "confirmDelete": "¿Está seguro de eliminar esta receta?"
+  }
 }
